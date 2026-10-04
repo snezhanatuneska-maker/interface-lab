@@ -8,7 +8,6 @@ import { betLoading, C_DEFAULT, C_RANGE, K_DEFAULT, K_RANGE, langmuirTheta, load
 const X_MAX = 0.95
 const N_POINTS = 300
 const X_DEFAULT = 0.3
-const FAST = 5 // fast-forward speed factor
 const SETTLE_MIN_TIME = 3 // simulated s at a setting (one averaging window) before it can count as settled
 const BET_RANGE: [number, number] = [0.05, 0.35] // usual fitting range of the BET equation
 
@@ -88,9 +87,7 @@ export default function AdsorptionPage() {
   const [runId, setRunId] = useState(0) // bump to restart the animation on a clean surface
   const [K, setK] = useState(K_DEFAULT)
   const [c, setC] = useState(C_DEFAULT)
-  const [fast, setFast] = useState(false)
   const [paused, setPaused] = useState(false)
-  const [stepCount, setStepCount] = useState(0)
   const [stats, setStats] = useState<SurfaceStats>({ occupied: 0, total: 0, tallest: 0, avgLoading: 0, time: 0 })
   const { occupied, total, tallest } = stats
   const cov = loading(mode, x, K, c)
@@ -289,9 +286,7 @@ export default function AdsorptionPage() {
             pressure={x}
             K={K}
             c={c}
-            speed={fast ? FAST : 1}
             paused={paused}
-            stepCount={stepCount}
             onStats={setStats}
             label={
               mode === 'langmuir'
@@ -365,12 +360,6 @@ export default function AdsorptionPage() {
           <div className="sim-buttons">
             <button type="button" className="reset-btn" aria-pressed={paused} onClick={() => setPaused((p) => !p)}>
               {paused ? '▶ Play' : '❚❚ Pause'}
-            </button>
-            <button type="button" className="reset-btn" disabled={!paused} onClick={() => setStepCount((n) => n + 1)}>
-              Step
-            </button>
-            <button type="button" className="reset-btn" aria-pressed={fast} onClick={() => setFast((f) => !f)}>
-              {FAST}× fast
             </button>
             <button type="button" className="reset-btn" onClick={reset}>
               Reset

@@ -48,7 +48,6 @@ const kDesFirst = (mode: Model, K: number, c: number) => RATE / (mode === 'langm
 const DELAY_PRIOR = Math.PI / (2 * MEAN_SPEED)
 const DELAY_PRIOR_HITS = 20
 const DELAY_TAU = 120 // s
-const FRAME = 1 / 60 // s of real time advanced by one Step while paused
 
 interface Particle {
   x: number
@@ -88,14 +87,12 @@ interface Props {
   pressure: number // relative pressure 0..1, sets the gas density
   K: number // Langmuir constant
   c: number // BET constant
-  speed: number // simulated seconds per real second
   paused: boolean
-  stepCount: number // bump while paused to advance one frame
   label: string
   onStats?: (s: SurfaceStats) => void
 }
 
-export default function SurfaceView({ mode, pressure, K, c, speed, paused, stepCount, label, onStats }: Props) {
+export default function SurfaceView({ mode, pressure, K, c, paused, label, onStats }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const modeRef = useRef(mode)
@@ -106,12 +103,8 @@ export default function SurfaceView({ mode, pressure, K, c, speed, paused, stepC
   onStatsRef.current = onStats
   const constsRef = useRef({ K, c })
   constsRef.current = { K, c }
-  const speedRef = useRef(speed)
-  speedRef.current = speed
   const pausedRef = useRef(paused)
   pausedRef.current = paused
-  const stepCountRef = useRef(stepCount)
-  stepCountRef.current = stepCount
 
   useEffect(() => {
     const wrap = wrapRef.current!
@@ -159,10 +152,7 @@ export default function SurfaceView({ mode, pressure, K, c, speed, paused, stepC
     let statsTimer = 0
     let time = 0
 
-    const report = (occupied: number, total: number, tallest: number) =>
-      onStatsRef.current?.({ occupied, total, tallest, avgLoading, time })
-
-    const step = (dt: number, forceReport = false) => {
+    const step = (dt: number) => {
       const mode = modeRef.current
       time += dt
 
@@ -254,9 +244,9 @@ export default function SurfaceView({ mode, pressure, K, c, speed, paused, stepC
       }
       avgLoading += ((total / N_SITES - avgLoading) * dt) / 3
       statsTimer += dt
-      if (statsTimer > 0.25 || forceReport) {
+      if (statsTimer > 0.25) {
         statsTimer = 0
-        report(occupied, total, tallest)
+        onStatsRef.current?.({ occupied, total, tallest, avgLoading, time })
       }
     }
 
@@ -365,19 +355,13 @@ export default function SurfaceView({ mode, pressure, K, c, speed, paused, stepC
 
     let raf = 0
     let last = performance.now()
-    let stepsDone = stepCountRef.current
-    // Advance by `real` seconds of wall time, scaled by the speed factor.
-    const advance = (real: number, forceReport = false) => {
-      const dt = real * speedRef.current
-      const n = Math.ceil(dt / MAX_SUBSTEP)
-      for (let k = 0; k < n; k++) step(dt / n, forceReport && k === n - 1)
-    }
     const frame = (now: number) => {
-      const real = Math.min(0.05, (now - last) / 1000)
+      const dt = Math.min(0.05, (now - last) / 1000)
       last = now
-      if (!pausedRef.current) advance(real)
-      else if (stepsDone !== stepCountRef.current) advance(FRAME, true)
-      stepsDone = stepCountRef.current
+      if (!pausedRef.current) {
+        const n = Math.ceil(dt / MAX_SUBSTEP)
+        for (let k = 0; k < n; k++) step(dt / n)
+      }
       draw()
       raf = requestAnimationFrame(frame)
     }

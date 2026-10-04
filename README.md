@@ -13,7 +13,7 @@ The first tool is a **Langmuir vs BET adsorption** simulator for bachelor studen
   "simulation" point (points are cleared on Reset, model change, or a K/c change).
 - Controls beneath both: model toggle, pressure P/P₀, a log-scale slider for the active model's constant
   (Langmuir K, 0.5–200, default 10; BET c, 0.5–500, default 50, with c < 2 giving a type III isotherm),
-  Pause/Play, Step (one frame while paused), 5× fast-forward and Reset. The simulation's desorption rates follow
+  Pause/Play and Reset. The simulation's desorption rates follow
   K and c, so its average still matches the equation.
 - **The equations**: both isotherms rendered with KaTeX (loaded from cdnjs), every term explained,
   assumptions listed, and the one matching the selected model highlighted.

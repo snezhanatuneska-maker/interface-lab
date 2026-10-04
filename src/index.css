@@ -100,7 +100,6 @@ sub, sup { line-height: 0; }
 }
 .reset-btn:hover { background: #eef2f7; }
 .reset-btn[aria-pressed='true'] { background: var(--accent); color: #fff; }
-.reset-btn:disabled { opacity: 0.45; cursor: default; background: #fff; }
 .sim-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
 .sim-buttons .reset-btn { padding: 6px 12px; white-space: nowrap; }
 .control-label { display: block; font-size: 0.95rem; margin-bottom: 6px; }
