@@ -2,9 +2,15 @@
 
 Interactive educational tools for interface engineering in clean energy processes.
 
-The first tool (in progress) is a **Langmuir vs BET adsorption isotherm** simulator.
-Right now the page only shows a placeholder curve with one slider, to prove that the
-interactive plotting works. No adsorption physics is implemented yet.
+The first tool is a **Langmuir vs BET adsorption isotherm** simulator for bachelor students:
+
+- Langmuir (V/Vm = Kx/(1+Kx)) and BET (V/Vm = Cx/[(1−x)(1−x+Cx)]) isotherms vs x = P/P0,
+  with sliders for Vm, K and C and a dashed line at the monolayer capacity Vm.
+- A **Linearized BET** tab: x/[V(1−x)] vs x on synthetic data (optional ±2 % noise),
+  least-squares fit in the shaded range 0.05–0.35, and Vm, C recovered from slope and intercept.
+- A **surface view**: a cross-section of a solid where molecules fill one layer (Langmuir)
+  or stack into multilayers following the BET layer statistics (BET), driven by a P/P0 slider.
+- A specific-surface-area readout S = Vm·N_A·σ/22414 with σ(N2) = 0.162 nm².
 
 **Stack:** [Vite](https://vite.dev) + React + TypeScript, plots with
 [Plotly.js](https://plotly.com/javascript/) via `react-plotly.js`.
@@ -35,8 +41,10 @@ index.html                     HTML entry point
 vite.config.ts                 Vite config (sets base: "/interface-lab/")
 src/main.tsx                   React entry
 src/App.tsx                    Site layout: header, main area, footer
-src/pages/AdsorptionPage.tsx   "Langmuir vs BET Adsorption" page (placeholder curve + slider)
+src/pages/AdsorptionPage.tsx   "Langmuir vs BET Adsorption" page (plots, sliders, readouts)
+src/components/SurfaceView.tsx SVG cross-section of the surface with adsorbed molecules
 src/components/Plot.tsx        Plotly wrapper (uses the smaller "basic" Plotly bundle)
+src/lib/adsorption.ts          Isotherm equations, BET linearization, fit, surface area
 src/index.css                  Global styles
 .github/workflows/deploy.yml   GitHub Pages deployment workflow
 ```
