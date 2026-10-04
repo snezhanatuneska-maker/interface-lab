@@ -88,6 +88,131 @@ function Slider({ id, label, value, min, max, step, pos, onChange, hint }: Slide
 
 type Tab = 'isotherms' | 'linear'
 
+interface Preset {
+  id: string
+  label: string
+  K: number
+  C: number
+  x: number
+  mode: SurfaceMode
+  explain: ReactNode
+}
+
+// V_m is left alone so students can still compare cases at the same monolayer capacity.
+const PRESETS: Preset[] = [
+  {
+    id: 'strong',
+    label: 'Strong adsorption (high C)',
+    K: 200,
+    C: 500,
+    x: 0.2,
+    mode: 'bet',
+    explain: (
+      <>
+        The first layer binds far more strongly than the ones above it, so a sharp knee forms at low P/P₀ (Type II)
+        and V<sub>m</sub> is easy to read off, as for N<sub>2</sub> on oxides and carbon blacks.
+      </>
+    ),
+  },
+  {
+    id: 'weak',
+    label: 'Weak adsorption (low C, Type III-like)',
+    K: 0.5,
+    C: 1,
+    x: 0.6,
+    mode: 'bet',
+    explain: (
+      <>
+        With C ≈ 1 the solid holds the first layer no more tightly than the adsorbate holds itself, so there is no
+        knee and uptake only climbs near saturation, as for water on a hydrophobic surface.
+      </>
+    ),
+  },
+  {
+    id: 'langmuir',
+    label: 'Langmuir-like (monolayer only)',
+    K: 50,
+    C: 50,
+    x: 0.5,
+    mode: 'langmuir',
+    explain: (
+      <>
+        There is room for only one layer, as in narrow micropores (zeolites, activated carbon) or chemisorption, so
+        uptake rises fast and plateaus at V<sub>m</sub> (Type I).
+      </>
+    ),
+  },
+]
+
+const close = (a: number, b: number) => Math.abs(a - b) <= 1e-6 * Math.max(1, Math.abs(b))
+
+const QUESTIONS: { q: ReactNode; a: ReactNode }[] = [
+  {
+    q: (
+      <>
+        Drag <strong>C</strong> all the way left (C → 1). What happens to the knee of the BET curve, and what does
+        that mean for reading off V<sub>m</sub>?
+      </>
+    ),
+    a: (
+      <>
+        The knee disappears: at C = 1 the BET equation becomes V/V<sub>m</sub> = x/(1 − x), which curves upward
+        from the origin (Type III shape). The first layer is no more strongly bound than later layers, so there is
+        no pressure at which the monolayer is clearly complete, and V<sub>m</sub> from a BET fit becomes
+        unreliable.
+      </>
+    ),
+  },
+  {
+    q: (
+      <>
+        Move <strong>K</strong> from about 1 to 1000. At what P/P₀ does the Langmuir curve reach half of V
+        <sub>m</sub>?
+      </>
+    ),
+    a: (
+      <>
+        θ = Kx/(1 + Kx) = ½ when Kx = 1, so at P/P₀ = 1/K. A larger K (stronger binding) fills the monolayer at
+        lower pressure, but the plateau stays at V<sub>m</sub>: K changes <em>how fast</em> the surface fills, not{' '}
+        <em>how much</em> it holds.
+      </>
+    ),
+  },
+  {
+    q: (
+      <>
+        Open <strong>Linearized BET</strong>, keep the noise on, set C near 1000 and click{' '}
+        <em>New sample</em> a few times. Which comes out reliably, V<sub>m</sub> or C?
+      </>
+    ),
+    a: (
+      <>
+        V<sub>m</sub> = 1/(s + i) stays close to the set value, but C = 1 + s/i jumps around and can even go
+        negative. At high C the intercept i = 1/(V<sub>m</sub>C) is almost zero, so small noise changes it by a
+        large fraction. This is why BET reports are trusted for surface area but rarely for C.
+      </>
+    ),
+  },
+]
+
+function Question({ n, q, a }: { n: number; q: ReactNode; a: ReactNode }) {
+  const [open, setOpen] = useState(false)
+  const id = `answer-${n}`
+  return (
+    <li>
+      <p className="question">{q}</p>
+      <button type="button" className="btn-small" aria-expanded={open} aria-controls={id} onClick={() => setOpen((o) => !o)}>
+        {open ? 'Hide answer' : 'Show answer'}
+      </button>
+      {open && (
+        <p id={id} className="answer">
+          {a}
+        </p>
+      )}
+    </li>
+  )
+}
+
 export default function AdsorptionPage() {
   const [Vm, setVm] = useState(50)
   const [K, setK] = useState(30)
@@ -249,8 +374,19 @@ export default function AdsorptionPage() {
   const Srec = specificSurfaceArea(lin.recovered.Vm)
   const unphysicalC = !(lin.recovered.C > 0) || lin.fit.intercept <= 0
 
+  const applyPreset = (p: Preset) => {
+    setK(p.K)
+    setC(p.C)
+    setX(p.x)
+    setMode(p.mode)
+  }
+  const isActive = (p: Preset) => close(K, p.K) && close(C, p.C) && close(x, p.x) && mode === p.mode
+
   return (
     <article className="page">
+      <a className="back-link" href="#/">
+        ← All tools
+      </a>
       <h1>Langmuir vs BET Adsorption</h1>
       <p className="lede">
         Gas molecules adsorbing on a solid. Move the sliders and watch why the Langmuir isotherm levels off at
@@ -258,6 +394,21 @@ export default function AdsorptionPage() {
       </p>
 
       <section className="card">
+        <div className="presets" role="group" aria-label="Typical cases">
+          {PRESETS.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              className={`preset${isActive(p) ? ' active' : ''}`}
+              aria-pressed={isActive(p)}
+              onClick={() => applyPreset(p)}
+            >
+              <span className="preset-label">{p.label}</span>
+              <span className="preset-explain">{p.explain}</span>
+            </button>
+          ))}
+        </div>
+
         <div className="param-grid">
           <Slider
             id="vm"
@@ -477,6 +628,42 @@ export default function AdsorptionPage() {
           </p>
         </section>
       </div>
+
+      <section className="card try-this">
+        <h2>Try this</h2>
+        <ol>
+          {QUESTIONS.map((item, i) => (
+            <Question key={i} n={i + 1} q={item.q} a={item.a} />
+          ))}
+        </ol>
+      </section>
+
+      <section className="card">
+        <h2>Why it matters for clean energy</h2>
+        <p>
+          Reactions, charge storage and gas uptake all happen at surfaces, so the BET surface area is one of the
+          first numbers measured for a new energy material.
+        </p>
+        <ul className="why-list">
+          <li>
+            <strong>Catalyst supports and fuel cell catalyst layers.</strong> Pt nanoparticles in PEM fuel cells sit
+            on high-area carbon (roughly 250–800 m²/g). More support area spreads the Pt more thinly, so more of the
+            expensive metal touches the reactants, and the porosity of the layer controls how gas and water move
+            through it.
+          </li>
+          <li>
+            <strong>Porous electrodes.</strong> A supercapacitor stores charge in the electric double layer, so its
+            capacitance scales with accessible area; activated carbons reach 1000–2000 m²/g. In batteries, extra
+            area speeds up charging but also feeds side reactions with the electrolyte.
+          </li>
+          <li>
+            <strong>Gas storage materials.</strong> Metal–organic frameworks and porous carbons store H<sub>2</sub>{' '}
+            and CH<sub>4</sub> by adsorption, and uptake grows with surface area (several thousand m²/g for the best
+            MOFs). In such micropores BET gives an <em>apparent</em> area, since the multilayer picture no longer
+            holds exactly.
+          </li>
+        </ul>
+      </section>
     </article>
   )
 }
