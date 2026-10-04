@@ -5,11 +5,11 @@ Interactive educational tools for interface engineering in clean energy processe
 The homepage lists the tools as cards (more are marked "coming soon").
 The first tool is a **Langmuir vs BET adsorption** simulator for bachelor students:
 
-- An animated **molecular view** (the main element of the page): gas molecules land on and leave a solid
-  surface. In Langmuir mode each site holds at most one molecule; in BET mode molecules stack into
+- An animated **molecular view** (the main element of the page): a kinetic simulation where gas molecules
+  fly with Maxwell–Boltzmann speeds, stick to and desorb from a solid surface. In Langmuir mode each site holds at most one molecule; in BET mode molecules stack into
   multilayers, coloured by layer (1, 2, 3+), with the live coverage θ or n/nₘ shown next to it.
-- Controls under the animation: model toggle, pressure P/P₀, Langmuir K and BET c, plus preset cases.
-- A smaller **isotherm** plot that tracks the current pressure with a single marker.
+- An **isotherm** plot beside it that tracks the current pressure with a single marker.
+- Controls beneath both: model toggle, pressure P/P₀ and Reset (K and c are fixed).
 - **The equations**: both isotherms rendered with KaTeX (loaded from cdnjs), every term explained,
   assumptions listed, and the one matching the selected model highlighted.
 - A short "Why it matters for clean energy" section.
@@ -50,7 +50,7 @@ src/pages/AdsorptionPage.tsx   "Langmuir vs BET Adsorption" page (molecular view
 src/components/SurfaceView.tsx Animated canvas: gas molecules adsorbing on the surface
 src/components/Tex.tsx         KaTeX loader (CDN) and equation component
 src/components/Plot.tsx        Plotly wrapper (uses the smaller "basic" Plotly bundle)
-src/lib/adsorption.ts          Isotherm equations and per-site stack heights
+src/lib/adsorption.ts          Isotherm equations and fixed constants K, c
 src/index.css                  Global styles
 .github/workflows/deploy.yml   GitHub Pages deployment workflow
 ```
