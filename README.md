@@ -3,18 +3,16 @@
 Interactive educational tools for interface engineering in clean energy processes.
 
 The homepage lists the tools as cards (more are marked "coming soon").
-The first tool is a **Langmuir vs BET adsorption isotherm** simulator for bachelor students:
+The first tool is a **Langmuir vs BET adsorption** simulator for bachelor students:
 
-- Langmuir (V/Vm = Kx/(1+Kx)) and BET (V/Vm = Cx/[(1−x)(1−x+Cx)]) isotherms vs x = P/P0,
-  with sliders for Vm, K and C and a dashed line at the monolayer capacity Vm.
-- A **Linearized BET** tab: x/[V(1−x)] vs x on synthetic data (optional ±2 % noise),
-  least-squares fit in the shaded range 0.05–0.35, and Vm, C recovered from slope and intercept.
-- A **surface view**: a cross-section of a solid where molecules fill one layer (Langmuir)
-  or stack into multilayers following the BET layer statistics (BET), driven by a P/P0 slider.
-- A specific-surface-area readout S = Vm·N_A·σ/22414 with σ(N2) = 0.162 nm².
-- Preset buttons for typical cases (strong adsorption, weak/Type III-like, Langmuir-like),
-  a "Try this" box with guided questions and hidden answers, and a short
-  "Why it matters for clean energy" section.
+- An animated **molecular view** (the main element of the page): gas molecules land on and leave a solid
+  surface. In Langmuir mode each site holds at most one molecule; in BET mode molecules stack into
+  multilayers, coloured by layer (1, 2, 3+), with the live coverage θ or n/nₘ shown next to it.
+- Controls under the animation: model toggle, pressure P/P₀, Langmuir K and BET c, plus preset cases.
+- A smaller **isotherm** plot that tracks the current pressure with a single marker.
+- **The equations**: both isotherms rendered with KaTeX (loaded from cdnjs), every term explained,
+  assumptions listed, and the one matching the selected model highlighted.
+- A short "Why it matters for clean energy" section.
 
 **Stack:** [Vite](https://vite.dev) + React + TypeScript, plots with
 [Plotly.js](https://plotly.com/javascript/) via `react-plotly.js`.
@@ -48,10 +46,11 @@ src/App.tsx                    Site layout: header, hash routing (#/ and #/adsor
 src/siteConfig.ts              Author and course name shown in the footer
 src/pages/HomePage.tsx         Homepage with tool cards
 src/lib/useHashRoute.ts        Tiny hash-based router (works on GitHub Pages)
-src/pages/AdsorptionPage.tsx   "Langmuir vs BET Adsorption" page (plots, sliders, readouts)
-src/components/SurfaceView.tsx SVG cross-section of the surface with adsorbed molecules
+src/pages/AdsorptionPage.tsx   "Langmuir vs BET Adsorption" page (molecular view, controls, isotherm, equations)
+src/components/SurfaceView.tsx Animated canvas: gas molecules adsorbing on the surface
+src/components/Tex.tsx         KaTeX loader (CDN) and equation component
 src/components/Plot.tsx        Plotly wrapper (uses the smaller "basic" Plotly bundle)
-src/lib/adsorption.ts          Isotherm equations, BET linearization, fit, surface area
+src/lib/adsorption.ts          Isotherm equations and per-site stack heights
 src/index.css                  Global styles
 .github/workflows/deploy.yml   GitHub Pages deployment workflow
 ```

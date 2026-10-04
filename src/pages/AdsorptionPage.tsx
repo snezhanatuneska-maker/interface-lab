@@ -1,25 +1,12 @@
 import { useMemo, useState, type ReactNode } from 'react'
 import type { Annotation, Data, Layout, Shape } from 'plotly.js'
 import Plot from '../components/Plot'
-import SurfaceView, { type SurfaceMode } from '../components/SurfaceView'
-import {
-  betLineFromParams,
-  betLoading,
-  betParamsFromLine,
-  betTransform,
-  gaussian,
-  langmuirTheta,
-  linearFit,
-  mulberry32,
-  SIGMA_N2_NM2,
-  specificSurfaceArea,
-} from '../lib/adsorption'
+import SurfaceView, { GAS_COLOR, LAYER_COLORS, N_SITES, SITE_ORDER } from '../components/SurfaceView'
+import Tex, { Frac } from '../components/Tex'
+import { betLoading, langmuirTheta, loading, siteStackHeights, type Model } from '../lib/adsorption'
 
 const X_MAX = 0.95
 const N_POINTS = 300
-const BET_RANGE: [number, number] = [0.05, 0.35]
-const LIN_X_MAX = 0.5
-const NOISE = 0.02 // 2 % relative noise on synthetic V "measurements"
 
 const COLORS = {
   langmuir: '#2a6fb0',
@@ -27,16 +14,15 @@ const COLORS = {
   ink: '#1d2433',
   muted: '#5b6475',
   grid: '#ebe8e0',
-  shade: 'rgba(242, 193, 78, 0.22)',
 }
 
 const BASE_LAYOUT: Partial<Layout> = {
   autosize: true,
-  margin: { l: 64, r: 16, t: 16, b: 56 },
-  font: { family: 'Source Sans 3, Helvetica, Arial, sans-serif', size: 14, color: COLORS.ink },
+  margin: { l: 56, r: 12, t: 12, b: 48 },
+  font: { family: 'Source Sans 3, Helvetica, Arial, sans-serif', size: 13, color: COLORS.ink },
   paper_bgcolor: 'rgba(0,0,0,0)',
   plot_bgcolor: '#ffffff',
-  hovermode: 'x unified',
+  hovermode: false,
   legend: { orientation: 'h', x: 0, y: 1.02, yanchor: 'bottom', bgcolor: 'rgba(0,0,0,0)' },
   dragmode: false,
 }
@@ -47,19 +33,8 @@ const AXIS = { zeroline: false, gridcolor: COLORS.grid, linecolor: '#c9c4b6', sh
 const toLog = (v: number) => Math.log10(v)
 const fromLog = (s: number) => Math.pow(10, s)
 
-/** Format with ~3 significant figures, using exponent notation for very small/large values. */
-function fmt(v: number, sig = 3): string {
-  if (!Number.isFinite(v)) return '—'
-  const a = Math.abs(v)
-  if (a !== 0 && (a < 1e-3 || a >= 1e5)) return v.toExponential(sig - 1).replace('e', ' × 10^')
-  return Number(v.toPrecision(sig)).toString()
-}
-
-function Sci({ v, sig = 3 }: { v: number; sig?: number }) {
-  const s = fmt(v, sig)
-  const [m, e] = s.split(' × 10^')
-  return e === undefined ? <>{s}</> : <>{m} × 10<sup>{Number(e)}</sup></>
-}
+/** Format with ~3 significant figures. */
+const fmt = (v: number, sig = 3) => Number(v.toPrecision(sig)).toString()
 
 interface SliderProps {
   id: string
@@ -71,11 +46,12 @@ interface SliderProps {
   pos: number
   onChange: (v: number) => void
   hint?: string
+  dim?: boolean
 }
 
-function Slider({ id, label, value, min, max, step, pos, onChange, hint }: SliderProps) {
+function Slider({ id, label, value, min, max, step, pos, onChange, hint, dim }: SliderProps) {
   return (
-    <div className="slider">
+    <div className={`slider${dim ? ' dim' : ''}`}>
       <label htmlFor={id}>
         <span>{label}</span>
         <output htmlFor={id}>{value}</output>
@@ -86,45 +62,42 @@ function Slider({ id, label, value, min, max, step, pos, onChange, hint }: Slide
   )
 }
 
-type Tab = 'isotherms' | 'linear'
-
 interface Preset {
   id: string
   label: string
   K: number
-  C: number
+  c: number
   x: number
-  mode: SurfaceMode
+  mode: Model
   explain: ReactNode
 }
 
-// V_m is left alone so students can still compare cases at the same monolayer capacity.
 const PRESETS: Preset[] = [
   {
     id: 'strong',
-    label: 'Strong adsorption (high C)',
+    label: 'Strong adsorption (high c)',
     K: 200,
-    C: 500,
+    c: 500,
     x: 0.2,
     mode: 'bet',
     explain: (
       <>
-        The first layer binds far more strongly than the ones above it, so a sharp knee forms at low P/P₀ (Type II)
-        and V<sub>m</sub> is easy to read off, as for N<sub>2</sub> on oxides and carbon blacks.
+        The first layer binds far more strongly than the ones above it, so it fills almost completely before the
+        second layer starts (Type II), as for N<sub>2</sub> on oxides and carbon blacks.
       </>
     ),
   },
   {
     id: 'weak',
-    label: 'Weak adsorption (low C, Type III-like)',
+    label: 'Weak adsorption (low c, Type III-like)',
     K: 0.5,
-    C: 1,
+    c: 1,
     x: 0.6,
     mode: 'bet',
     explain: (
       <>
-        With C ≈ 1 the solid holds the first layer no more tightly than the adsorbate holds itself, so there is no
-        knee and uptake only climbs near saturation, as for water on a hydrophobic surface.
+        With c ≈ 1 the solid holds the first layer no more tightly than the adsorbate holds itself, so stacks start
+        growing while bare sites remain, as for water on a hydrophobic surface.
       </>
     ),
   },
@@ -132,13 +105,13 @@ const PRESETS: Preset[] = [
     id: 'langmuir',
     label: 'Langmuir-like (monolayer only)',
     K: 50,
-    C: 50,
+    c: 50,
     x: 0.5,
     mode: 'langmuir',
     explain: (
       <>
         There is room for only one layer, as in narrow micropores (zeolites, activated carbon) or chemisorption, so
-        uptake rises fast and plateaus at V<sub>m</sub> (Type I).
+        uptake rises fast and plateaus at a full monolayer (Type I).
       </>
     ),
   },
@@ -146,84 +119,37 @@ const PRESETS: Preset[] = [
 
 const close = (a: number, b: number) => Math.abs(a - b) <= 1e-6 * Math.max(1, Math.abs(b))
 
-const QUESTIONS: { q: ReactNode; a: ReactNode }[] = [
-  {
-    q: (
-      <>
-        Drag <strong>C</strong> all the way left (C → 1). What happens to the knee of the BET curve, and what does
-        that mean for reading off V<sub>m</sub>?
-      </>
-    ),
-    a: (
-      <>
-        The knee disappears: at C = 1 the BET equation becomes V/V<sub>m</sub> = x/(1 − x), which curves upward
-        from the origin (Type III shape). The first layer is no more strongly bound than later layers, so there is
-        no pressure at which the monolayer is clearly complete, and V<sub>m</sub> from a BET fit becomes
-        unreliable.
-      </>
-    ),
-  },
-  {
-    q: (
-      <>
-        Move <strong>K</strong> from about 1 to 1000. At what P/P₀ does the Langmuir curve reach half of V
-        <sub>m</sub>?
-      </>
-    ),
-    a: (
-      <>
-        θ = Kx/(1 + Kx) = ½ when Kx = 1, so at P/P₀ = 1/K. A larger K (stronger binding) fills the monolayer at
-        lower pressure, but the plateau stays at V<sub>m</sub>: K changes <em>how fast</em> the surface fills, not{' '}
-        <em>how much</em> it holds.
-      </>
-    ),
-  },
-  {
-    q: (
-      <>
-        Open <strong>Linearized BET</strong>, keep the noise on, set C near 1000 and click{' '}
-        <em>New sample</em> a few times. Which comes out reliably, V<sub>m</sub> or C?
-      </>
-    ),
-    a: (
-      <>
-        V<sub>m</sub> = 1/(s + i) stays close to the set value, but C = 1 + s/i jumps around and can even go
-        negative. At high C the intercept i = 1/(V<sub>m</sub>C) is almost zero, so small noise changes it by a
-        large fraction. This is why BET reports are trusted for surface area but rarely for C.
-      </>
-    ),
-  },
+const LEGEND = [
+  { color: LAYER_COLORS[0], label: 'layer 1 (on the solid)' },
+  { color: LAYER_COLORS[1], label: 'layer 2' },
+  { color: LAYER_COLORS[2], label: 'layer 3+' },
+  { color: GAS_COLOR, label: 'gas molecule' },
 ]
 
-function Question({ n, q, a }: { n: number; q: ReactNode; a: ReactNode }) {
-  const [open, setOpen] = useState(false)
-  const id = `answer-${n}`
+function Term({ sym, fallback, children }: { sym: string; fallback: ReactNode; children: ReactNode }) {
   return (
-    <li>
-      <p className="question">{q}</p>
-      <button type="button" className="btn-small" aria-expanded={open} aria-controls={id} onClick={() => setOpen((o) => !o)}>
-        {open ? 'Hide answer' : 'Show answer'}
-      </button>
-      {open && (
-        <p id={id} className="answer">
-          {a}
-        </p>
-      )}
-    </li>
+    <>
+      <dt>
+        <Tex tex={sym} fallback={fallback} />
+      </dt>
+      <dd>{children}</dd>
+    </>
   )
 }
 
 export default function AdsorptionPage() {
-  const [Vm, setVm] = useState(50)
   const [K, setK] = useState(30)
-  const [C, setC] = useState(100)
+  const [c, setC] = useState(100)
   const [x, setX] = useState(0.3)
-  const [mode, setMode] = useState<SurfaceMode>('bet')
-  const [tab, setTab] = useState<Tab>('isotherms')
-  const [noisy, setNoisy] = useState(true)
-  const [seed, setSeed] = useState(7)
+  const [mode, setMode] = useState<Model>('bet')
 
-  // ---------- Isotherms ----------
+  const targets = useMemo(() => siteStackHeights(mode, x, K, c, SITE_ORDER), [mode, x, K, c])
+  const total = targets.reduce((a, b) => a + b, 0)
+  const occupied = targets.filter((h) => h > 0).length
+  const tallest = Math.max(...targets)
+  const cov = loading(mode, x, K, c)
+
+  // ---------- Isotherm (secondary plot) ----------
   const curves = useMemo(() => {
     const xs: number[] = []
     const lang: number[] = []
@@ -231,15 +157,15 @@ export default function AdsorptionPage() {
     for (let i = 0; i <= N_POINTS; i++) {
       const xi = (i / N_POINTS) * X_MAX
       xs.push(xi)
-      lang.push(Vm * langmuirTheta(xi, K))
-      bet.push(Vm * betLoading(xi, C))
+      lang.push(langmuirTheta(xi, K))
+      bet.push(betLoading(xi, c))
     }
     return { xs, lang, bet }
-  }, [Vm, K, C])
+  }, [K, c])
 
-  const yMax = 5 * Vm
-  const vLangX = Vm * langmuirTheta(x, K)
-  const vBetX = Vm * betLoading(x, C)
+  const yMax = mode === 'langmuir' ? 1.6 : Math.max(4, cov * 1.15)
+  const curveStyle = (m: Model) =>
+    mode === m ? { color: COLORS[m], width: 3 } : { color: COLORS[m], width: 1.5, dash: 'dot' as const }
 
   const isoData: Data[] = [
     {
@@ -247,140 +173,54 @@ export default function AdsorptionPage() {
       y: curves.lang,
       type: 'scatter',
       mode: 'lines',
-      name: 'Langmuir (monolayer)',
-      line: { color: COLORS.langmuir, width: 2.5 },
-      hovertemplate: '%{y:.1f} cm³/g<extra>Langmuir</extra>',
+      name: 'Langmuir θ',
+      line: curveStyle('langmuir'),
+      opacity: mode === 'langmuir' ? 1 : 0.45,
     },
     {
       x: curves.xs,
       y: curves.bet,
       type: 'scatter',
       mode: 'lines',
-      name: 'BET (multilayer)',
-      line: { color: COLORS.bet, width: 2.5 },
-      hovertemplate: '%{y:.1f} cm³/g<extra>BET</extra>',
+      name: 'BET n/nₘ',
+      line: curveStyle('bet'),
+      opacity: mode === 'bet' ? 1 : 0.45,
     },
     {
-      x: [x, x],
-      y: [vLangX, Math.min(vBetX, yMax)],
+      x: [x],
+      y: [cov],
       type: 'scatter',
       mode: 'markers',
       showlegend: false,
-      hoverinfo: 'skip',
-      marker: { size: 10, color: [COLORS.langmuir, COLORS.bet], line: { color: '#fff', width: 2 } },
+      marker: { size: 12, color: COLORS[mode], line: { color: '#fff', width: 2 } },
     },
   ]
 
   const isoShapes: Partial<Shape>[] = [
-    {
-      type: 'line',
-      xref: 'paper',
-      x0: 0,
-      x1: 1,
-      y0: Vm,
-      y1: Vm,
-      line: { color: COLORS.muted, width: 1.5, dash: 'dash' },
-    },
-    {
-      type: 'line',
-      x0: x,
-      x1: x,
-      yref: 'paper',
-      y0: 0,
-      y1: 1,
-      line: { color: '#9aa1ae', width: 1, dash: 'dot' },
-    },
+    { type: 'line', xref: 'paper', x0: 0, x1: 1, y0: 1, y1: 1, line: { color: COLORS.muted, width: 1.2, dash: 'dash' } },
   ]
 
   const isoAnnotations: Partial<Annotation>[] = [
     {
       xref: 'paper',
       x: 0.99,
-      y: Vm,
+      y: 1,
       xanchor: 'right',
-      yshift: 2,
-      bgcolor: 'rgba(255,255,255,0.85)',
       yanchor: 'bottom',
-      text: `monolayer capacity V<sub>m</sub> = ${fmt(Vm)}`,
+      yshift: 2,
+      text: 'one full monolayer',
       showarrow: false,
-      font: { size: 12, color: COLORS.muted },
+      font: { size: 11, color: COLORS.muted },
     },
   ]
-
-  // ---------- Linearized BET ----------
-  const lin = useMemo(() => {
-    const rand = mulberry32(seed)
-    const xs: number[] = []
-    const ys: number[] = []
-    for (let xi = BET_RANGE[0]; xi <= BET_RANGE[1] + 1e-9; xi += 0.025) {
-      const vTrue = Vm * betLoading(xi, C)
-      const v = noisy ? vTrue * (1 + NOISE * gaussian(rand)) : vTrue
-      xs.push(xi)
-      ys.push(betTransform(xi, v))
-    }
-    const fit = linearFit(xs, ys)
-    const recovered = betParamsFromLine(fit.slope, fit.intercept)
-    return { xs, ys, fit, recovered, exact: betLineFromParams(Vm, C) }
-  }, [Vm, C, noisy, seed])
-
-  const linData: Data[] = [
-    {
-      x: [0, LIN_X_MAX],
-      y: [lin.fit.intercept, lin.fit.intercept + lin.fit.slope * LIN_X_MAX],
-      type: 'scatter',
-      mode: 'lines',
-      name: 'Least-squares fit',
-      line: { color: COLORS.ink, width: 2 },
-      hoverinfo: 'skip',
-    },
-    {
-      x: lin.xs,
-      y: lin.ys,
-      type: 'scatter',
-      mode: 'markers',
-      name: noisy ? 'Synthetic data (±2 % noise)' : 'Synthetic data (exact BET)',
-      marker: { color: COLORS.bet, size: 9, line: { color: '#fff', width: 1.5 } },
-      hovertemplate: 'x = %{x:.3f}<br>x/[V(1−x)] = %{y:.3e} g/cm³<extra></extra>',
-    },
-  ]
-
-  const linShapes: Partial<Shape>[] = [
-    {
-      type: 'rect',
-      yref: 'paper',
-      x0: BET_RANGE[0],
-      x1: BET_RANGE[1],
-      y0: 0,
-      y1: 1,
-      fillcolor: COLORS.shade,
-      line: { width: 0 },
-      layer: 'below',
-    },
-  ]
-
-  const linAnnotations: Partial<Annotation>[] = [
-    {
-      x: (BET_RANGE[0] + BET_RANGE[1]) / 2,
-      yref: 'paper',
-      y: 0.98,
-      yanchor: 'top',
-      text: 'valid BET range 0.05–0.35',
-      showarrow: false,
-      font: { size: 12, color: COLORS.muted },
-    },
-  ]
-
-  const S = specificSurfaceArea(Vm)
-  const Srec = specificSurfaceArea(lin.recovered.Vm)
-  const unphysicalC = !(lin.recovered.C > 0) || lin.fit.intercept <= 0
 
   const applyPreset = (p: Preset) => {
     setK(p.K)
-    setC(p.C)
+    setC(p.c)
     setX(p.x)
     setMode(p.mode)
   }
-  const isActive = (p: Preset) => close(K, p.K) && close(C, p.C) && close(x, p.x) && mode === p.mode
+  const isActive = (p: Preset) => close(K, p.K) && close(c, p.c) && close(x, p.x) && mode === p.mode
 
   return (
     <article className="page">
@@ -389,11 +229,104 @@ export default function AdsorptionPage() {
       </a>
       <h1>Langmuir vs BET Adsorption</h1>
       <p className="lede">
-        Gas molecules adsorbing on a solid. Move the sliders and watch why the Langmuir isotherm levels off at
-        one monolayer, while the BET isotherm keeps climbing as molecules stack into multilayers.
+        Gas molecules adsorbing on a solid. Raise the pressure and watch the Langmuir surface fill up to a single
+        layer, while in BET molecules keep stacking into multilayers.
       </p>
 
-      <section className="card">
+      {/* ---------- Hero: molecular view ---------- */}
+      <section className="card hero" aria-label="Molecular view">
+        <div className="hero-head">
+          <div className="coverage">
+            <span className="coverage-label">
+              {mode === 'langmuir' ? (
+                <>
+                  Coverage <em>θ</em>
+                </>
+              ) : (
+                <>
+                  Loading <em>n</em>/<em>n</em>
+                  <sub>m</sub>
+                </>
+              )}
+            </span>
+            <span className={`coverage-value ${mode}`}>{cov.toFixed(2)}</span>
+            <span className="coverage-sub">
+              {mode === 'langmuir'
+                ? `${occupied} of ${N_SITES} sites occupied · 1 layer max`
+                : `${total} molecules on ${N_SITES} sites · ${N_SITES - occupied} bare · up to ${tallest} layer${tallest === 1 ? '' : 's'}`}
+            </span>
+          </div>
+          <ul className="layer-legend" aria-label="Legend">
+            {LEGEND.map((l) => (
+              <li key={l.label}>
+                <span className="dot" style={{ background: l.color }} /> {l.label}
+              </li>
+            ))}
+            <li>
+              <span className="dash" /> one monolayer (ML)
+            </li>
+          </ul>
+        </div>
+
+        <SurfaceView
+          targets={targets}
+          pressure={x}
+          label={
+            mode === 'langmuir'
+              ? `Langmuir: ${occupied} of ${N_SITES} sites occupied, single layer, coverage ${cov.toFixed(2)}`
+              : `BET: ${total} molecules on ${N_SITES} sites, up to ${tallest} layers, n/nm ${cov.toFixed(2)}`
+          }
+        />
+
+        <div className="hero-controls">
+          <div className="model-control">
+            <span className="control-label">Model</span>
+            <div className="segmented" role="radiogroup" aria-label="Model">
+              <button role="radio" aria-checked={mode === 'langmuir'} className={mode === 'langmuir' ? 'active lang' : ''} onClick={() => setMode('langmuir')}>
+                Langmuir
+              </button>
+              <button role="radio" aria-checked={mode === 'bet'} className={mode === 'bet' ? 'active bet' : ''} onClick={() => setMode('bet')}>
+                BET
+              </button>
+            </div>
+          </div>
+          <Slider
+            id="x"
+            label={<>Pressure P/P₀</>}
+            value={x.toFixed(2)}
+            min={0}
+            max={X_MAX}
+            step={0.01}
+            pos={x}
+            onChange={setX}
+            hint="relative to the saturation pressure P₀"
+          />
+          <Slider
+            id="k"
+            label={<>Langmuir constant K</>}
+            value={fmt(K)}
+            min={toLog(0.3)}
+            max={toLog(1000)}
+            step={0.01}
+            pos={toLog(K)}
+            onChange={(s) => setK(fromLog(s))}
+            hint="binding strength (per unit P/P₀)"
+            dim={mode !== 'langmuir'}
+          />
+          <Slider
+            id="c"
+            label={<>BET constant c</>}
+            value={fmt(c)}
+            min={0}
+            max={3}
+            step={0.01}
+            pos={toLog(c)}
+            onChange={(s) => setC(fromLog(s))}
+            hint="c ≈ exp[(E₁ − E_L)/RT]"
+            dim={mode !== 'bet'}
+          />
+        </div>
+
         <div className="presets" role="group" aria-label="Typical cases">
           {PRESETS.map((p) => (
             <button
@@ -408,234 +341,160 @@ export default function AdsorptionPage() {
             </button>
           ))}
         </div>
+      </section>
 
-        <div className="param-grid">
-          <Slider
-            id="vm"
-            label={<>Monolayer capacity V<sub>m</sub></>}
-            value={`${Vm} cm³(STP)/g`}
-            min={5}
-            max={300}
-            step={1}
-            pos={Vm}
-            onChange={setVm}
+      {/* ---------- Secondary: isotherm ---------- */}
+      <section className="card iso-grid">
+        <div className="iso-plot">
+          <h2>Isotherm</h2>
+          <Plot
+            data={isoData}
+            layout={{
+              ...BASE_LAYOUT,
+              xaxis: { ...AXIS, title: { text: 'Relative pressure P/P₀' }, range: [0, 1] },
+              yaxis: { ...AXIS, title: { text: 'θ  or  n/nₘ' }, range: [0, yMax] },
+              shapes: isoShapes,
+              annotations: isoAnnotations,
+            }}
+            config={{ staticPlot: true, responsive: true }}
+            useResizeHandler
+            className="plot"
           />
-          <Slider
-            id="k"
-            label={<>Langmuir constant K</>}
-            value={fmt(K)}
-            min={toLog(0.3)}
-            max={toLog(1000)}
-            step={0.01}
-            pos={toLog(K)}
-            onChange={(s) => setK(fromLog(s))}
-            hint="adsorption strength (per unit P/P₀)"
-          />
-          <Slider
-            id="c"
-            label={<>BET constant C</>}
-            value={fmt(C)}
-            min={0}
-            max={3}
-            step={0.01}
-            pos={toLog(C)}
-            onChange={(s) => setC(fromLog(s))}
-            hint="C ≈ exp[(E₁ − E_L)/RT]"
-          />
+          <p className="caption">The dot is the current pressure shown in the molecular view above.</p>
         </div>
-
-        <div className="sim-grid">
-          <div className="sim-plot">
-            <div className="tabs" role="tablist" aria-label="Plot view">
-              <button role="tab" aria-selected={tab === 'isotherms'} className={tab === 'isotherms' ? 'active' : ''} onClick={() => setTab('isotherms')}>
-                Isotherms
-              </button>
-              <button role="tab" aria-selected={tab === 'linear'} className={tab === 'linear' ? 'active' : ''} onClick={() => setTab('linear')}>
-                Linearized BET
-              </button>
-            </div>
-
-            {tab === 'isotherms' ? (
-              <>
-                <Plot
-                  data={isoData}
-                  layout={{
-                    ...BASE_LAYOUT,
-                    xaxis: { ...AXIS, title: { text: 'Relative pressure P/P₀' }, range: [0, 1] },
-                    yaxis: { ...AXIS, title: { text: 'V  [cm³(STP)/g]' }, range: [0, yMax] },
-                    shapes: isoShapes,
-                    annotations: isoAnnotations,
-                  }}
-                  config={{ displaylogo: false, responsive: true, displayModeBar: false }}
-                  useResizeHandler
-                  className="plot"
-                />
-                <p className="caption">
-                  Langmuir saturates at V<sub>m</sub>. BET passes V<sub>m</sub> and diverges as P/P₀ → 1 (bulk
-                  condensation); the curve leaves the plot near saturation. Dotted line = P/P₀ shown on the right.
-                </p>
-              </>
-            ) : (
-              <>
-                <Plot
-                  data={linData}
-                  layout={{
-                    ...BASE_LAYOUT,
-                    hovermode: 'closest',
-                    margin: { ...BASE_LAYOUT.margin, l: 76 },
-                    xaxis: { ...AXIS, title: { text: 'x = P/P₀' }, range: [0, LIN_X_MAX] },
-                    yaxis: { ...AXIS, title: { text: 'x / [V(1 − x)]  [g/cm³]' }, rangemode: 'tozero', exponentformat: 'power' },
-                    shapes: linShapes,
-                    annotations: linAnnotations,
-                  }}
-                  config={{ displaylogo: false, responsive: true, displayModeBar: false }}
-                  useResizeHandler
-                  className="plot"
-                />
-                <div className="lin-controls">
-                  <label>
-                    <input type="checkbox" checked={noisy} onChange={(e) => setNoisy(e.target.checked)} /> add ±2 %
-                    measurement noise
-                  </label>
-                  {noisy && (
-                    <button type="button" className="btn-small" onClick={() => setSeed((s) => s + 1)}>
-                      New sample
-                    </button>
-                  )}
-                </div>
-
-                <table className="readout">
-                  <tbody>
-                    <tr>
-                      <th>Slope s = (C − 1)/(V<sub>m</sub>C)</th>
-                      <td>
-                        <Sci v={lin.fit.slope} /> g/cm³
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>Intercept i = 1/(V<sub>m</sub>C)</th>
-                      <td>
-                        <Sci v={lin.fit.intercept} /> g/cm³
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>R²</th>
-                      <td>{lin.fit.r2.toFixed(5)}</td>
-                    </tr>
-                    <tr className="sep">
-                      <th>
-                        V<sub>m</sub> = 1/(s + i)
-                      </th>
-                      <td>
-                        <strong>{fmt(lin.recovered.Vm)}</strong> cm³/g <span className="muted">(set: {Vm})</span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>C = 1 + s/i</th>
-                      <td>
-                        <strong>{unphysicalC ? 'not physical' : fmt(lin.recovered.C)}</strong>{' '}
-                        <span className="muted">(set: {fmt(C)})</span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>S<sub>BET</sub> from fitted V<sub>m</sub></th>
-                      <td>
-                        <strong>{fmt(Srec)}</strong> m²/g
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                {unphysicalC && (
-                  <p className="note">
-                    The fitted intercept is ≤ 0, so C comes out negative. At large C the intercept is tiny and
-                    measurement noise swamps it, but V<sub>m</sub> = 1/(s + i) is still robust. This also happens
-                    with real data; it is a reason to check the fitting range.
-                  </p>
-                )}
-                <p className="caption">
-                  Fit uses only points in the shaded range. Synthetic data follow the BET equation exactly, so they
-                  stay linear everywhere; real isotherms bend away outside ≈ 0.05–0.35.
-                </p>
-              </>
-            )}
-          </div>
-
-          <div className="sim-surface">
-            <h2>Surface view</h2>
-            <div className="segmented" role="radiogroup" aria-label="Model">
-              <button role="radio" aria-checked={mode === 'langmuir'} className={mode === 'langmuir' ? 'active lang' : ''} onClick={() => setMode('langmuir')}>
-                Langmuir
-              </button>
-              <button role="radio" aria-checked={mode === 'bet'} className={mode === 'bet' ? 'active bet' : ''} onClick={() => setMode('bet')}>
-                BET
-              </button>
-            </div>
-            <Slider
-              id="x"
-              label={<>Relative pressure P/P₀</>}
-              value={x.toFixed(2)}
-              min={0}
-              max={X_MAX}
-              step={0.01}
-              pos={x}
-              onChange={setX}
-            />
-            <SurfaceView mode={mode} x={x} K={K} C={C} />
-            <p className="legend-note">
-              {mode === 'bet' ? (
-                <>
-                  <span className="dot" style={{ background: '#c4552b' }} /> 1st layer (bound to the solid){' '}
-                  <span className="dot" style={{ background: '#e9a98d' }} /> upper layers (like liquid)
-                </>
-              ) : (
-                <>
-                  <span className="dot" style={{ background: '#2a6fb0' }} /> adsorbed molecule, one per site
-                </>
-              )}
-            </p>
-          </div>
+        <div className="iso-text">
+          <h2>What you are seeing</h2>
+          <p>
+            <strong className="lang-ink">Langmuir:</strong> each site holds at most one molecule. As P rises the
+            surface fills up, and the curve levels off at θ = 1, a full monolayer.
+          </p>
+          <p>
+            <strong className="bet-ink">BET:</strong> molecules can also land on top of adsorbed ones. The first
+            layer sits on the solid and is bound more strongly (in the animation it rarely leaves), while upper layers
+            behave like a liquid and exchange with the gas often. As P/P₀ → 1 the stacks keep growing: the gas
+            condenses on the surface.
+          </p>
         </div>
       </section>
 
-      <div className="info-grid">
-        <section className="card key-idea">
-          <h2>Key idea</h2>
-          <p>
-            <strong className="lang-ink">Langmuir:</strong> one molecule per site, all sites equivalent, no
-            interaction between adsorbed molecules. Once every site is taken the surface is full, so adsorption
-            stops at a <em>monolayer</em> (V → V<sub>m</sub>).
-          </p>
-          <p>
-            <strong className="bet-ink">BET:</strong> molecules can adsorb on top of already adsorbed ones, forming{' '}
-            <em>multilayers</em>. Only the first layer feels the solid; layers above it behave like condensation
-            into a liquid, so V grows without limit as P/P₀ → 1. Fitting BET at low P/P₀ gives V<sub>m</sub>, which
-            is the standard way to measure the <em>specific surface area</em> of powders and porous materials.
-          </p>
-        </section>
+      {/* ---------- The equations ---------- */}
+      <section className="equations" aria-labelledby="eq-title">
+        <h2 id="eq-title" className="section-title">
+          The equations
+        </h2>
+        <div className="eq-grid">
+          <div className={`card eq-card lang${mode === 'langmuir' ? ' current' : ''}`}>
+            <div className="eq-head">
+              <h3>Langmuir isotherm (monolayer)</h3>
+              {mode === 'langmuir' && <span className="eq-badge">current model</span>}
+            </div>
+            <div className="eq-math">
+              <Tex
+                display
+                tex={String.raw`\theta = \frac{K\,P}{1 + K\,P}`}
+                fallback={
+                  <>
+                    <i>θ</i> = <Frac n={<><i>K</i>·<i>P</i></>} d={<>1 + <i>K</i>·<i>P</i></>} />
+                  </>
+                }
+              />
+            </div>
+            <dl className="terms">
+              <Term sym={String.raw`\theta`} fallback={<i>θ</i>}>
+                fractional surface coverage: share of adsorption sites that are occupied (0 = empty, 1 = full
+                monolayer)
+              </Term>
+              <Term sym="P" fallback={<i>P</i>}>
+                partial pressure of the gas above the surface
+              </Term>
+              <Term sym="K" fallback={<i>K</i>}>
+                Langmuir adsorption constant (equilibrium constant of adsorption ⇌ desorption); larger K = stronger
+                binding, surface fills at lower pressure
+              </Term>
+            </dl>
+            <h4>Assumptions</h4>
+            <ul className="assumptions">
+              <li>one molecule per site</li>
+              <li>only a single layer</li>
+              <li>all sites equivalent</li>
+              <li>no interaction between adsorbed molecules</li>
+            </ul>
+          </div>
 
-        <section className="card">
-          <h2>Specific surface area</h2>
-          <p className="formula">
-            S = V<sub>m</sub> · N<sub>A</sub> · σ / 22 414
-          </p>
-          <p className="ssa">
-            <strong>{fmt(S, 4)}</strong> m²/g
-          </p>
-          <p className="small muted">
-            V<sub>m</sub> = {Vm} cm³(STP)/g, N<sub>A</sub> = 6.022 × 10<sup>23</sup> mol⁻¹, σ(N<sub>2</sub>) ={' '}
-            {SIGMA_N2_NM2} nm² = {SIGMA_N2_NM2} × 10<sup>−18</sup> m², 22 414 cm³/mol = molar volume at STP. Each
-            cm³(STP)/g of monolayer ≈ 4.35 m²/g.
-          </p>
-        </section>
-      </div>
-
-      <section className="card try-this">
-        <h2>Try this</h2>
-        <ol>
-          {QUESTIONS.map((item, i) => (
-            <Question key={i} n={i + 1} q={item.q} a={item.a} />
-          ))}
-        </ol>
+          <div className={`card eq-card bet${mode === 'bet' ? ' current' : ''}`}>
+            <div className="eq-head">
+              <h3>BET isotherm (multilayer)</h3>
+              {mode === 'bet' && <span className="eq-badge">current model</span>}
+            </div>
+            <div className="eq-math">
+              <Tex
+                display
+                tex={String.raw`\frac{n}{n_m} = \frac{c\,x}{(1 - x)\,(1 - x + c\,x)}`}
+                fallback={
+                  <>
+                    <Frac n={<i>n</i>} d={<><i>n</i><sub>m</sub></>} /> ={' '}
+                    <Frac n={<><i>c</i>·<i>x</i></>} d={<>(1 − <i>x</i>)(1 − <i>x</i> + <i>c</i>·<i>x</i>)</>} />
+                  </>
+                }
+              />
+              <Tex
+                display
+                tex={String.raw`\text{with}\quad x = \frac{P}{P_0}`}
+                fallback={
+                  <>
+                    with <i>x</i> = <Frac n={<i>P</i>} d={<><i>P</i><sub>0</sub></>} />
+                  </>
+                }
+              />
+            </div>
+            <dl className="terms">
+              <Term sym="n" fallback={<i>n</i>}>
+                amount of gas adsorbed at pressure P
+              </Term>
+              <Term sym="n_m" fallback={<><i>n</i><sub>m</sub></>}>
+                amount needed to form one complete monolayer
+              </Term>
+              <Term sym="n/n_m" fallback={<><i>n</i>/<i>n</i><sub>m</sub></>}>
+                number of “layers’ worth” adsorbed (can exceed 1)
+              </Term>
+              <Term sym="P" fallback={<i>P</i>}>
+                equilibrium pressure of the gas
+              </Term>
+              <Term sym="P_0" fallback={<><i>P</i><sub>0</sub></>}>
+                saturation vapour pressure of the gas at that temperature
+              </Term>
+              <Term sym="x = P/P_0" fallback={<><i>x</i> = <i>P</i>/<i>P</i><sub>0</sub></>}>
+                relative pressure (0 to 1)
+              </Term>
+              <Term sym="c" fallback={<i>c</i>}>
+                BET constant, related to how much more strongly the first layer binds than the higher layers:{' '}
+                <Tex
+                  tex={String.raw`c \approx \exp\!\left(\frac{E_1 - E_L}{RT}\right)`}
+                  fallback={
+                    <>
+                      <i>c</i> ≈ exp((<i>E</i>
+                      <sub>1</sub> − <i>E</i>
+                      <sub>L</sub>)/<i>RT</i>)
+                    </>
+                  }
+                />
+                , where <Tex tex="E_1" fallback={<><i>E</i><sub>1</sub></>} /> = adsorption heat of the first layer
+                and <Tex tex="E_L" fallback={<><i>E</i><sub>L</sub></>} /> = heat of liquefaction
+              </Term>
+            </dl>
+            <h4>Assumptions</h4>
+            <ul className="assumptions">
+              <li>multiple layers allowed</li>
+              <li>first layer binds directly to the solid</li>
+              <li>higher layers behave like liquid condensation</li>
+              <li>no lateral interactions</li>
+            </ul>
+          </div>
+        </div>
+        <p className="eq-relation">
+          <strong>How they relate:</strong> Langmuir describes a single layer and plateaus; BET extends the idea to
+          multiple layers, which is why its curve rises sharply as P → P₀.
+        </p>
       </section>
 
       <section className="card">
