@@ -93,14 +93,12 @@ export default function AdsorptionPage() {
   const { occupied, total, tallest } = stats
   const cov = loading(mode, x, K, c)
 
-  // Simulation points on the isotherm belong to one run, model and K/c; changing any of them clears them.
-  const pointsKey = `${runId}|${mode}|${K}|${c}`
-  const [simPoints, setSimPoints] = useState<{ key: string; pts: { x: number; y: number }[] }>({ key: '', pts: [] })
-  const points = simPoints.key === pointsKey ? simPoints.pts : []
-
   // "settling…" shows after a reset or a pressure/K/c change until the running average, after at least
-  // SETTLE_MIN_TIME of simulated time, first comes within ~5%. Settling then adds a simulation point.
-  const runKey = `${pointsKey}|${x}`
+  // SETTLE_MIN_TIME of simulated time, first comes within ~5%. Settling then places the simulation point,
+  // which belongs to that one setting: any change (pressure included) hides it until the next settle.
+  const runKey = `${runId}|${mode}|${K}|${c}|${x}`
+  const [simPoint, setSimPoint] = useState<{ key: string; x: number; y: number } | null>(null)
+  const points = simPoint && simPoint.key === runKey ? [simPoint] : []
   const runStart = useRef({ key: runKey, time: 0 })
   if (runStart.current.key !== runKey) runStart.current = { key: runKey, time: stats.time }
   const [settledKey, setSettledKey] = useState('')
@@ -109,9 +107,8 @@ export default function AdsorptionPage() {
   useEffect(() => {
     if (!settleReady || settledKey === runKey) return
     setSettledKey(runKey)
-    const pt = { x, y: stats.avgLoading }
-    setSimPoints((s) => ({ key: pointsKey, pts: [...(s.key === pointsKey ? s.pts : []).filter((p) => p.x !== x), pt] }))
-  }, [settleReady, settledKey, runKey, pointsKey, x, stats.avgLoading])
+    setSimPoint({ key: runKey, x, y: stats.avgLoading })
+  }, [settleReady, settledKey, runKey, x, stats.avgLoading])
   const settling = settledKey !== runKey
 
   const restart = () => {
@@ -381,8 +378,8 @@ export default function AdsorptionPage() {
           condenses on the surface.
         </p>
         <p className="caption">
-          The dot on the isotherm marks the current pressure; the simulation average should settle near it, and each
-          settled average is added as a diamond. The shaded band (P/P₀ 0.05–0.35) is where the BET equation is
+          The dot on the isotherm marks the current pressure; the simulation average should settle near it, and once it
+          has settled it is shown as a diamond (cleared as soon as you change a setting). The shaded band (P/P₀ 0.05–0.35) is where the BET equation is
           normally fitted.
         </p>
       </section>
