@@ -17,7 +17,7 @@ const TOOLS: Tool[] = [
   {
     title: 'Langmuir vs BET Adsorption',
     blurb:
-      'Monolayer vs multilayer isotherms, the linearized BET fit, and the specific surface area of a material.',
+      'Watch gas molecules adsorb on a surface: a single Langmuir monolayer vs stacking BET multilayers, with both isotherm equations explained.',
     href: '#/adsorption',
     icon: svg(
       <>
