@@ -27,10 +27,13 @@ const BOX_W = MARGIN + N_SITES + MARGIN
 const WORLD_W = BOX_W + GUTTER
 const R = 0.46 // molecule radius
 
-const MEAN_SPEED = 10 // diameters per second
+// Speed and density set the wall flux, and with it every adsorption/desorption rate:
+// RATE ≈ 3.2 /s gives Langmuir (and BET up to P/P₀ ≈ 0.6) a settling time of ≲ 5 s.
+const MEAN_SPEED = 20 // diameters per second
 const SIGMA = MEAN_SPEED / Math.sqrt(Math.PI / 2) // 2D Maxwell–Boltzmann (Rayleigh) scale
-const GAS_DENSITY = 0.3 // molecules per unit area at P/P₀ = 1
-const STICK = 0.9 // sticking probability per hit
+const GAS_DENSITY = 0.5 // molecules per unit area at P/P₀ = 1
+const STICK = 1 // sticking probability per hit
+const MAX_SUBSTEP = 1 / 125 // s; keeps fast molecules from skipping over a stack in one step
 // Adsorption rate per site per unit P/P₀: sticking × wall flux (2D: n·<v>/π).
 const RATE = (STICK * GAS_DENSITY * MEAN_SPEED) / Math.PI
 // Desorption rates (per second) of the top molecule of a stack. Upper layers are
@@ -38,6 +41,13 @@ const RATE = (STICK * GAS_DENSITY * MEAN_SPEED) / Math.PI
 // binds more strongly by a factor K (Langmuir) or c (BET).
 const K_DES_UPPER = RATE
 const kDesFirst = (mode: Model) => RATE / (mode === 'langmuir' ? K_LANGMUIR : C_BET)
+// A spot vacated by desorption is empty of gas until molecules fly in, so its next adsorption comes
+// on average a short delay (~π/2v̄) later than 1/(RATE·P). That delay is measured per layer while the
+// simulation runs (forgetting window DELAY_TAU, prior below) and desorption is slowed by the same
+// factor, which keeps detailed balance, and the steady state, on the isotherm.
+const DELAY_PRIOR = Math.PI / (2 * MEAN_SPEED)
+const DELAY_PRIOR_HITS = 20
+const DELAY_TAU = 120 // s
 
 interface Particle {
   x: number
@@ -127,6 +137,9 @@ export default function SurfaceView({ mode, pressure, label, onStats }: Props) {
       randomGas(left + Math.random() * (right - left), R + Math.random() * (ceiling - R)),
     )
     let spawnBudget = 0
+    let lastPressure = pressureRef.current
+    const waitExcess: number[] = new Array(MAX_LAYERS + 1).fill(0) // Σ (exposed time − 1/(RATE·P) per hit), by layer
+    const hits: number[] = new Array(MAX_LAYERS + 1).fill(0)
     let avgLoading = 0
     let statsTimer = 0
     let time = 0
@@ -135,16 +148,40 @@ export default function SurfaceView({ mode, pressure, label, onStats }: Props) {
       const mode = modeRef.current
       time += dt
 
-      // 1. Random desorption of the top molecule of each stack.
+      // 1. Random desorption of the top molecule of each stack (rate corrected for the refill delay).
+      const P = pressureRef.current
+      const forget = 1 - dt / DELAY_TAU
+      for (let c = 0; c <= MAX_LAYERS; c++) {
+        waitExcess[c] *= forget
+        hits[c] *= forget
+      }
       const kFirst = kDesFirst(mode)
       for (let s = 0; s < N_SITES; s++) {
         const h = landed[s]
-        if (h === 0 || Math.random() >= (h === 1 ? kFirst : K_DES_UPPER) * dt) continue
+        if (P > 0.005 && (mode === 'bet' || h === 0)) waitExcess[Math.min(h, MAX_LAYERS)] += dt
+        if (h === 0) continue
+        const c = Math.min(h - 1, MAX_LAYERS)
+        const delay = Math.max(0, (waitExcess[c] + DELAY_PRIOR * DELAY_PRIOR_HITS) / (hits[c] + DELAY_PRIOR_HITS))
+        if (Math.random() >= ((h === 1 ? kFirst : K_DES_UPPER) / (1 + RATE * P * delay)) * dt) continue
         landed[s]--
         particles.push(wallGas(siteX(s), Math.min(h, MAX_LAYERS) - 0.5, 1))
       }
 
-      // 2. Reservoir: molecules enter through the top at the equilibrium flux for pressure P.
+      // 2a. Pressure changed: bring the gas count to the new equilibrium at once. Extra
+      // molecules stream in through the open top edge; surplus ones leave through it.
+      if (pressureRef.current !== lastPressure) {
+        lastPressure = pressureRef.current
+        let freeArea = (right - left) * (ceiling - R)
+        for (let s = 0; s < N_SITES; s++) freeArea -= Math.min(landed[s], MAX_LAYERS)
+        const target = Math.round(GAS_DENSITY * lastPressure * freeArea)
+        while (particles.length < target) particles.push(wallGas(left + Math.random() * (right - left), ceiling, -1))
+        if (particles.length > target) {
+          particles.sort((a, b) => a.y - b.y) // highest last: those nearest the opening exit first
+          particles.length = target
+        }
+      }
+
+      // 2b. Reservoir: molecules enter through the top at the equilibrium flux for pressure P.
       spawnBudget += dt * GAS_DENSITY * pressureRef.current * (MEAN_SPEED / Math.PI) * (right - left)
       while (spawnBudget >= 1) {
         particles.push(wallGas(left + Math.random() * (right - left), ceiling, -1))
@@ -154,6 +191,7 @@ export default function SurfaceView({ mode, pressure, label, onStats }: Props) {
       // 3. Straight-line flight with elastic wall collisions; sticking on surface hits.
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i]
+        const y0 = p.y
         const nx = p.x + p.vx * dt
         // Side of a taller neighbouring stack acts as a wall.
         if (p.y < columnTop(nx) + R && p.y >= columnTop(p.x) + R) p.vx = -p.vx
@@ -170,7 +208,13 @@ export default function SurfaceView({ mode, pressure, label, onStats }: Props) {
         if (p.y < floor && p.vy < 0) {
           const site = Math.floor(p.x - MARGIN)
           const free = site >= 0 && site < N_SITES && (mode === 'bet' || landed[site] === 0)
-          if (free && Math.random() < STICK) {
+          // Only a molecule arriving from above can stick; one engulfed by a stack that just grew is pushed out.
+          if (free && y0 >= floor && Math.random() < STICK) {
+            if (P > 0.005) {
+              const c = Math.min(landed[site], MAX_LAYERS)
+              hits[c]++
+              waitExcess[c] -= 1 / (RATE * P)
+            }
             landed[site]++
             particles.splice(i, 1)
             continue
@@ -306,7 +350,8 @@ export default function SurfaceView({ mode, pressure, label, onStats }: Props) {
     const frame = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000)
       last = now
-      step(dt)
+      const n = Math.ceil(dt / MAX_SUBSTEP)
+      for (let k = 0; k < n; k++) step(dt / n)
       draw()
       raf = requestAnimationFrame(frame)
     }

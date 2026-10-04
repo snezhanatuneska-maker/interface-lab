@@ -87,6 +87,12 @@ export default function AdsorptionPage() {
     setRunId((r) => r + 1)
   }
 
+  const switchMode = (m: Model) => {
+    if (m === mode) return
+    setMode(m)
+    reset()
+  }
+
   // ---------- Isotherm (secondary plot) ----------
   const curves = useMemo(() => {
     const xs: number[] = []
@@ -231,10 +237,10 @@ export default function AdsorptionPage() {
           <div className="model-control">
             <span className="control-label">Model</span>
             <div className="segmented" role="radiogroup" aria-label="Model">
-              <button role="radio" aria-checked={mode === 'langmuir'} className={mode === 'langmuir' ? 'active lang' : ''} onClick={() => setMode('langmuir')}>
+              <button role="radio" aria-checked={mode === 'langmuir'} className={mode === 'langmuir' ? 'active lang' : ''} onClick={() => switchMode('langmuir')}>
                 Langmuir
               </button>
-              <button role="radio" aria-checked={mode === 'bet'} className={mode === 'bet' ? 'active bet' : ''} onClick={() => setMode('bet')}>
+              <button role="radio" aria-checked={mode === 'bet'} className={mode === 'bet' ? 'active bet' : ''} onClick={() => switchMode('bet')}>
                 BET
               </button>
             </div>
