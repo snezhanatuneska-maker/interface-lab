@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { Annotation, Data, Layout, Shape } from 'plotly.js'
 import Plot from '../components/Plot'
 import SurfaceView, { GAS_COLOR, LAYER_COLORS, N_SITES, type SurfaceStats } from '../components/SurfaceView'
@@ -80,6 +80,14 @@ export default function AdsorptionPage() {
   const [stats, setStats] = useState<SurfaceStats>({ occupied: 0, total: 0, tallest: 0, avgLoading: 0 })
   const { occupied, total, tallest } = stats
   const cov = loading(mode, x, K_LANGMUIR, C_BET)
+  // "settling…" shows after a reset or pressure change until the running average first comes within ~5%.
+  const runKey = `${runId}|${mode}|${x}`
+  const [settledKey, setSettledKey] = useState('')
+  const near = Math.abs(stats.avgLoading - cov) <= Math.max(0.05 * cov, 0.02)
+  useEffect(() => {
+    if (near) setSettledKey(runKey)
+  }, [near, runKey])
+  const settling = settledKey !== runKey
 
   const reset = () => {
     setX(X_DEFAULT)
@@ -107,7 +115,8 @@ export default function AdsorptionPage() {
     return { xs, lang, bet }
   }, [])
 
-  const yMax = mode === 'langmuir' ? 1.6 : Math.max(4, cov * 1.15)
+  // Auto-scale to the active curve over the plotted range (kept ≥ 1 so the monolayer line stays visible).
+  const yMax = Math.max(1, ...(mode === 'langmuir' ? curves.lang : curves.bet)) * 1.1
   const curveStyle = (m: Model) =>
     mode === m ? { color: COLORS[m], width: 3 } : { color: COLORS[m], width: 1.5, dash: 'dot' as const }
 
@@ -187,7 +196,8 @@ export default function AdsorptionPage() {
             </span>
             <span className={`coverage-value ${mode}`}>{cov.toFixed(2)}</span>
             <span className="coverage-sub">
-              isotherm · simulation avg {stats.avgLoading.toFixed(2)}
+              equation: {cov.toFixed(2)} · simulation (running average): {stats.avgLoading.toFixed(2)}
+              {settling && ', settling…'}
               <br />
               {mode === 'langmuir'
                 ? `${occupied} of ${N_SITES} sites occupied · 1 layer max`
@@ -265,7 +275,7 @@ export default function AdsorptionPage() {
       <section className="card iso-text">
         <h2>What you are seeing</h2>
         <p>
-          <strong className="lang-ink">Langmuir:</strong> each site holds at most one molecule. As P rises the
+          <strong className="lang-ink">Langmuir:</strong> each site holds at most one molecule. As P/P₀ rises the
           surface fills up, and the curve levels off at θ = 1, a full monolayer.
         </p>
         <p>
@@ -291,10 +301,19 @@ export default function AdsorptionPage() {
             <div className="eq-math">
               <Tex
                 display
-                tex={String.raw`\theta = \frac{K\,P}{1 + K\,P}`}
+                tex={String.raw`\theta = \frac{K\,x}{1 + K\,x}`}
                 fallback={
                   <>
-                    <i>θ</i> = <Frac n={<><i>K</i>·<i>P</i></>} d={<>1 + <i>K</i>·<i>P</i></>} />
+                    <i>θ</i> = <Frac n={<><i>K</i>·<i>x</i></>} d={<>1 + <i>K</i>·<i>x</i></>} />
+                  </>
+                }
+              />
+              <Tex
+                display
+                tex={String.raw`\text{with}\quad x = \frac{P}{P_0}`}
+                fallback={
+                  <>
+                    with <i>x</i> = <Frac n={<i>P</i>} d={<><i>P</i><sub>0</sub></>} />
                   </>
                 }
               />
@@ -304,12 +323,12 @@ export default function AdsorptionPage() {
                 fractional surface coverage: share of adsorption sites that are occupied (0 = empty, 1 = full
                 monolayer)
               </Term>
-              <Term sym="P" fallback={<i>P</i>}>
-                partial pressure of the gas above the surface
+              <Term sym="x = P/P_0" fallback={<><i>x</i> = <i>P</i>/<i>P</i><sub>0</sub></>}>
+                relative pressure: gas pressure P divided by the saturation pressure P₀ (0 to 1)
               </Term>
               <Term sym="K" fallback={<i>K</i>}>
-                Langmuir adsorption constant (equilibrium constant of adsorption ⇌ desorption); larger K = stronger
-                binding, surface fills at lower pressure
+                Langmuir adsorption constant (equilibrium constant of adsorption ⇌ desorption), dimensionless, per
+                unit of P/P₀; larger K = stronger binding, surface fills at lower P/P₀
               </Term>
             </dl>
             <h4>Assumptions</h4>

@@ -28,8 +28,8 @@ const WORLD_W = BOX_W + GUTTER
 const R = 0.46 // molecule radius
 
 // Speed and density set the wall flux, and with it every adsorption/desorption rate:
-// RATE ≈ 3.2 /s gives Langmuir (and BET up to P/P₀ ≈ 0.6) a settling time of ≲ 5 s.
-const MEAN_SPEED = 20 // diameters per second
+// RATE ≈ 1.6 /s.
+const MEAN_SPEED = 10 // diameters per second
 const SIGMA = MEAN_SPEED / Math.sqrt(Math.PI / 2) // 2D Maxwell–Boltzmann (Rayleigh) scale
 const GAS_DENSITY = 0.5 // molecules per unit area at P/P₀ = 1
 const STICK = 1 // sticking probability per hit
