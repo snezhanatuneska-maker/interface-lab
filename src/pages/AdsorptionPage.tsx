@@ -115,8 +115,9 @@ export default function AdsorptionPage() {
     return { xs, lang, bet }
   }, [])
 
-  // Same y-axis for both models: auto-scaled to the highest curve over the plotted range, with 10% headroom.
-  const yMax = Math.max(...curves.lang, ...curves.bet) * 1.1
+  // Same y-axis for both models (0–5 shows Langmuir and the BET knee and rise); it only grows when the
+  // BET marker would go off the top (P/P₀ > ~0.8).
+  const yMax = Math.max(5, cov * 1.1)
   const curveStyle = (m: Model) =>
     mode === m ? { color: COLORS[m], width: 3 } : { color: COLORS[m], width: 1.5, dash: 'dot' as const }
 
