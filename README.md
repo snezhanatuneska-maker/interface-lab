@@ -69,7 +69,7 @@ You can also run it by hand from the **Actions** tab (**Deploy to GitHub Pages**
 The live site is served at:
 
 ```
-https://<your-github-username>.github.io/interface-lab/
+https://snezhanatuneska-maker.github.io/interface-lab/
 ```
 
 Because the site lives under `/interface-lab/` rather than the domain root, `vite.config.ts`
