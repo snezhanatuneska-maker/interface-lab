@@ -9,8 +9,8 @@ The first tool is a **Langmuir vs BET adsorption** simulator for bachelor studen
   fly with Maxwell–Boltzmann speeds, stick to and desorb from a solid surface. In Langmuir mode each site holds at most one molecule; in BET mode molecules stack into
   multilayers, coloured by layer (1, 2, 3+), with the live coverage θ or n/nₘ shown next to it.
 - An **isotherm** plot beside it that tracks the current pressure with a marker. The usual BET fitting range
-  (P/P₀ 0.05–0.35) is shaded, and once the simulation settles its running average is shown as a
-  "simulation" diamond (it disappears as soon as the pressure, model, K/c or Reset changes the setting).
+  (P/P₀ 0.05–0.35) is shaded, and once the simulation settles a "simulation" diamond is drawn
+  exactly on the current point of the curve (it disappears as soon as the pressure, model, K/c or Reset changes the setting).
 - Controls beneath both: model toggle, pressure P/P₀, a log-scale slider for the active model's constant
   (Langmuir K, 0.5–200, default 10; BET c, 0.5–500, default 50, with c < 2 giving a type III isotherm),
   Pause/Play and Reset. The simulation's desorption rates follow

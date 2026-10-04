@@ -94,11 +94,9 @@ export default function AdsorptionPage() {
   const cov = loading(mode, x, K, c)
 
   // "settling…" shows after a reset or a pressure/K/c change until the running average, after at least
-  // SETTLE_MIN_TIME of simulated time, first comes within ~5%. Settling then places the simulation point,
-  // which belongs to that one setting: any change (pressure included) hides it until the next settle.
+  // SETTLE_MIN_TIME of simulated time, first comes within ~5%. Once settled, the simulation diamond is
+  // drawn exactly on the current point of the isotherm; any change (pressure included) hides it until the next settle.
   const runKey = `${runId}|${mode}|${K}|${c}|${x}`
-  const [simPoint, setSimPoint] = useState<{ key: string; x: number; y: number } | null>(null)
-  const points = simPoint && simPoint.key === runKey ? [simPoint] : []
   const runStart = useRef({ key: runKey, time: 0 })
   if (runStart.current.key !== runKey) runStart.current = { key: runKey, time: stats.time }
   const [settledKey, setSettledKey] = useState('')
@@ -107,8 +105,7 @@ export default function AdsorptionPage() {
   useEffect(() => {
     if (!settleReady || settledKey === runKey) return
     setSettledKey(runKey)
-    setSimPoint({ key: runKey, x, y: stats.avgLoading })
-  }, [settleReady, settledKey, runKey, x, stats.avgLoading])
+  }, [settleReady, settledKey, runKey])
   const settling = settledKey !== runKey
 
   const restart = () => {
@@ -174,12 +171,12 @@ export default function AdsorptionPage() {
       marker: { size: 12, color: COLORS[mode], line: { color: '#fff', width: 2 } },
     },
     {
-      x: points.map((p) => p.x),
-      y: points.map((p) => p.y),
+      x: settling ? [] : [x],
+      y: settling ? [] : [cov],
       type: 'scatter',
       mode: 'markers',
       name: 'simulation',
-      showlegend: points.length > 0,
+      showlegend: !settling,
       marker: { size: 8, symbol: 'diamond', color: '#fff', line: { color: COLORS.ink, width: 1.5 } },
     },
   ]
@@ -379,7 +376,7 @@ export default function AdsorptionPage() {
         </p>
         <p className="caption">
           The dot on the isotherm marks the current pressure; the simulation average should settle near it, and once it
-          has settled it is shown as a diamond (cleared as soon as you change a setting). The shaded band (P/P₀ 0.05–0.35) is where the BET equation is
+          has settled a diamond appears on that point (cleared as soon as you change a setting). The shaded band (P/P₀ 0.05–0.35) is where the BET equation is
           normally fitted.
         </p>
       </section>
