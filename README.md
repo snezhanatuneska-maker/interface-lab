@@ -1,6 +1,6 @@
 # Interface Engineering Lab
 
-Interactive educational tools for interface engineering in clean energy processes.
+Interactive educational tools for interface engineering in CEP.
 
 The homepage lists the tools as cards (more are marked "coming soon").
 The first tool is a **Langmuir vs BET adsorption** simulator for bachelor students:

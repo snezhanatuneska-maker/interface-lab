@@ -16,7 +16,7 @@ export default function App() {
           <a className="site-title" href="#/">
             Interface Engineering Lab
           </a>
-          <span className="site-subtitle">Interactive tools for clean energy processes</span>
+          <span className="site-subtitle">Interactive tools for CEP</span>
         </div>
       </header>
 
@@ -34,8 +34,6 @@ export default function App() {
         <div className="container">
           <span>{AUTHOR}</span>
           <span>{COURSE}</span>
-          <span>Built with React</span>
-          <span>{new Date().getFullYear()}</span>
         </div>
       </footer>
     </div>

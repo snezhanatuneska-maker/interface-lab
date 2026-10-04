@@ -6,6 +6,7 @@ import Tex, { Frac } from '../components/Tex'
 import { betLoading, C_DEFAULT, C_RANGE, K_DEFAULT, K_RANGE, langmuirTheta, loading, type Model } from '../lib/adsorption'
 
 const X_MAX = 0.95
+const Y_MAX = 3 // same fixed y-axis for both models: shows the Langmuir plateau and the BET knee and rise
 const N_POINTS = 300
 const X_DEFAULT = 0.3
 const SETTLE_MIN_TIME = 3 // simulated s at a setting (one averaging window) before it can count as settled
@@ -145,9 +146,6 @@ export default function AdsorptionPage() {
     return { xs, lang, bet }
   }, [K, c])
 
-  // Same y-axis for both models (0–5 shows Langmuir and the BET knee and rise); it only grows when the
-  // BET marker would go off the top (P/P₀ > ~0.8).
-  const yMax = Math.max(5, cov * 1.1)
   const curveStyle = (m: Model) =>
     mode === m ? { color: COLORS[m], width: 3 } : { color: COLORS[m], width: 1.5, dash: 'dot' as const }
 
@@ -259,8 +257,10 @@ export default function AdsorptionPage() {
             </span>
             <span className={`coverage-value ${mode}`}>{cov.toFixed(2)}</span>
             <span className="coverage-sub">
-              equation: {cov.toFixed(2)} · simulation (running average): {stats.avgLoading.toFixed(2)}
-              {settling && ', settling…'}
+              equation: {cov.toFixed(2)} · simulation (running average): {stats.avgLoading.toFixed(2)}{' '}
+              <span className={`sim-status ${settling ? 'settling' : 'settled'}`} role="status">
+                {settling ? 'settling…' : '✓ settled'}
+              </span>
               <br />
               {mode === 'langmuir'
                 ? `${occupied} of ${N_SITES} sites occupied · 1 layer max`
@@ -299,7 +299,7 @@ export default function AdsorptionPage() {
             layout={{
               ...BASE_LAYOUT,
               xaxis: { ...AXIS, title: { text: 'Relative pressure P/P₀' }, range: [0, 1] },
-              yaxis: { ...AXIS, title: { text: 'θ  or  n/nₘ' }, range: [0, yMax] },
+              yaxis: { ...AXIS, title: { text: 'θ  or  n/nₘ' }, range: [0, Y_MAX] },
               shapes: isoShapes,
               annotations: isoAnnotations,
             }}
