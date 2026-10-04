@@ -1,13 +1,22 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Annotation, Data, Layout, Shape } from 'plotly.js'
 import Plot from '../components/Plot'
 import SurfaceView, { GAS_COLOR, LAYER_COLORS, N_SITES, type SurfaceStats } from '../components/SurfaceView'
 import Tex, { Frac } from '../components/Tex'
-import { betLoading, C_BET, K_LANGMUIR, langmuirTheta, loading, type Model } from '../lib/adsorption'
+import { betLoading, C_DEFAULT, C_RANGE, K_DEFAULT, K_RANGE, langmuirTheta, loading, type Model } from '../lib/adsorption'
 
 const X_MAX = 0.95
 const N_POINTS = 300
 const X_DEFAULT = 0.3
+const FAST = 5 // fast-forward speed factor
+const SETTLE_MIN_TIME = 3 // simulated s at a setting (one averaging window) before it can count as settled
+const BET_RANGE: [number, number] = [0.05, 0.35] // usual fitting range of the BET equation
+
+// K and c sliders move on a log scale; values are rounded to two significant figures.
+const LOG_STEPS = 200
+const toLogPos = (v: number, [lo, hi]: [number, number]) => (Math.log(v / lo) / Math.log(hi / lo)) * LOG_STEPS
+const fromLogPos = (pos: number, [lo, hi]: [number, number]) => Number((lo * (hi / lo) ** (pos / LOG_STEPS)).toPrecision(2))
+const fmtConst = (v: number) => (v < 10 ? v.toFixed(1) : String(v))
 
 const COLORS = {
   langmuir: '#2a6fb0',
@@ -77,28 +86,52 @@ export default function AdsorptionPage() {
   const [x, setX] = useState(X_DEFAULT)
   const [mode, setMode] = useState<Model>('bet')
   const [runId, setRunId] = useState(0) // bump to restart the animation on a clean surface
-  const [stats, setStats] = useState<SurfaceStats>({ occupied: 0, total: 0, tallest: 0, avgLoading: 0 })
+  const [K, setK] = useState(K_DEFAULT)
+  const [c, setC] = useState(C_DEFAULT)
+  const [fast, setFast] = useState(false)
+  const [paused, setPaused] = useState(false)
+  const [stepCount, setStepCount] = useState(0)
+  const [stats, setStats] = useState<SurfaceStats>({ occupied: 0, total: 0, tallest: 0, avgLoading: 0, time: 0 })
   const { occupied, total, tallest } = stats
-  const cov = loading(mode, x, K_LANGMUIR, C_BET)
-  // "settling…" shows after a reset or pressure change until the running average first comes within ~5%.
-  const runKey = `${runId}|${mode}|${x}`
+  const cov = loading(mode, x, K, c)
+
+  // Simulation points on the isotherm belong to one run, model and K/c; changing any of them clears them.
+  const pointsKey = `${runId}|${mode}|${K}|${c}`
+  const [simPoints, setSimPoints] = useState<{ key: string; pts: { x: number; y: number }[] }>({ key: '', pts: [] })
+  const points = simPoints.key === pointsKey ? simPoints.pts : []
+
+  // "settling…" shows after a reset or a pressure/K/c change until the running average, after at least
+  // SETTLE_MIN_TIME of simulated time, first comes within ~5%. Settling then adds a simulation point.
+  const runKey = `${pointsKey}|${x}`
+  const runStart = useRef({ key: runKey, time: 0 })
+  if (runStart.current.key !== runKey) runStart.current = { key: runKey, time: stats.time }
   const [settledKey, setSettledKey] = useState('')
   const near = Math.abs(stats.avgLoading - cov) <= Math.max(0.05 * cov, 0.02)
+  const settleReady = near && stats.time - runStart.current.time >= SETTLE_MIN_TIME
   useEffect(() => {
-    if (near) setSettledKey(runKey)
-  }, [near, runKey])
+    if (!settleReady || settledKey === runKey) return
+    setSettledKey(runKey)
+    const pt = { x, y: stats.avgLoading }
+    setSimPoints((s) => ({ key: pointsKey, pts: [...(s.key === pointsKey ? s.pts : []).filter((p) => p.x !== x), pt] }))
+  }, [settleReady, settledKey, runKey, pointsKey, x, stats.avgLoading])
   const settling = settledKey !== runKey
 
-  const reset = () => {
+  const restart = () => {
     setX(X_DEFAULT)
-    setStats({ occupied: 0, total: 0, tallest: 0, avgLoading: 0 })
+    setStats({ occupied: 0, total: 0, tallest: 0, avgLoading: 0, time: 0 })
     setRunId((r) => r + 1)
+  }
+
+  const reset = () => {
+    setK(K_DEFAULT)
+    setC(C_DEFAULT)
+    restart()
   }
 
   const switchMode = (m: Model) => {
     if (m === mode) return
     setMode(m)
-    reset()
+    restart()
   }
 
   // ---------- Isotherm (secondary plot) ----------
@@ -109,11 +142,11 @@ export default function AdsorptionPage() {
     for (let i = 0; i <= N_POINTS; i++) {
       const xi = (i / N_POINTS) * X_MAX
       xs.push(xi)
-      lang.push(langmuirTheta(xi, K_LANGMUIR))
-      bet.push(betLoading(xi, C_BET))
+      lang.push(langmuirTheta(xi, K))
+      bet.push(betLoading(xi, c))
     }
     return { xs, lang, bet }
-  }, [])
+  }, [K, c])
 
   // Same y-axis for both models (0–5 shows Langmuir and the BET knee and rise); it only grows when the
   // BET marker would go off the top (P/P₀ > ~0.8).
@@ -148,13 +181,45 @@ export default function AdsorptionPage() {
       showlegend: false,
       marker: { size: 12, color: COLORS[mode], line: { color: '#fff', width: 2 } },
     },
+    {
+      x: points.map((p) => p.x),
+      y: points.map((p) => p.y),
+      type: 'scatter',
+      mode: 'markers',
+      name: 'simulation',
+      showlegend: points.length > 0,
+      marker: { size: 8, symbol: 'diamond', color: '#fff', line: { color: COLORS.ink, width: 1.5 } },
+    },
   ]
 
   const isoShapes: Partial<Shape>[] = [
+    {
+      type: 'rect',
+      xref: 'x',
+      yref: 'paper',
+      x0: BET_RANGE[0],
+      x1: BET_RANGE[1],
+      y0: 0,
+      y1: 1,
+      layer: 'below',
+      fillcolor: 'rgba(196, 85, 43, 0.08)',
+      line: { width: 0 },
+    },
     { type: 'line', xref: 'paper', x0: 0, x1: 1, y0: 1, y1: 1, line: { color: COLORS.muted, width: 1.2, dash: 'dash' } },
   ]
 
   const isoAnnotations: Partial<Annotation>[] = [
+    {
+      xref: 'x',
+      yref: 'paper',
+      x: (BET_RANGE[0] + BET_RANGE[1]) / 2,
+      y: 1,
+      yanchor: 'top',
+      yshift: -2,
+      text: 'BET valid range',
+      showarrow: false,
+      font: { size: 11, color: COLORS.bet },
+    },
     {
       xref: 'paper',
       x: 0.99,
@@ -222,6 +287,11 @@ export default function AdsorptionPage() {
             key={runId}
             mode={mode}
             pressure={x}
+            K={K}
+            c={c}
+            speed={fast ? FAST : 1}
+            paused={paused}
+            stepCount={stepCount}
             onStats={setStats}
             label={
               mode === 'langmuir'
@@ -265,11 +335,47 @@ export default function AdsorptionPage() {
             step={0.01}
             pos={x}
             onChange={setX}
-            hint={`relative to the saturation pressure P₀ · K = ${K_LANGMUIR}, c = ${C_BET}`}
+            hint="relative to the saturation pressure P₀"
           />
-          <button type="button" className="reset-btn" onClick={reset}>
-            Reset
-          </button>
+          {mode === 'langmuir' ? (
+            <Slider
+              id="K"
+              label={<>Langmuir constant <em>K</em></>}
+              value={fmtConst(K)}
+              min={0}
+              max={LOG_STEPS}
+              step={1}
+              pos={toLogPos(K, K_RANGE)}
+              onChange={(p) => setK(fromLogPos(p, K_RANGE))}
+              hint="larger K = stronger binding, fills at lower P/P₀"
+            />
+          ) : (
+            <Slider
+              id="c"
+              label={<>BET constant <em>c</em></>}
+              value={fmtConst(c)}
+              min={0}
+              max={LOG_STEPS}
+              step={1}
+              pos={toLogPos(c, C_RANGE)}
+              onChange={(p) => setC(fromLogPos(p, C_RANGE))}
+              hint={c < 2 ? 'c < 2: type III, weak first layer, no knee' : 'larger c = sharper knee (type II)'}
+            />
+          )}
+          <div className="sim-buttons">
+            <button type="button" className="reset-btn" aria-pressed={paused} onClick={() => setPaused((p) => !p)}>
+              {paused ? '▶ Play' : '❚❚ Pause'}
+            </button>
+            <button type="button" className="reset-btn" disabled={!paused} onClick={() => setStepCount((n) => n + 1)}>
+              Step
+            </button>
+            <button type="button" className="reset-btn" aria-pressed={fast} onClick={() => setFast((f) => !f)}>
+              {FAST}× fast
+            </button>
+            <button type="button" className="reset-btn" onClick={reset}>
+              Reset
+            </button>
+          </div>
         </div>
       </section>
 
@@ -285,7 +391,11 @@ export default function AdsorptionPage() {
           behave like a liquid and exchange with the gas often. As P/P₀ → 1 the stacks keep growing: the gas
           condenses on the surface.
         </p>
-        <p className="caption">The dot on the isotherm marks the current pressure; the simulation average should settle near it.</p>
+        <p className="caption">
+          The dot on the isotherm marks the current pressure; the simulation average should settle near it, and each
+          settled average is added as a diamond. The shaded band (P/P₀ 0.05–0.35) is where the BET equation is
+          normally fitted.
+        </p>
       </section>
 
       {/* ---------- The equations ---------- */}

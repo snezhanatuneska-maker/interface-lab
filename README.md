@@ -8,8 +8,13 @@ The first tool is a **Langmuir vs BET adsorption** simulator for bachelor studen
 - An animated **molecular view** (the main element of the page): a kinetic simulation where gas molecules
   fly with Maxwell–Boltzmann speeds, stick to and desorb from a solid surface. In Langmuir mode each site holds at most one molecule; in BET mode molecules stack into
   multilayers, coloured by layer (1, 2, 3+), with the live coverage θ or n/nₘ shown next to it.
-- An **isotherm** plot beside it that tracks the current pressure with a single marker.
-- Controls beneath both: model toggle, pressure P/P₀ and Reset (K and c are fixed).
+- An **isotherm** plot beside it that tracks the current pressure with a marker. The usual BET fitting range
+  (P/P₀ 0.05–0.35) is shaded, and each time the simulation settles its running average is added as a
+  "simulation" point (points are cleared on Reset, model change, or a K/c change).
+- Controls beneath both: model toggle, pressure P/P₀, a log-scale slider for the active model's constant
+  (Langmuir K, 0.5–200, default 10; BET c, 0.5–500, default 50, with c < 2 giving a type III isotherm),
+  Pause/Play, Step (one frame while paused), 5× fast-forward and Reset. The simulation's desorption rates follow
+  K and c, so its average still matches the equation.
 - **The equations**: both isotherms rendered with KaTeX (loaded from cdnjs), every term explained,
   assumptions listed, and the one matching the selected model highlighted.
 - A short "Why it matters for clean energy" section.
@@ -50,7 +55,7 @@ src/pages/AdsorptionPage.tsx   "Langmuir vs BET Adsorption" page (molecular view
 src/components/SurfaceView.tsx Animated canvas: gas molecules adsorbing on the surface
 src/components/Tex.tsx         KaTeX loader (CDN) and equation component
 src/components/Plot.tsx        Plotly wrapper (uses the smaller "basic" Plotly bundle)
-src/lib/adsorption.ts          Isotherm equations and fixed constants K, c
+src/lib/adsorption.ts          Isotherm equations, default K and c and their slider ranges
 src/index.css                  Global styles
 .github/workflows/deploy.yml   GitHub Pages deployment workflow
 ```

@@ -91,7 +91,7 @@ sub, sup { line-height: 0; }
 .sim-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: center; }
 .sim-grid .plot { height: 250px; }
 .hero-controls {
-  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px 24px; align-items: center;
+  display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr) auto; gap: 12px 24px; align-items: center;
   padding-top: 12px;
 }
 .reset-btn {
@@ -99,6 +99,10 @@ sub, sup { line-height: 0; }
   border-radius: 6px; padding: 6px 18px; cursor: pointer;
 }
 .reset-btn:hover { background: #eef2f7; }
+.reset-btn[aria-pressed='true'] { background: var(--accent); color: #fff; }
+.reset-btn:disabled { opacity: 0.45; cursor: default; background: #fff; }
+.sim-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+.sim-buttons .reset-btn { padding: 6px 12px; white-space: nowrap; }
 .control-label { display: block; font-size: 0.95rem; margin-bottom: 6px; }
 .slider { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .slider label { display: flex; justify-content: space-between; gap: 8px; font-size: 0.95rem; }
@@ -154,6 +158,8 @@ sub, sup { line-height: 0; }
   .sim-grid, .eq-grid { grid-template-columns: minmax(0, 1fr); }
   .sim-grid { gap: 8px; }
   .sim-grid .plot { height: 210px; }
+  .hero-controls { grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr); }
+  .sim-buttons { grid-column: 1 / -1; }
 }
 
 @media (max-width: 600px) {
@@ -164,7 +170,7 @@ sub, sup { line-height: 0; }
   .hero { padding: 10px 12px; }
   .layer-legend { font-size: 0.8rem; gap: 0 10px; }
   .sim-grid .plot { height: 165px; }
-  .hero-controls { grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; }
+  .hero-controls { grid-template-columns: minmax(0, 1fr); gap: 8px 12px; }
   .model-control { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; }
   .model-control .control-label { margin: 0; }
   .coverage-value { font-size: 1.6rem; }

@@ -4,9 +4,13 @@
 
 export type Model = 'langmuir' | 'bet'
 
-/** Fixed model constants: Langmuir K (per unit P/P₀) and BET c. */
-export const K_LANGMUIR = 10
-export const C_BET = 50
+/** Default model constants: Langmuir K (per unit P/P₀) and BET c. Both are adjustable on the page. */
+export const K_DEFAULT = 10
+export const C_DEFAULT = 50
+
+/** Slider ranges (log scale). c below 2 gives a type III isotherm (no knee). */
+export const K_RANGE: [number, number] = [0.5, 200]
+export const C_RANGE: [number, number] = [0.5, 500]
 
 /** Langmuir (monolayer) coverage θ = K·x / (1 + K·x). Bounded by 1. */
 export function langmuirTheta(x: number, K: number): number {

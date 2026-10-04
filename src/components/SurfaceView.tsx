@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { C_BET, K_LANGMUIR, type Model } from '../lib/adsorption'
+import type { Model } from '../lib/adsorption'
 
 // Animated cross-section of a solid with N_SITES adsorption sites and the gas above it.
 // Kinetic model: gas molecules fly in straight lines with Maxwell–Boltzmann speeds and
@@ -38,9 +38,9 @@ const MAX_SUBSTEP = 1 / 125 // s; keeps fast molecules from skipping over a stac
 const RATE = (STICK * GAS_DENSITY * MEAN_SPEED) / Math.PI
 // Desorption rates (per second) of the top molecule of a stack. Upper layers are
 // liquid-like (P₀ is where adsorption onto them balances desorption); the first layer
-// binds more strongly by a factor K (Langmuir) or c (BET).
+// binds more strongly by a factor K (Langmuir) or c (BET; c < 1 means it binds more weakly).
 const K_DES_UPPER = RATE
-const kDesFirst = (mode: Model) => RATE / (mode === 'langmuir' ? K_LANGMUIR : C_BET)
+const kDesFirst = (mode: Model, K: number, c: number) => RATE / (mode === 'langmuir' ? K : c)
 // A spot vacated by desorption is empty of gas until molecules fly in, so its next adsorption comes
 // on average a short delay (~π/2v̄) later than 1/(RATE·P). That delay is measured per layer while the
 // simulation runs (forgetting window DELAY_TAU, prior below) and desorption is slowed by the same
@@ -48,6 +48,7 @@ const kDesFirst = (mode: Model) => RATE / (mode === 'langmuir' ? K_LANGMUIR : C_
 const DELAY_PRIOR = Math.PI / (2 * MEAN_SPEED)
 const DELAY_PRIOR_HITS = 20
 const DELAY_TAU = 120 // s
+const FRAME = 1 / 60 // s of real time advanced by one Step while paused
 
 interface Particle {
   x: number
@@ -61,6 +62,7 @@ export interface SurfaceStats {
   total: number // adsorbed molecules
   tallest: number
   avgLoading: number // time-averaged θ or n/nm
+  time: number // simulated seconds since the start of this run
 }
 
 const siteX = (site: number) => MARGIN + site + 0.5
@@ -84,11 +86,16 @@ function wallGas(x: number, y: number, dir: 1 | -1): Particle {
 interface Props {
   mode: Model
   pressure: number // relative pressure 0..1, sets the gas density
+  K: number // Langmuir constant
+  c: number // BET constant
+  speed: number // simulated seconds per real second
+  paused: boolean
+  stepCount: number // bump while paused to advance one frame
   label: string
   onStats?: (s: SurfaceStats) => void
 }
 
-export default function SurfaceView({ mode, pressure, label, onStats }: Props) {
+export default function SurfaceView({ mode, pressure, K, c, speed, paused, stepCount, label, onStats }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const modeRef = useRef(mode)
@@ -97,6 +104,14 @@ export default function SurfaceView({ mode, pressure, label, onStats }: Props) {
   modeRef.current = mode
   pressureRef.current = pressure
   onStatsRef.current = onStats
+  const constsRef = useRef({ K, c })
+  constsRef.current = { K, c }
+  const speedRef = useRef(speed)
+  speedRef.current = speed
+  const pausedRef = useRef(paused)
+  pausedRef.current = paused
+  const stepCountRef = useRef(stepCount)
+  stepCountRef.current = stepCount
 
   useEffect(() => {
     const wrap = wrapRef.current!
@@ -144,7 +159,10 @@ export default function SurfaceView({ mode, pressure, label, onStats }: Props) {
     let statsTimer = 0
     let time = 0
 
-    const step = (dt: number) => {
+    const report = (occupied: number, total: number, tallest: number) =>
+      onStatsRef.current?.({ occupied, total, tallest, avgLoading, time })
+
+    const step = (dt: number, forceReport = false) => {
       const mode = modeRef.current
       time += dt
 
@@ -155,7 +173,7 @@ export default function SurfaceView({ mode, pressure, label, onStats }: Props) {
         waitExcess[c] *= forget
         hits[c] *= forget
       }
-      const kFirst = kDesFirst(mode)
+      const kFirst = kDesFirst(mode, constsRef.current.K, constsRef.current.c)
       for (let s = 0; s < N_SITES; s++) {
         const h = landed[s]
         if (P > 0.005 && (mode === 'bet' || h === 0)) waitExcess[Math.min(h, MAX_LAYERS)] += dt
@@ -236,9 +254,9 @@ export default function SurfaceView({ mode, pressure, label, onStats }: Props) {
       }
       avgLoading += ((total / N_SITES - avgLoading) * dt) / 3
       statsTimer += dt
-      if (statsTimer > 0.25) {
+      if (statsTimer > 0.25 || forceReport) {
         statsTimer = 0
-        onStatsRef.current?.({ occupied, total, tallest, avgLoading })
+        report(occupied, total, tallest)
       }
     }
 
@@ -347,11 +365,19 @@ export default function SurfaceView({ mode, pressure, label, onStats }: Props) {
 
     let raf = 0
     let last = performance.now()
-    const frame = (now: number) => {
-      const dt = Math.min(0.05, (now - last) / 1000)
-      last = now
+    let stepsDone = stepCountRef.current
+    // Advance by `real` seconds of wall time, scaled by the speed factor.
+    const advance = (real: number, forceReport = false) => {
+      const dt = real * speedRef.current
       const n = Math.ceil(dt / MAX_SUBSTEP)
-      for (let k = 0; k < n; k++) step(dt / n)
+      for (let k = 0; k < n; k++) step(dt / n, forceReport && k === n - 1)
+    }
+    const frame = (now: number) => {
+      const real = Math.min(0.05, (now - last) / 1000)
+      last = now
+      if (!pausedRef.current) advance(real)
+      else if (stepsDone !== stepCountRef.current) advance(FRAME, true)
+      stepsDone = stepCountRef.current
       draw()
       raf = requestAnimationFrame(frame)
     }
