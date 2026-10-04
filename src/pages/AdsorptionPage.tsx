@@ -115,8 +115,8 @@ export default function AdsorptionPage() {
     return { xs, lang, bet }
   }, [])
 
-  // Auto-scale to the active curve over the plotted range (kept ≥ 1 so the monolayer line stays visible).
-  const yMax = Math.max(1, ...(mode === 'langmuir' ? curves.lang : curves.bet)) * 1.1
+  // Same y-axis for both models: auto-scaled to the highest curve over the plotted range, with 10% headroom.
+  const yMax = Math.max(...curves.lang, ...curves.bet) * 1.1
   const curveStyle = (m: Model) =>
     mode === m ? { color: COLORS[m], width: 3 } : { color: COLORS[m], width: 1.5, dash: 'dot' as const }
 
