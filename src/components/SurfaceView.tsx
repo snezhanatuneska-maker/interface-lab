@@ -1,17 +1,17 @@
 import { useEffect, useRef } from 'react'
+import { C_BET, K_LANGMUIR, type Model } from '../lib/adsorption'
 
 // Animated cross-section of a solid with N_SITES adsorption sites and the gas above it.
-// The page computes how many molecules should sit on each site (`targets`); this
-// component animates gas molecules landing on / leaving the sites until the picture
-// matches, and keeps a slow exchange going so the equilibrium looks alive.
+// Kinetic model: gas molecules fly in straight lines with Maxwell–Boltzmann speeds and
+// bounce elastically off the walls; the top edge opens to a gas reservoir at pressure P. A molecule hitting a free site (or, for BET, the top
+// of a stack) sticks with probability STICK; adsorbed molecules desorb at random with a
+// rate set by their binding. Rates are calibrated so the steady state follows the
+// Langmuir / BET isotherms at the current pressure.
 //
 // World coordinates are in molecule diameters: x runs left → right, y runs up from
 // the surface (y = 0). Layer L (0-based) is centred at y = L + 0.5.
 
 export const N_SITES = 24
-// Fixed, scrambled order in which sites get occupied, so molecules appear in a
-// natural-looking pattern and stay put as the pressure changes.
-export const SITE_ORDER = [7, 18, 2, 13, 21, 9, 0, 15, 5, 11, 23, 3, 17, 8, 20, 1, 12, 22, 6, 14, 4, 19, 10, 16]
 
 /** Molecule colours by layer: layer 1, layer 2, layer 3+. */
 export const LAYER_COLORS = ['#1f3a5f', '#3f8f8a', '#f2c14e']
@@ -21,57 +21,72 @@ const MAX_LAYERS = 8 // layers drawn; taller stacks get a "+n" label
 const MARGIN = 0.5
 const GUTTER = 2.2 // room on the right for the "monolayer" label
 const SOLID = 1.1
-const WORLD_W = MARGIN + N_SITES + GUTTER
+const HEADROOM = 5
+const TOP = MAX_LAYERS + HEADROOM // ceiling of the gas region (world units)
+const BOX_W = MARGIN + N_SITES + MARGIN
+const WORLD_W = BOX_W + GUTTER
 const R = 0.46 // molecule radius
-const GAS_SPEED = 4 // diameters per second
-const FLY_SPEED = 12
-const GAS_MIN = 2
-const GAS_MAX = 36
-// Spontaneous desorption rates of the top molecule of a stack, per second.
-// Layer 1 is bound to the solid and leaves rarely; upper layers exchange faster.
-const K_DES_FIRST = 0.06
-const K_DES_UPPER = 0.45
 
-type State = 'gas' | 'landing' | 'leaving'
+const MEAN_SPEED = 10 // diameters per second
+const SIGMA = MEAN_SPEED / Math.sqrt(Math.PI / 2) // 2D Maxwell–Boltzmann (Rayleigh) scale
+const GAS_DENSITY = 0.3 // molecules per unit area at P/P₀ = 1
+const STICK = 0.9 // sticking probability per hit
+// Adsorption rate per site per unit P/P₀: sticking × wall flux (2D: n·<v>/π).
+const RATE = (STICK * GAS_DENSITY * MEAN_SPEED) / Math.PI
+// Desorption rates (per second) of the top molecule of a stack. Upper layers are
+// liquid-like (P₀ is where adsorption onto them balances desorption); the first layer
+// binds more strongly by a factor K (Langmuir) or c (BET).
+const K_DES_UPPER = RATE
+const kDesFirst = (mode: Model) => RATE / (mode === 'langmuir' ? K_LANGMUIR : C_BET)
+
 interface Particle {
   x: number
   y: number
   vx: number
   vy: number
-  state: State
-  site: number // target site while landing
 }
 
-interface Sim {
-  landed: number[]
-  inflight: (Particle | null)[]
-  particles: Particle[]
-  addBudget: number
-  spawnBudget: number
+export interface SurfaceStats {
+  occupied: number // sites with at least one molecule
+  total: number // adsorbed molecules
+  tallest: number
+  avgLoading: number // time-averaged θ or n/nm
 }
 
 const siteX = (site: number) => MARGIN + site + 0.5
 const layerColor = (layer: number) => LAYER_COLORS[Math.min(layer, LAYER_COLORS.length - 1)]
 
-function randomGas(x: number, y: number, speed = GAS_SPEED): Particle {
+function randomGas(x: number, y: number): Particle {
   const a = Math.random() * Math.PI * 2
-  const v = speed * (0.6 + 0.8 * Math.random())
-  return { x, y, vx: v * Math.cos(a), vy: v * Math.sin(a), state: 'gas', site: -1 }
+  const v = SIGMA * Math.sqrt(-2 * Math.log(1 - Math.random()))
+  return { x, y, vx: v * Math.cos(a), vy: v * Math.sin(a) }
+}
+
+const gauss = () => Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(2 * Math.PI * Math.random())
+
+/** Molecule entering from a wall (dir = 1 up, -1 down): flux-weighted speed and cosine-law angle. */
+function wallGas(x: number, y: number, dir: 1 | -1): Particle {
+  const v = SIGMA * Math.hypot(gauss(), gauss(), gauss())
+  const a = Math.asin(2 * Math.random() - 1)
+  return { x, y, vx: v * Math.sin(a), vy: dir * v * Math.cos(a) }
 }
 
 interface Props {
-  targets: number[] // molecules per site, length N_SITES
+  mode: Model
   pressure: number // relative pressure 0..1, sets the gas density
   label: string
+  onStats?: (s: SurfaceStats) => void
 }
 
-export default function SurfaceView({ targets, pressure, label }: Props) {
+export default function SurfaceView({ mode, pressure, label, onStats }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const targetsRef = useRef(targets)
+  const modeRef = useRef(mode)
   const pressureRef = useRef(pressure)
-  targetsRef.current = targets
+  const onStatsRef = useRef(onStats)
+  modeRef.current = mode
   pressureRef.current = pressure
+  onStatsRef.current = onStats
 
   useEffect(() => {
     const wrap = wrapRef.current!
@@ -80,16 +95,13 @@ export default function SurfaceView({ targets, pressure, label }: Props) {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     let scale = 1 // CSS px per molecule diameter
-    let headroom = 2.5
-    let top = MAX_LAYERS + headroom // ceiling of the gas region (world units)
+    const top = TOP
     let cssW = 0
     let cssH = 0
 
     const resize = () => {
       cssW = wrap.clientWidth
       scale = cssW / WORLD_W
-      headroom = cssW < 600 ? 8 : 2.5 // taller gas region on phones so the hero stays readable
-      top = MAX_LAYERS + headroom
       cssH = Math.round((top + SOLID) * scale)
       const dpr = window.devicePixelRatio || 1
       canvas.width = Math.round(cssW * dpr)
@@ -101,145 +113,51 @@ export default function SurfaceView({ targets, pressure, label }: Props) {
     const ro = new ResizeObserver(resize)
     ro.observe(wrap)
 
-    // Start in equilibrium so the first frame already matches the curve.
-    const gasTarget = () => Math.round(GAS_MIN + (GAS_MAX - GAS_MIN) * pressureRef.current)
-    const sim: Sim = {
-      landed: [...targetsRef.current],
-      inflight: new Array(N_SITES).fill(null),
-      particles: Array.from({ length: gasTarget() }, () =>
-        randomGas(MARGIN + Math.random() * N_SITES, MAX_LAYERS * 0.6 + Math.random() * (top - MAX_LAYERS * 0.6)),
-      ),
-      addBudget: 0,
-      spawnBudget: 0,
-    }
-
+    const landed: number[] = new Array(N_SITES).fill(0) // clean surface
     const columnTop = (x: number) => {
       const site = Math.floor(x - MARGIN)
       if (site < 0 || site >= N_SITES) return 0
-      return Math.min(sim.landed[site], MAX_LAYERS)
+      return Math.min(landed[site], MAX_LAYERS)
     }
-
-    const desorb = (site: number) => {
-      const layer = Math.min(sim.landed[site], MAX_LAYERS) - 1
-      sim.landed[site]--
-      const p = randomGas(siteX(site), layer + 0.5)
-      p.vy = Math.abs(p.vy) + 1.5
-      sim.particles.push(p)
-    }
+    const left = R
+    const right = BOX_W - R
+    const ceiling = top - R
+    // Start with an equilibrium gas: density proportional to pressure.
+    const particles: Particle[] = Array.from({ length: Math.round(GAS_DENSITY * pressureRef.current * (right - left) * (ceiling - R)) }, () =>
+      randomGas(left + Math.random() * (right - left), R + Math.random() * (ceiling - R)),
+    )
+    let spawnBudget = 0
+    let avgLoading = 0
+    let statsTimer = 0
+    let time = 0
 
     const step = (dt: number) => {
-      const targets = targetsRef.current
-      const { landed, inflight, particles } = sim
+      const mode = modeRef.current
+      time += dt
 
-      if (reduceMotion) {
-        for (let s = 0; s < N_SITES; s++) landed[s] = targets[s]
-      }
-
-      // 1. Too many molecules on a site: call off incoming ones, then desorb from the top.
-      let deficit = 0
+      // 1. Random desorption of the top molecule of each stack.
+      const kFirst = kDesFirst(mode)
       for (let s = 0; s < N_SITES; s++) {
-        const f = inflight[s]
-        if (f && landed[s] + 1 > targets[s]) {
-          f.state = 'gas'
-          inflight[s] = null
-        }
-        if (landed[s] > targets[s] && Math.random() < dt * 8) desorb(s)
-        deficit += Math.max(0, targets[s] - landed[s] - (inflight[s] ? 1 : 0))
+        const h = landed[s]
+        if (h === 0 || Math.random() >= (h === 1 ? kFirst : K_DES_UPPER) * dt) continue
+        landed[s]--
+        particles.push(wallGas(siteX(s), Math.min(h, MAX_LAYERS) - 0.5, 1))
       }
 
-      // 2. Too few: send gas molecules down, one at a time per site so stacks grow bottom-up.
-      sim.addBudget = Math.min(sim.addBudget + dt * Math.max(4, deficit * 2.5), N_SITES)
-      if (deficit === 0) sim.addBudget = 0
-      while (sim.addBudget >= 1) {
-        const open: number[] = []
-        for (let s = 0; s < N_SITES; s++) if (!inflight[s] && landed[s] < targets[s]) open.push(s)
-        if (open.length === 0) break
-        const site = open[Math.floor(Math.random() * open.length)]
-        sim.addBudget -= 1
-        if (landed[site] >= MAX_LAYERS) {
-          // Hidden part of a tall stack (shown as "+n"): no flight needed.
-          landed[site]++
-          continue
-        }
-        const tx = siteX(site)
-        let best: Particle | null = null
-        let bestD = Infinity
-        for (const p of particles) {
-          if (p.state !== 'gas') continue
-          const d = Math.abs(p.x - tx) + Math.abs(p.y - landed[site])
-          if (d < bestD) {
-            bestD = d
-            best = p
-          }
-        }
-        if (!best) {
-          best = randomGas(tx, top - 0.5)
-          particles.push(best)
-        }
-        best.state = 'landing'
-        best.site = site
-        inflight[site] = best
+      // 2. Reservoir: molecules enter through the top at the equilibrium flux for pressure P.
+      spawnBudget += dt * GAS_DENSITY * pressureRef.current * (MEAN_SPEED / Math.PI) * (right - left)
+      while (spawnBudget >= 1) {
+        particles.push(wallGas(left + Math.random() * (right - left), ceiling, -1))
+        spawnBudget -= 1
       }
 
-      // 3. Dynamic equilibrium: top molecules occasionally desorb and get replaced.
-      if (!reduceMotion) {
-        for (let s = 0; s < N_SITES; s++) {
-          if (landed[s] === 0 || inflight[s]) continue
-          const k = landed[s] === 1 ? K_DES_FIRST : K_DES_UPPER
-          if (Math.random() < k * dt) desorb(s)
-        }
-      }
-
-      // 4. Keep the gas density in line with the pressure: extra molecules leave
-      // through the top, missing ones arrive from above.
-      let gasCount = 0
-      for (const p of particles) if (p.state === 'gas') gasCount++
-      const want = gasTarget()
-      if (gasCount > want) {
-        let extra = gasCount - want
-        for (const p of particles) {
-          if (extra === 0) break
-          if (p.state === 'gas' && p.y > MAX_LAYERS * 0.5) {
-            p.state = 'leaving'
-            p.vy = Math.abs(p.vy) + 1
-            extra--
-          }
-        }
-      } else if (gasCount < want) {
-        sim.spawnBudget = Math.min(sim.spawnBudget + dt * 25, want - gasCount)
-        while (sim.spawnBudget >= 1) {
-          const p = randomGas(MARGIN + Math.random() * N_SITES, top - 0.5)
-          p.vy = -Math.abs(p.vy)
-          particles.push(p)
-          sim.spawnBudget -= 1
-        }
-      }
-
-      // 5. Move everything.
-      const left = R
-      const right = MARGIN + N_SITES + MARGIN - R
+      // 3. Straight-line flight with elastic wall collisions; sticking on surface hits.
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i]
-        if (p.state === 'landing') {
-          const layer = Math.min(landed[p.site], MAX_LAYERS - 1)
-          const tx = siteX(p.site)
-          const ty = layer + 0.5
-          const dx = tx - p.x
-          const dy = ty - p.y
-          const dist = Math.hypot(dx, dy)
-          const move = reduceMotion ? Infinity : FLY_SPEED * dt
-          if (dist <= move) {
-            landed[p.site]++
-            inflight[p.site] = null
-            particles.splice(i, 1)
-          } else {
-            p.x += (dx / dist) * move
-            p.y += (dy / dist) * move
-          }
-          continue
-        }
-        if (reduceMotion) continue
-        p.x += p.vx * dt
+        const nx = p.x + p.vx * dt
+        // Side of a taller neighbouring stack acts as a wall.
+        if (p.y < columnTop(nx) + R && p.y >= columnTop(p.x) + R) p.vx = -p.vx
+        else p.x = nx
         p.y += p.vy * dt
         if (p.x < left) {
           p.x = left
@@ -249,16 +167,34 @@ export default function SurfaceView({ targets, pressure, label }: Props) {
           p.vx = -Math.abs(p.vx)
         }
         const floor = columnTop(p.x) + R
-        if (p.y < floor) {
-          p.y = floor
-          p.vy = Math.abs(p.vy)
+        if (p.y < floor && p.vy < 0) {
+          const site = Math.floor(p.x - MARGIN)
+          const free = site >= 0 && site < N_SITES && (mode === 'bet' || landed[site] === 0)
+          if (free && Math.random() < STICK) {
+            landed[site]++
+            particles.splice(i, 1)
+            continue
+          }
+          p.y = 2 * floor - p.y
+          p.vy = -p.vy
         }
-        if (p.state === 'leaving') {
-          if (p.y > top + 1) particles.splice(i, 1)
-        } else if (p.y > top - R) {
-          p.y = top - R
-          p.vy = -Math.abs(p.vy)
-        }
+        if (p.y > ceiling) particles.splice(i, 1) // back into the reservoir
+      }
+
+      // 4. Report a time-averaged loading (~3 s window) to the page.
+      let total = 0
+      let occupied = 0
+      let tallest = 0
+      for (const h of landed) {
+        total += h
+        if (h > 0) occupied++
+        tallest = Math.max(tallest, h)
+      }
+      avgLoading += ((total / N_SITES - avgLoading) * dt) / 3
+      statsTimer += dt
+      if (statsTimer > 0.25) {
+        statsTimer = 0
+        onStatsRef.current?.({ occupied, total, tallest, avgLoading })
       }
     }
 
@@ -344,9 +280,14 @@ export default function SurfaceView({ targets, pressure, label }: Props) {
 
       // adsorbed molecules
       const stroke = 'rgba(29, 36, 51, 0.35)'
+      const amp = reduceMotion ? 0 : 0.05 // small thermal vibration about the binding site
       for (let s = 0; s < N_SITES; s++) {
-        const h = sim.landed[s]
-        for (let layer = 0; layer < Math.min(h, MAX_LAYERS); layer++) circle(siteX(s), layer + 0.5, layerColor(layer), stroke)
+        const h = landed[s]
+        for (let layer = 0; layer < Math.min(h, MAX_LAYERS); layer++) {
+          const dx = amp * Math.sin(time * 23 + s * 1.7 + layer * 2.3)
+          const dy = amp * Math.sin(time * 19 + s * 2.9 + layer * 1.1)
+          circle(siteX(s) + dx, layer + 0.5 + dy, layerColor(layer), stroke)
+        }
         if (h > MAX_LAYERS) {
           const [px, py] = toPx(siteX(s), MAX_LAYERS + 0.45)
           ctx.textAlign = 'center'
@@ -356,8 +297,8 @@ export default function SurfaceView({ targets, pressure, label }: Props) {
         }
       }
 
-      // gas molecules (including ones on their way to a site)
-      for (const p of sim.particles) circle(p.x, p.y, GAS_COLOR, 'rgba(29, 36, 51, 0.25)')
+      // gas molecules
+      for (const p of particles) circle(p.x, p.y, GAS_COLOR, 'rgba(29, 36, 51, 0.25)')
     }
 
     let raf = 0
