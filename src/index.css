@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Source+Sans+3:wght@400;600&display=swap');
+
+:root {
+  --ink: #1d2433;
+  --muted: #5b6475;
+  --accent: #1f3a5f;
+  --gold: #f2c14e;
+  --bg: #f7f6f2;
+  --card: #ffffff;
+  --rule: #e2dfd6;
+  font-family: 'Source Sans 3', Helvetica, Arial, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.6;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); }
+
+.app { min-height: 100vh; display: flex; flex-direction: column; }
+.container { width: 100%; max-width: 960px; margin: 0 auto; padding: 0 16px; }
+main.container { flex: 1; }
+
+.site-header { background: var(--accent); color: #fff; border-bottom: 4px solid var(--gold); }
+.site-header .container {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; padding-top: 18px; padding-bottom: 18px;
+}
+.site-title { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.5rem; font-weight: 600; }
+.site-subtitle { font-size: 0.95rem; opacity: 0.8; }
+
+.page h1 { font-family: 'Source Serif 4', Georgia, serif; font-weight: 600; font-size: 2rem; margin: 32px 0 4px; }
+.page h2 { font-family: 'Source Serif 4', Georgia, serif; font-weight: 600; font-size: 1.3rem; margin: 0 0 8px; }
+.lede { color: var(--muted); margin: 0 0 24px; }
+
+.card {
+  background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 20px; margin-bottom: 24px;
+}
+
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-bottom: 8px; }
+.controls input[type='range'] { flex: 1; min-width: 180px; max-width: 360px; accent-color: var(--accent); }
+
+.plot { width: 100%; height: 420px; }
+.caption { font-size: 0.9rem; color: var(--muted); margin: 8px 0 0; text-align: center; }
+.placeholder { color: var(--muted); font-style: italic; margin: 0; }
+
+.site-footer { border-top: 1px solid var(--rule); color: var(--muted); font-size: 0.85rem; padding: 16px 0; }
+
+@media (max-width: 600px) {
+  .page h1 { font-size: 1.6rem; }
+  .plot { height: 320px; }
+}
