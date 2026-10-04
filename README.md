@@ -2,6 +2,7 @@
 
 Interactive educational tools for interface engineering in clean energy processes.
 
+The homepage lists the tools as cards (more are marked "coming soon").
 The first tool is a **Langmuir vs BET adsorption isotherm** simulator for bachelor students:
 
 - Langmuir (V/Vm = Kx/(1+Kx)) and BET (V/Vm = Cx/[(1−x)(1−x+Cx)]) isotherms vs x = P/P0,
@@ -11,6 +12,9 @@ The first tool is a **Langmuir vs BET adsorption isotherm** simulator for bachel
 - A **surface view**: a cross-section of a solid where molecules fill one layer (Langmuir)
   or stack into multilayers following the BET layer statistics (BET), driven by a P/P0 slider.
 - A specific-surface-area readout S = Vm·N_A·σ/22414 with σ(N2) = 0.162 nm².
+- Preset buttons for typical cases (strong adsorption, weak/Type III-like, Langmuir-like),
+  a "Try this" box with guided questions and hidden answers, and a short
+  "Why it matters for clean energy" section.
 
 **Stack:** [Vite](https://vite.dev) + React + TypeScript, plots with
 [Plotly.js](https://plotly.com/javascript/) via `react-plotly.js`.
@@ -40,7 +44,10 @@ npm run preview    # serve the dist/ build locally to check it before deploying
 index.html                     HTML entry point
 vite.config.ts                 Vite config (sets base: "/interface-lab/")
 src/main.tsx                   React entry
-src/App.tsx                    Site layout: header, main area, footer
+src/App.tsx                    Site layout: header, hash routing (#/ and #/adsorption), footer
+src/siteConfig.ts              Author and course name shown in the footer
+src/pages/HomePage.tsx         Homepage with tool cards
+src/lib/useHashRoute.ts        Tiny hash-based router (works on GitHub Pages)
 src/pages/AdsorptionPage.tsx   "Langmuir vs BET Adsorption" page (plots, sliders, readouts)
 src/components/SurfaceView.tsx SVG cross-section of the surface with adsorbed molecules
 src/components/Plot.tsx        Plotly wrapper (uses the smaller "basic" Plotly bundle)

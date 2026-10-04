@@ -1,21 +1,42 @@
-import AdsorptionPage from './pages/AdsorptionPage'
+import { lazy, Suspense } from 'react'
+import HomePage from './pages/HomePage'
+import { useHashRoute } from './lib/useHashRoute'
+import { AUTHOR, COURSE } from './siteConfig'
+
+// Loaded on demand so the homepage does not pull in Plotly.
+const AdsorptionPage = lazy(() => import('./pages/AdsorptionPage'))
 
 export default function App() {
+  const route = useHashRoute()
+
   return (
     <div className="app">
       <header className="site-header">
         <div className="container">
-          <span className="site-title">Interface Engineering Lab</span>
+          <a className="site-title" href="#/">
+            Interface Engineering Lab
+          </a>
           <span className="site-subtitle">Interactive tools for clean energy processes</span>
         </div>
       </header>
 
       <main className="container">
-        <AdsorptionPage />
+        {route === '/adsorption' ? (
+          <Suspense fallback={<p className="loading">Loading simulator…</p>}>
+            <AdsorptionPage />
+          </Suspense>
+        ) : (
+          <HomePage />
+        )}
       </main>
 
       <footer className="site-footer">
-        <div className="container">Interface Engineering Lab · educational use</div>
+        <div className="container">
+          <span>{AUTHOR}</span>
+          <span>{COURSE}</span>
+          <span>Built with React</span>
+          <span>{new Date().getFullYear()}</span>
+        </div>
       </footer>
     </div>
   )
