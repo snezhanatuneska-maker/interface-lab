@@ -2,11 +2,12 @@
  * Design tokens for Interface Engineering Lab.
  * Calm, textbook-like: neutral paper background, one accent (deep teal),
  * serif headings, sans-serif body. No gradients, no drop shadows.
- * Light values are the default; dark values follow the OS setting.
+ * Light values are the default; dark values apply when <html data-theme="dark">,
+ * which index.html sets from the saved choice or the OS setting (see src/lib/theme.ts).
  */
 
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 
   /* ---------- Type ---------- */
   --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
@@ -73,34 +74,33 @@
   --solid-line: #8f9189;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #131517;
-    --color-surface: #1a1d20;
-    --color-surface-sunken: #202427;
-    --color-text: #e4e6e8;
-    --color-text-muted: #a1a8af;
-    --color-border: #2b3034;
-    --color-border-strong: #42484d;
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-bg: #131517;
+  --color-surface: #1a1d20;
+  --color-surface-sunken: #202427;
+  --color-text: #e4e6e8;
+  --color-text-muted: #a1a8af;
+  --color-border: #2b3034;
+  --color-border-strong: #42484d;
 
-    --color-accent: #5fbcb4;
-    --color-accent-strong: #84d2cb;
-    --color-accent-soft: #17302e;
-    --color-on-accent: #0c1716;
+  --color-accent: #5fbcb4;
+  --color-accent-strong: #84d2cb;
+  --color-accent-soft: #17302e;
+  --color-on-accent: #0c1716;
 
-    --data-1: #74a7de;
-    --data-2: #e2885f;
-    --data-1-soft: rgba(116, 167, 222, 0.14);
-    --data-2-soft: rgba(226, 136, 95, 0.12);
-    --data-grid: #2a2e32;
-    --data-axis: #4b5157;
-    --data-plot-bg: #1a1d20;
+  --data-1: #74a7de;
+  --data-2: #e2885f;
+  --data-1-soft: rgba(116, 167, 222, 0.14);
+  --data-2-soft: rgba(226, 136, 95, 0.12);
+  --data-grid: #2a2e32;
+  --data-axis: #4b5157;
+  --data-plot-bg: #1a1d20;
 
-    --layer-1: #84d2cb;
-    --layer-2: #3f9d96;
-    --layer-3: #23615d;
-    --gas: #5f666d;
-    --solid: #24282b;
-    --solid-line: #6b7177;
-  }
+  --layer-1: #84d2cb;
+  --layer-2: #3f9d96;
+  --layer-3: #23615d;
+  --gas: #5f666d;
+  --solid: #24282b;
+  --solid-line: #6b7177;
 }

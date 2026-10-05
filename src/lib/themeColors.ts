@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
+import { onThemeChange } from './theme'
 
 // Canvas drawing and Plotly need concrete colors, so they read the CSS design tokens
-// (src/design-tokens.css) here and re-read them when the OS switches light/dark.
+// (src/design-tokens.css) here and re-read them when the theme switches.
 
 const TOKENS = {
   text: '--color-text',
@@ -31,14 +32,7 @@ export function readThemeColors(): ThemeColors {
   return out
 }
 
-const darkQuery = () => window.matchMedia('(prefers-color-scheme: dark)')
-
-/** Calls `cb` whenever the color scheme changes; returns an unsubscribe function. */
-export function onThemeChange(cb: () => void): () => void {
-  const mq = darkQuery()
-  mq.addEventListener('change', cb)
-  return () => mq.removeEventListener('change', cb)
-}
+export { onThemeChange }
 
 export function useThemeColors(): ThemeColors {
   const [colors, setColors] = useState(readThemeColors)

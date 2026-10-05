@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import HomePage from './pages/HomePage'
+import ThemeToggle from './components/ThemeToggle'
 import { useHashRoute } from './lib/useHashRoute'
 import { AUTHOR, COURSE } from './siteConfig'
 
@@ -17,6 +18,7 @@ export default function App() {
             Interface Engineering Lab
           </a>
           <span className="site-subtitle">Interactive tools for CEP</span>
+          <ThemeToggle />
         </div>
       </header>
 
