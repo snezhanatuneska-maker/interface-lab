@@ -1,0 +1,106 @@
+/*
+ * Design tokens for Interface Engineering Lab.
+ * Calm, textbook-like: neutral paper background, one accent (deep teal),
+ * serif headings, sans-serif body. No gradients, no drop shadows.
+ * Light values are the default; dark values follow the OS setting.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* ---------- Type ---------- */
+  --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  /* Scale: ratio ≈ 1.2 on a 17px body */
+  --text-xs: 0.8125rem; /* 13px: plot labels, fine print */
+  --text-sm: 0.9375rem; /* 15px: captions, hints, UI */
+  --text-base: 1.0625rem; /* 17px: body */
+  --text-lg: 1.25rem; /* 20px: lede, h3 */
+  --text-xl: 1.5rem; /* 24px: h2 */
+  --text-2xl: 1.875rem; /* 30px: h1 on mobile, key values */
+  --text-3xl: 2.375rem; /* 38px: h1 */
+
+  --leading-tight: 1.2;
+  --leading-snug: 1.4;
+  --leading-body: 1.65;
+  --measure: 68ch; /* comfortable line length for prose */
+
+  /* ---------- Space (4px base) ---------- */
+  --space-1: 0.25rem; /* 4 */
+  --space-2: 0.5rem; /* 8 */
+  --space-3: 0.75rem; /* 12 */
+  --space-4: 1rem; /* 16 */
+  --space-5: 1.5rem; /* 24 */
+  --space-6: 2rem; /* 32 */
+  --space-7: 3rem; /* 48 */
+  --space-8: 4rem; /* 64 */
+
+  --gutter: var(--space-4);
+  --content-width: 60rem; /* 960px */
+  --radius-sm: 4px;
+  --radius: 6px;
+
+  /* ---------- Color: light ---------- */
+  --color-bg: #f8f8f6;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #f1f2ef;
+  --color-text: #1b1f23;
+  --color-text-muted: #565e66;
+  --color-border: #e0e1dc;
+  --color-border-strong: #c5c8c2;
+
+  --color-accent: #0e6b68; /* deep teal */
+  --color-accent-strong: #0a5451;
+  --color-accent-soft: #e4efee;
+  --color-on-accent: #ffffff;
+
+  /* Data colors: only inside figures and for the series they label */
+  --data-1: #2f6aa8; /* Langmuir */
+  --data-2: #b5502a; /* BET */
+  --data-1-soft: rgba(47, 106, 168, 0.1);
+  --data-2-soft: rgba(181, 80, 42, 0.08);
+  --data-grid: #ebece8;
+  --data-axis: #b9bcb5;
+  --data-plot-bg: #ffffff;
+
+  /* Molecule colors (sequential teal: first layer darkest) */
+  --layer-1: #0e4f4c;
+  --layer-2: #2f8f88;
+  --layer-3: #93cbc4;
+  --gas: #b4bac2;
+  --solid: #ecebe6;
+  --solid-line: #8f9189;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #131517;
+    --color-surface: #1a1d20;
+    --color-surface-sunken: #202427;
+    --color-text: #e4e6e8;
+    --color-text-muted: #a1a8af;
+    --color-border: #2b3034;
+    --color-border-strong: #42484d;
+
+    --color-accent: #5fbcb4;
+    --color-accent-strong: #84d2cb;
+    --color-accent-soft: #17302e;
+    --color-on-accent: #0c1716;
+
+    --data-1: #74a7de;
+    --data-2: #e2885f;
+    --data-1-soft: rgba(116, 167, 222, 0.14);
+    --data-2-soft: rgba(226, 136, 95, 0.12);
+    --data-grid: #2a2e32;
+    --data-axis: #4b5157;
+    --data-plot-bg: #1a1d20;
+
+    --layer-1: #84d2cb;
+    --layer-2: #3f9d96;
+    --layer-3: #23615d;
+    --gas: #5f666d;
+    --solid: #24282b;
+    --solid-line: #6b7177;
+  }
+}
