@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import type { Model } from '../lib/adsorption'
+import { onThemeChange, readThemeColors } from '../lib/themeColors'
 
 // Animated cross-section of a solid with N_SITES adsorption sites and the gas above it.
 // Kinetic model: gas molecules fly in straight lines with Maxwell–Boltzmann speeds and
@@ -12,10 +13,6 @@ import type { Model } from '../lib/adsorption'
 // the surface (y = 0). Layer L (0-based) is centred at y = L + 0.5.
 
 export const N_SITES = 24
-
-/** Molecule colours by layer: layer 1, layer 2, layer 3+. */
-export const LAYER_COLORS = ['#1f3a5f', '#3f8f8a', '#f2c14e']
-export const GAS_COLOR = '#b4bac6'
 
 const MAX_LAYERS = 8 // layers drawn; taller stacks get a "+n" label
 const MARGIN = 0.5
@@ -65,7 +62,6 @@ export interface SurfaceStats {
 }
 
 const siteX = (site: number) => MARGIN + site + 0.5
-const layerColor = (layer: number) => LAYER_COLORS[Math.min(layer, LAYER_COLORS.length - 1)]
 
 function randomGas(x: number, y: number): Particle {
   const a = Math.random() * Math.PI * 2
@@ -111,6 +107,10 @@ export default function SurfaceView({ mode, pressure, K, c, paused, label, onSta
     const canvas = canvasRef.current!
     const ctx = canvas.getContext('2d')!
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    let theme = readThemeColors()
+    const offTheme = onThemeChange(() => (theme = readThemeColors()))
+    /** Molecule colours by layer: layer 1, layer 2, layer 3+. */
+    const layerColor = (layer: number) => [theme.layer1, theme.layer2, theme.layer3][Math.min(layer, 2)]
 
     let scale = 1 // CSS px per molecule diameter
     const top = TOP
@@ -269,20 +269,17 @@ export default function SurfaceView({ mode, pressure, K, c, paused, label, onSta
       const sitesEnd = (MARGIN + N_SITES) * scale
 
       // gas region
-      const grad = ctx.createLinearGradient(0, 0, 0, surfaceY)
-      grad.addColorStop(0, '#ffffff')
-      grad.addColorStop(1, '#f2f4f8')
-      ctx.fillStyle = grad
+      ctx.fillStyle = theme.plotBg
       ctx.fillRect(0, 0, cssW, surfaceY)
 
       // solid with hatching
-      ctx.fillStyle = '#ece9e1'
+      ctx.fillStyle = theme.solid
       ctx.fillRect(0, surfaceY, cssW, cssH - surfaceY)
       ctx.save()
       ctx.beginPath()
       ctx.rect(0, surfaceY, cssW, cssH - surfaceY)
       ctx.clip()
-      ctx.strokeStyle = '#c9c4b6'
+      ctx.strokeStyle = theme.axis
       ctx.lineWidth = 1.2
       const hatch = Math.max(6, scale * 0.3)
       ctx.beginPath()
@@ -292,7 +289,7 @@ export default function SurfaceView({ mode, pressure, K, c, paused, label, onSta
       }
       ctx.stroke()
       ctx.restore()
-      ctx.strokeStyle = '#8a8578'
+      ctx.strokeStyle = theme.solidLine
       ctx.lineWidth = 1.2
       ctx.beginPath()
       ctx.moveTo(0, surfaceY)
@@ -312,14 +309,14 @@ export default function SurfaceView({ mode, pressure, K, c, paused, label, onSta
       ctx.font = `600 ${fontPx}px "Source Sans 3", Helvetica, Arial, sans-serif`
       ctx.textBaseline = 'middle'
       ctx.textAlign = 'center'
-      ctx.fillStyle = '#5b6475'
+      ctx.fillStyle = theme.muted
       ctx.fillText('SOLID ADSORBENT', (MARGIN + N_SITES / 2) * scale, surfaceY + (cssH - surfaceY) / 2 + 1)
 
       // monolayer guide
       const mlY = (top - 1) * scale
       ctx.save()
       ctx.setLineDash([5, 4])
-      ctx.strokeStyle = '#5b6475'
+      ctx.strokeStyle = theme.muted
       ctx.lineWidth = 1
       ctx.beginPath()
       ctx.moveTo(MARGIN * scale * 0.5, mlY)
@@ -331,7 +328,7 @@ export default function SurfaceView({ mode, pressure, K, c, paused, label, onSta
       ctx.fillText(GUTTER * scale > 64 ? 'monolayer' : 'ML', sitesEnd + 6, mlY)
 
       // adsorbed molecules
-      const stroke = 'rgba(29, 36, 51, 0.35)'
+      const stroke = theme.plotBg
       const amp = reduceMotion ? 0 : 0.05 // small thermal vibration about the binding site
       for (let s = 0; s < N_SITES; s++) {
         const h = landed[s]
@@ -343,14 +340,14 @@ export default function SurfaceView({ mode, pressure, K, c, paused, label, onSta
         if (h > MAX_LAYERS) {
           const [px, py] = toPx(siteX(s), MAX_LAYERS + 0.45)
           ctx.textAlign = 'center'
-          ctx.fillStyle = '#c4552b'
+          ctx.fillStyle = theme.data2
           ctx.font = `700 ${fontPx}px "Source Sans 3", Helvetica, Arial, sans-serif`
           ctx.fillText(`+${h - MAX_LAYERS}`, px, py)
         }
       }
 
       // gas molecules
-      for (const p of particles) circle(p.x, p.y, GAS_COLOR, 'rgba(29, 36, 51, 0.25)')
+      for (const p of particles) circle(p.x, p.y, theme.gas, theme.plotBg)
     }
 
     let raf = 0
@@ -370,6 +367,7 @@ export default function SurfaceView({ mode, pressure, K, c, paused, label, onSta
     return () => {
       cancelAnimationFrame(raf)
       ro.disconnect()
+      offTheme()
     }
   }, [])
 

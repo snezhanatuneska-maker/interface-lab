@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Annotation, Data, Layout, Shape } from 'plotly.js'
 import Plot from '../components/Plot'
-import SurfaceView, { GAS_COLOR, LAYER_COLORS, N_SITES, type SurfaceStats } from '../components/SurfaceView'
+import SurfaceView, { N_SITES, type SurfaceStats } from '../components/SurfaceView'
 import Tex, { Frac } from '../components/Tex'
+import { useThemeColors, type ThemeColors } from '../lib/themeColors'
 import { betLoading, C_DEFAULT, C_RANGE, K_DEFAULT, K_RANGE, langmuirTheta, loading, type Model } from '../lib/adsorption'
 
 const X_MAX = 0.95
@@ -18,26 +19,25 @@ const toLogPos = (v: number, [lo, hi]: [number, number]) => (Math.log(v / lo) / 
 const fromLogPos = (pos: number, [lo, hi]: [number, number]) => Number((lo * (hi / lo) ** (pos / LOG_STEPS)).toPrecision(2))
 const fmtConst = (v: number) => (v < 10 ? v.toFixed(1) : String(v))
 
-const COLORS = {
-  langmuir: '#2a6fb0',
-  bet: '#c4552b',
-  ink: '#1d2433',
-  muted: '#5b6475',
-  grid: '#ebe8e0',
-}
-
-const BASE_LAYOUT: Partial<Layout> = {
+const baseLayout = (t: ThemeColors): Partial<Layout> => ({
   autosize: true,
   margin: { l: 56, r: 12, t: 12, b: 48 },
-  font: { family: 'Source Sans 3, Helvetica, Arial, sans-serif', size: 13, color: COLORS.ink },
+  font: { family: 'Source Sans 3, system-ui, Helvetica, Arial, sans-serif', size: 13, color: t.text },
   paper_bgcolor: 'rgba(0,0,0,0)',
-  plot_bgcolor: '#ffffff',
+  plot_bgcolor: t.plotBg,
   hovermode: false,
   legend: { orientation: 'h', x: 0, y: 1.02, yanchor: 'bottom', bgcolor: 'rgba(0,0,0,0)' },
   dragmode: false,
-}
+})
 
-const AXIS = { zeroline: false, gridcolor: COLORS.grid, linecolor: '#c9c4b6', showline: true, ticks: 'outside' as const }
+const axis = (t: ThemeColors) => ({
+  zeroline: false,
+  gridcolor: t.grid,
+  linecolor: t.axis,
+  tickcolor: t.axis,
+  showline: true,
+  ticks: 'outside' as const,
+})
 
 interface SliderProps {
   id: string
@@ -65,10 +65,10 @@ function Slider({ id, label, value, min, max, step, pos, onChange, hint }: Slide
 }
 
 const LEGEND = [
-  { color: LAYER_COLORS[0], label: 'layer 1 (on the solid)' },
-  { color: LAYER_COLORS[1], label: 'layer 2' },
-  { color: LAYER_COLORS[2], label: 'layer 3+' },
-  { color: GAS_COLOR, label: 'gas molecule' },
+  { color: 'var(--layer-1)', label: 'layer 1 (on the solid)' },
+  { color: 'var(--layer-2)', label: 'layer 2' },
+  { color: 'var(--layer-3)', label: 'layer 3+' },
+  { color: 'var(--gas)', label: 'gas molecule' },
 ]
 
 function Term({ sym, fallback, children }: { sym: string; fallback: ReactNode; children: ReactNode }) {
@@ -89,6 +89,8 @@ export default function AdsorptionPage() {
   const [K, setK] = useState(K_DEFAULT)
   const [c, setC] = useState(C_DEFAULT)
   const [paused, setPaused] = useState(false)
+  const theme = useThemeColors()
+  const COLORS = { langmuir: theme.data1, bet: theme.data2, ink: theme.text, muted: theme.muted }
   const [stats, setStats] = useState<SurfaceStats>({ occupied: 0, total: 0, tallest: 0, avgLoading: 0, time: 0 })
   const { occupied, total, tallest } = stats
   const cov = loading(mode, x, K, c)
@@ -168,7 +170,7 @@ export default function AdsorptionPage() {
       type: 'scatter',
       mode: 'markers',
       showlegend: false,
-      marker: { size: 12, color: COLORS[mode], line: { color: '#fff', width: 2 } },
+      marker: { size: 12, color: COLORS[mode], line: { color: theme.plotBg, width: 2 } },
     },
     {
       x: settling ? [] : [x],
@@ -177,7 +179,7 @@ export default function AdsorptionPage() {
       mode: 'markers',
       name: 'simulation',
       showlegend: !settling,
-      marker: { size: 8, symbol: 'diamond', color: '#fff', line: { color: COLORS.ink, width: 1.5 } },
+      marker: { size: 8, symbol: 'diamond', color: theme.plotBg, line: { color: COLORS.ink, width: 1.5 } },
     },
   ]
 
@@ -191,7 +193,7 @@ export default function AdsorptionPage() {
       y0: 0,
       y1: 1,
       layer: 'below',
-      fillcolor: 'rgba(196, 85, 43, 0.08)',
+      fillcolor: theme.data2Soft,
       line: { width: 0 },
     },
     { type: 'line', xref: 'paper', x0: 0, x1: 1, y0: 1, y1: 1, line: { color: COLORS.muted, width: 1.2, dash: 'dash' } },
@@ -224,17 +226,19 @@ export default function AdsorptionPage() {
 
   return (
     <article className="page">
-      <a className="back-link" href="#/">
-        ← All tools
-      </a>
-      <h1>Langmuir vs BET Adsorption</h1>
-      <p className="lede">
-        Gas molecules adsorbing on a solid. Raise the pressure and watch the Langmuir surface fill up to a single
-        layer, while in BET molecules keep stacking into multilayers.
-      </p>
+      <header className="page-intro compact">
+        <a className="back-link" href="#/">
+          ← All tools
+        </a>
+        <h1>Langmuir vs BET Adsorption</h1>
+        <p className="lede">
+          Gas molecules adsorbing on a solid. Raise the pressure and watch the Langmuir surface fill up to a single
+          layer, while in BET molecules keep stacking into multilayers.
+        </p>
+      </header>
 
       {/* ---------- Hero: molecular view ---------- */}
-      <section className="card hero" aria-label="Molecular view">
+      <figure className="figure hero" aria-label="Molecular view and isotherm">
         <div className="hero-head">
           <div className="coverage">
             <span className="coverage-label">
@@ -252,8 +256,8 @@ export default function AdsorptionPage() {
             <span className={`coverage-value ${mode}`}>{cov.toFixed(2)}</span>
             <span className="coverage-sub">
               equation: {cov.toFixed(2)} · simulation (running average): {stats.avgLoading.toFixed(2)}{' '}
-              <span className={`sim-status ${settling ? 'settling' : 'settled'}`} role="status">
-                {settling ? 'settling…' : '✓ settled'}
+              <span className={`tag sim-status${settling ? '' : ' accent'}`} role="status">
+                {settling ? 'settling…' : 'settled'}
               </span>
               <br />
               {mode === 'langmuir'
@@ -291,9 +295,9 @@ export default function AdsorptionPage() {
           <Plot
             data={isoData}
             layout={{
-              ...BASE_LAYOUT,
-              xaxis: { ...AXIS, title: { text: 'Relative pressure P/P₀' }, range: [0, 1] },
-              yaxis: { ...AXIS, title: { text: 'θ  or  n/nₘ' }, range: [0, Y_MAX] },
+              ...baseLayout(theme),
+              xaxis: { ...axis(theme), title: { text: 'Relative pressure P/P₀' }, range: [0, 1] },
+              yaxis: { ...axis(theme), title: { text: 'θ  or  n/nₘ' }, range: [0, Y_MAX] },
               shapes: isoShapes,
               annotations: isoAnnotations,
             }}
@@ -303,7 +307,7 @@ export default function AdsorptionPage() {
           />
         </div>
 
-        <div className="hero-controls">
+        <div className="figure-controls hero-controls">
           <div className="model-control">
             <span className="control-label">Model</span>
             <div className="segmented" role="radiogroup" aria-label="Model">
@@ -352,18 +356,26 @@ export default function AdsorptionPage() {
             />
           )}
           <div className="sim-buttons">
-            <button type="button" className="reset-btn" aria-pressed={paused} onClick={() => setPaused((p) => !p)}>
-              {paused ? '▶ Play' : '❚❚ Pause'}
+            <button type="button" className="button" aria-pressed={paused} onClick={() => setPaused((p) => !p)}>
+              {paused ? 'Play' : 'Pause'}
             </button>
-            <button type="button" className="reset-btn" onClick={reset}>
+            <button type="button" className="button" onClick={reset}>
               Reset
             </button>
           </div>
         </div>
-      </section>
+        <figcaption>
+          <span className="figure-label">Figure 1.</span> Left: cross-section of the surface, with gas above and the
+          adsorbent below. Right: the isotherm. The dot marks the current pressure; the simulation average should settle
+          near it, and once it has settled a diamond appears on that point (cleared as soon as you change a setting).
+          The shaded band (P/P₀ 0.05–0.35) is where the BET equation is normally fitted.
+        </figcaption>
+      </figure>
 
-      <section className="card iso-text">
-        <h2>What you are seeing</h2>
+      <section className="section iso-text" aria-labelledby="seeing-title">
+        <h2 id="seeing-title" className="section-title">
+          What you are seeing
+        </h2>
         <p>
           <strong className="lang-ink">Langmuir:</strong> each site holds at most one molecule. As P/P₀ rises the
           surface fills up, and the curve levels off at θ = 1, a full monolayer.
@@ -374,15 +386,10 @@ export default function AdsorptionPage() {
           behave like a liquid and exchange with the gas often. As P/P₀ → 1 the stacks keep growing: the gas
           condenses on the surface.
         </p>
-        <p className="caption">
-          The dot on the isotherm marks the current pressure; the simulation average should settle near it, and once it
-          has settled a diamond appears on that point (cleared as soon as you change a setting). The shaded band (P/P₀ 0.05–0.35) is where the BET equation is
-          normally fitted.
-        </p>
       </section>
 
       {/* ---------- The equations ---------- */}
-      <section className="equations" aria-labelledby="eq-title">
+      <section className="section equations" aria-labelledby="eq-title">
         <h2 id="eq-title" className="section-title">
           The equations
         </h2>
@@ -390,27 +397,30 @@ export default function AdsorptionPage() {
           <div className={`card eq-card lang${mode === 'langmuir' ? ' current' : ''}`}>
             <div className="eq-head">
               <h3>Langmuir isotherm (monolayer)</h3>
-              {mode === 'langmuir' && <span className="eq-badge">current model</span>}
+              {mode === 'langmuir' && <span className="tag">current model</span>}
             </div>
-            <div className="eq-math">
-              <Tex
-                display
-                tex={String.raw`\theta = \frac{K\,x}{1 + K\,x}`}
-                fallback={
-                  <>
-                    <i>θ</i> = <Frac n={<><i>K</i>·<i>x</i></>} d={<>1 + <i>K</i>·<i>x</i></>} />
-                  </>
-                }
-              />
-              <Tex
-                display
-                tex={String.raw`\text{with}\quad x = \frac{P}{P_0}`}
-                fallback={
-                  <>
-                    with <i>x</i> = <Frac n={<i>P</i>} d={<><i>P</i><sub>0</sub></>} />
-                  </>
-                }
-              />
+            <div className="formula">
+              <div className="formula-body eq-math">
+                <Tex
+                  display
+                  tex={String.raw`\theta = \frac{K\,x}{1 + K\,x}`}
+                  fallback={
+                    <>
+                      <i>θ</i> = <Frac n={<><i>K</i>·<i>x</i></>} d={<>1 + <i>K</i>·<i>x</i></>} />
+                    </>
+                  }
+                />
+                <Tex
+                  display
+                  tex={String.raw`\text{with}\quad x = \frac{P}{P_0}`}
+                  fallback={
+                    <>
+                      with <i>x</i> = <Frac n={<i>P</i>} d={<><i>P</i><sub>0</sub></>} />
+                    </>
+                  }
+                />
+              </div>
+              <span className="formula-number">(1)</span>
             </div>
             <dl className="terms">
               <Term sym={String.raw`\theta`} fallback={<i>θ</i>}>
@@ -437,28 +447,31 @@ export default function AdsorptionPage() {
           <div className={`card eq-card bet${mode === 'bet' ? ' current' : ''}`}>
             <div className="eq-head">
               <h3>BET isotherm (multilayer)</h3>
-              {mode === 'bet' && <span className="eq-badge">current model</span>}
+              {mode === 'bet' && <span className="tag">current model</span>}
             </div>
-            <div className="eq-math">
-              <Tex
-                display
-                tex={String.raw`\frac{n}{n_m} = \frac{c\,x}{(1 - x)\,(1 - x + c\,x)}`}
-                fallback={
-                  <>
-                    <Frac n={<i>n</i>} d={<><i>n</i><sub>m</sub></>} /> ={' '}
-                    <Frac n={<><i>c</i>·<i>x</i></>} d={<>(1 − <i>x</i>)(1 − <i>x</i> + <i>c</i>·<i>x</i>)</>} />
-                  </>
-                }
-              />
-              <Tex
-                display
-                tex={String.raw`\text{with}\quad x = \frac{P}{P_0}`}
-                fallback={
-                  <>
-                    with <i>x</i> = <Frac n={<i>P</i>} d={<><i>P</i><sub>0</sub></>} />
-                  </>
-                }
-              />
+            <div className="formula">
+              <div className="formula-body eq-math">
+                <Tex
+                  display
+                  tex={String.raw`\frac{n}{n_m} = \frac{c\,x}{(1 - x)\,(1 - x + c\,x)}`}
+                  fallback={
+                    <>
+                      <Frac n={<i>n</i>} d={<><i>n</i><sub>m</sub></>} /> ={' '}
+                      <Frac n={<><i>c</i>·<i>x</i></>} d={<>(1 − <i>x</i>)(1 − <i>x</i> + <i>c</i>·<i>x</i>)</>} />
+                    </>
+                  }
+                />
+                <Tex
+                  display
+                  tex={String.raw`\text{with}\quad x = \frac{P}{P_0}`}
+                  fallback={
+                    <>
+                      with <i>x</i> = <Frac n={<i>P</i>} d={<><i>P</i><sub>0</sub></>} />
+                    </>
+                  }
+                />
+              </div>
+              <span className="formula-number">(2)</span>
             </div>
             <dl className="terms">
               <Term sym="n" fallback={<i>n</i>}>
@@ -504,14 +517,16 @@ export default function AdsorptionPage() {
             </ul>
           </div>
         </div>
-        <p className="eq-relation">
+        <p className="callout">
           <strong>How they relate:</strong> Langmuir describes a single layer and plateaus; BET extends the idea to
           multiple layers, which is why its curve rises sharply as P → P₀.
         </p>
       </section>
 
-      <section className="card">
-        <h2>Why it matters for clean energy</h2>
+      <section className="section" aria-labelledby="why-title">
+        <h2 id="why-title" className="section-title">
+          Why it matters for clean energy
+        </h2>
         <ul className="why-list">
           <li>
             <strong>Fuel cells.</strong> H<sub>2</sub> and O<sub>2</sub> adsorb on Pt catalyst sites before they
