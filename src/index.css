@@ -140,15 +140,45 @@ a.tool-card:hover { border-color: var(--color-accent); color: inherit; }
 .tool-icon .series-2 { stroke: var(--data-2); }
 .tool-cta { display: inline-block; margin-top: var(--space-3); font-weight: 600; color: var(--color-accent); }
 
-.upcoming-list { list-style: none; margin: 0; padding: 0; }
-.upcoming-list li {
-  display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: var(--space-4); align-items: start;
-  padding: var(--space-4) 0; border-bottom: 1px solid var(--color-border);
+
+/* Tabs (Tools / Upcoming Projects): underline style, accent marks the active tab */
+.tab-bar { display: flex; gap: var(--space-5); border-bottom: 1px solid var(--color-border); margin-bottom: var(--space-5); }
+.tab {
+  font: inherit; font-weight: 600; color: var(--color-text-muted); cursor: pointer; background: none;
+  border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: var(--space-2) 0;
 }
-.upcoming-list li:first-child { padding-top: 0; }
-.upcoming-list .tool-icon { width: 40px; height: 40px; opacity: 0.7; }
-.upcoming-list h3 { font-size: var(--text-base); margin: 0 0 var(--space-1); }
-.upcoming-list p { margin: 0; font-size: var(--text-sm); color: var(--color-text-muted); max-width: var(--measure); }
+.tab:hover { color: var(--color-text); }
+.tab[aria-selected='true'] { color: var(--color-accent); border-bottom-color: var(--color-accent); }
+.tab-panel > section:first-child > .section-title { border-top: 0; padding-top: 0; }
+
+/* Upcoming projects */
+.upcoming-intro { margin-bottom: var(--space-4); }
+.filter-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-2); }
+.chip {
+  font: inherit; font-size: var(--text-sm); font-weight: 600; cursor: pointer; color: var(--color-text-muted);
+  background: var(--color-surface); border: 1px solid var(--color-border-strong); border-radius: 999px; padding: 2px var(--space-3);
+}
+.chip:hover { color: var(--color-text); border-color: var(--color-accent); }
+.chip[aria-pressed='true'] { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-on-accent); }
+
+.project-group { margin-top: var(--space-6); }
+.category-title { font-family: var(--font-sans); font-size: var(--text-sm); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-muted); margin-bottom: var(--space-3); }
+.project-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: var(--space-4); }
+.project-grid > li { display: flex; min-width: 0; }
+.project-card {
+  flex: 1; display: flex; flex-direction: column; min-width: 0;
+  background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius);
+  padding: var(--space-4) var(--space-5) var(--space-5); color: inherit; text-decoration: none; transition: border-color 0.15s;
+}
+a.project-card:hover { border-color: var(--color-accent); color: inherit; }
+.project-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-2); }
+.project-head h3 { font-size: var(--text-base); line-height: var(--leading-snug); margin: 0; }
+.project-head .tag { flex: none; margin-top: 2px; }
+.project-card p { font-size: var(--text-sm); line-height: var(--leading-snug); color: var(--color-text-muted); }
+.project-concepts { list-style: none; margin: 0 0 var(--space-3); padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.project-concepts .tag { white-space: normal; overflow-wrap: anywhere; font-weight: 400; }
+.project-card .project-cep { margin: auto 0 0; padding-top: var(--space-3); border-top: 1px solid var(--color-border); }
+.project-card .tool-cta { font-size: var(--text-sm); }
 
 .back-link { display: inline-block; margin-bottom: var(--space-3); font-size: var(--text-sm); font-weight: 600; text-decoration: none; }
 .back-link:hover { text-decoration: underline; }
@@ -165,6 +195,7 @@ a.tool-card:hover { border-color: var(--color-accent); color: inherit; }
   .formula { padding: var(--space-3) var(--space-4); }
   .tool-card { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); padding: var(--space-4); }
   .tool-card .tool-icon { width: 48px; height: 48px; }
+  .project-card { padding: var(--space-4); }
 }
 
 /* ================= Adsorption simulator ================= */
