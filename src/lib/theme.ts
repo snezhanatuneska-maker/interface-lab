@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 export type Theme = 'light' | 'dark'
 
 const STORAGE_KEY = 'theme'
-const META_COLORS: Record<Theme, string> = { light: '#f8f8f6', dark: '#131517' }
+const META_COLORS: Record<Theme, string> = { light: '#f7f5ef', dark: '#141a26' }
 const darkQuery = () => window.matchMedia('(prefers-color-scheme: dark)')
 
 function saved(): Theme | null {

@@ -1,46 +1,34 @@
-import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import UpcomingProjects from '../components/UpcomingProjects'
+import { COURSE } from '../siteConfig'
 
 interface Tool {
   title: string
   blurb: string
+  topics: string
   href: string
-  icon: ReactNode
 }
-
-const svg = (children: ReactNode) => (
-  <svg viewBox="0 0 48 48" aria-hidden="true" className="tool-icon">
-    {children}
-  </svg>
-)
 
 const TOOLS: Tool[] = [
   {
-    title: 'Langmuir vs BET Adsorption',
+    title: 'Langmuir vs BET adsorption',
     blurb:
-      'Watch gas molecules adsorb on a surface: a single Langmuir monolayer vs stacking BET multilayers, with both isotherm equations explained.',
+      'Gas molecules adsorbing on a solid surface, next to the adsorption isotherm. In the Langmuir model the surface saturates at one monolayer; in the BET model molecules keep stacking into multilayers as the relative pressure approaches 1.',
+    topics: 'adsorption isotherm, monolayer capacity, BET constant c, relative pressure P/P₀',
     href: '#/adsorption',
-    icon: svg(
-      <>
-        <path d="M6 42 V6 M6 42 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />
-        <path className="series-1" d="M6 42 C10 24 14 22 26 21 S40 20 44 19" strokeWidth="3" fill="none" />
-        <path className="series-2" d="M6 42 C10 26 16 26 26 24 S36 18 42 6" strokeWidth="3" fill="none" />
-      </>,
-    ),
   },
 ]
 
 type TabId = 'tools' | 'upcoming'
 const TABS: { id: TabId; label: string }[] = [
-  { id: 'tools', label: 'Tools' },
-  { id: 'upcoming', label: 'Upcoming Projects' },
+  { id: 'tools', label: 'Available' },
+  { id: 'upcoming', label: 'Planned' },
 ]
 
 // The active tab lives in the URL hash so "#upcoming" can be linked directly; anything else is "tools".
 const tabFromHash = (): TabId => (window.location.hash === '#upcoming' ? 'upcoming' : 'tools')
 
 export default function HomePage() {
-
   const [tab, setTab] = useState<TabId>(tabFromHash)
   const tabRefs = useRef<Record<TabId, HTMLButtonElement | null>>({ tools: null, upcoming: null })
 
@@ -73,16 +61,16 @@ export default function HomePage() {
 
   return (
     <article className="page">
-      <header className="page-intro">
-        <p className="eyebrow">Interface engineering for clean energy processes</p>
+      <header className="doc-head">
         <h1>Interface Engineering Lab</h1>
-        <p className="lede">
-          Interactive simulators for the surface and interface phenomena behind clean energy technologies: catalysts,
-          fuel cells, batteries and gas storage. Move a slider, see the physics.
+        <p className="doc-meta">Course: {COURSE} (CEP)</p>
+        <p className="doc-summary">
+          Small simulations that go with the lecture notes on surfaces and interfaces, each with the governing
+          equations and the assumptions behind them.
         </p>
       </header>
 
-      <div className="tab-bar" role="tablist" aria-label="Homepage sections">
+      <div className="tab-bar" role="tablist" aria-label="Contents">
         {TABS.map((t) => (
           <button
             key={t.id}
@@ -105,25 +93,23 @@ export default function HomePage() {
       </div>
 
       <div role="tabpanel" id="panel-tools" aria-labelledby="tab-tools" hidden={tab !== 'tools'} className="tab-panel">
-        <section aria-labelledby="tools-title">
-          <h2 id="tools-title" className="section-title">
-            Simulators
-          </h2>
-          <ul className="tool-list">
-            {TOOLS.map((t) => (
-              <li key={t.title}>
-                <a href={t.href} className="tool-card">
-                  {t.icon}
-                  <div>
-                    <h3>{t.title}</h3>
-                    <p>{t.blurb}</p>
-                    <span className="tool-cta">Open simulator →</span>
-                  </div>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <h2 className="visually-hidden">Available simulations</h2>
+        <ol className="toc">
+          {TOOLS.map((t, i) => (
+            <li key={t.title}>
+              <span className="toc-num">{i + 1}.</span>
+              <div>
+                <h3>
+                  <a href={t.href}>{t.title}</a>
+                </h3>
+                <p>{t.blurb}</p>
+                <p className="toc-topics">
+                  <span className="label">Topics:</span> {t.topics}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ol>
       </div>
 
       <div
