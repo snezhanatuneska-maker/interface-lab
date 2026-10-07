@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import { PROJECTS, type Project } from '../data/upcomingProjects'
 
+// "Next up" shows the few tools being built now; the full roadmap sits in a collapsed section below.
+const NEXT = PROJECTS.filter((p) => p.status === 'planned' && p.next)
+const LATER = PROJECTS.filter((p) => p.status === 'planned' && !p.next)
 // Category order follows first appearance in the data file.
-const CATEGORIES = [...new Set(PROJECTS.map((p) => p.category))]
+const CATEGORIES = [...new Set(LATER.map((p) => p.category))]
 
 function ProjectCard({ p }: { p: Project }) {
   const live = p.status === 'live' && p.href
@@ -46,32 +49,48 @@ export default function UpcomingProjects() {
         Interactive tools in development for interface engineering in clean energy processes.
       </p>
 
-      <div className="filter-chips" role="group" aria-label="Filter by category">
-        {[null, ...CATEGORIES].map((c) => (
-          <button
-            key={c ?? 'all'}
-            type="button"
-            className="chip"
-            aria-pressed={filter === c}
-            onClick={() => setFilter(c)}
-          >
-            {c ?? 'All'}
-          </button>
-        ))}
-      </div>
+      <section className="project-group" aria-labelledby="next-title">
+        <h2 id="next-title" className="category-title">
+          Next up
+        </h2>
+        <ul className="project-grid">
+          {NEXT.map((p) => (
+            <li key={p.id}>
+              <ProjectCard p={p} />
+            </li>
+          ))}
+        </ul>
+      </section>
 
-      {shown.map((cat) => (
-        <section key={cat} className="project-group" aria-label={cat}>
-          <h2 className="category-title">{cat}</h2>
-          <ul className="project-grid">
-            {PROJECTS.filter((p) => p.category === cat).map((p) => (
-              <li key={p.id}>
-                <ProjectCard p={p} />
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
+      <details className="roadmap">
+        <summary>Full roadmap ({LATER.length} more planned tools)</summary>
+        <div className="filter-chips" role="group" aria-label="Filter by category">
+          {[null, ...CATEGORIES].map((c) => (
+            <button
+              key={c ?? 'all'}
+              type="button"
+              className="chip"
+              aria-pressed={filter === c}
+              onClick={() => setFilter(c)}
+            >
+              {c ?? 'All'}
+            </button>
+          ))}
+        </div>
+
+        {shown.map((cat) => (
+          <section key={cat} className="project-group" aria-label={cat}>
+            <h2 className="category-title">{cat}</h2>
+            <ul className="project-grid">
+              {LATER.filter((p) => p.category === cat).map((p) => (
+                <li key={p.id}>
+                  <ProjectCard p={p} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </details>
     </>
   )
 }

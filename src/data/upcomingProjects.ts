@@ -1,6 +1,6 @@
-// Single source of truth for the "Upcoming Projects" tab on the homepage.
-// Add, remove or reorder projects here; cards and category groups are rendered from this list.
-// Categories appear in the order they are first used below.
+// Single source of truth for every tool on the homepage. Live tools (status 'live') appear as cards
+// on the Tools tab; planned ones on the Upcoming Projects tab, with those marked `next` shown first.
+// Add, remove or reorder projects here. Categories appear in the order they are first used below.
 
 export type ProjectStatus = 'live' | 'planned'
 
@@ -17,6 +17,8 @@ export interface Project {
   status: ProjectStatus
   /** Route of the live tool; only used when status is 'live'. */
   href?: string
+  /** Planned tool that is being built next; listed first on the Upcoming Projects tab. */
+  next?: boolean
 }
 
 export const PROJECTS: Project[] = [
@@ -50,6 +52,7 @@ export const PROJECTS: Project[] = [
     concepts: ['Young–Laplace', "Jurin's law", 'Capillary pressure ∝ 1/r', 'Hysteresis', 'Kelvin equation'],
     cepLink: 'Liquid transport in porous electrodes and catalyst layers.',
     status: 'planned',
+    next: true,
   },
   {
     id: 'mercury-porosimetry',
@@ -67,7 +70,7 @@ export const PROJECTS: Project[] = [
     title: 'Langmuir vs BET Adsorption',
     category: 'Solid Interfaces',
     description:
-      'Watch gas molecules adsorb on a surface: a single Langmuir monolayer vs stacking BET multilayers, with both isotherm equations explained.',
+      'Watch gas molecules adsorb on a surface: a single Langmuir monolayer vs stacking BET multilayers. Then fit the BET plot and turn it into a surface area in m²/g.',
     concepts: ['Monolayer vs multilayer', 'Adsorption isotherm', 'Surface coverage θ', 'BET surface area'],
     cepLink: 'Gas storage, catalyst surface area and porous electrode characterisation.',
     status: 'live',
@@ -146,6 +149,7 @@ export const PROJECTS: Project[] = [
     concepts: ['Slipping plane', 'Electrophoretic mobility', 'IEP = PZC', 'Potential-determining ions'],
     cepLink: 'Controlling dispersion of catalyst and electrode particles.',
     status: 'planned',
+    next: true,
   },
   {
     id: 'dlvo',
@@ -156,6 +160,7 @@ export const PROJECTS: Project[] = [
     concepts: ['Energy barrier', 'Primary/secondary minimum', 'Critical coagulation concentration ∝ 1/z⁶', 'Steric stabilisation'],
     cepLink: 'Stable inks and slurries for fuel-cell and battery electrode manufacturing.',
     status: 'planned',
+    next: true,
   },
 
   // ---------- Nucleation & Growth ----------

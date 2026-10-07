@@ -78,6 +78,31 @@ function wallGas(x: number, y: number, dir: 1 | -1): Particle {
   return { x, y, vx: v * Math.sin(a), vy: dir * v * Math.cos(a) }
 }
 
+/**
+ * Stack heights drawn from the model's equilibrium distribution. Langmuir: a site is taken with
+ * probability θ. BET: a site is bare with probability s₀ = (1 − x)/(1 − x + Cx); a covered site has
+ * i layers with probability (1 − x)·x^(i−1). Stratified quantiles (shuffled over the sites) keep
+ * the total close to the mean, so a 24-site surface starts on the isotherm rather than near it.
+ */
+function equilibriumStacks(mode: Model, x: number, K: number, c: number): number[] {
+  const u = Array.from({ length: N_SITES }, (_, i) => (i + Math.random()) / N_SITES)
+  for (let i = u.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[u[i], u[j]] = [u[j], u[i]]
+  }
+  if (mode === 'langmuir') {
+    const theta = (K * x) / (1 + K * x)
+    return u.map((q) => (q < theta ? 1 : 0))
+  }
+  const s0 = (1 - x) / (1 - x + c * x)
+  return u.map((q) => {
+    if (q < s0 || x <= 0) return 0
+    // Inverse CDF of the geometric number of layers, using the remaining quantile.
+    const r = (q - s0) / (1 - s0)
+    return 1 + Math.floor(Math.log(1 - r) / Math.log(x))
+  })
+}
+
 interface Props {
   mode: Model
   pressure: number // relative pressure 0..1, sets the gas density
@@ -131,7 +156,8 @@ export default function SurfaceView({ mode, pressure, K, c, paused, label, onSta
     const ro = new ResizeObserver(resize)
     ro.observe(wrap)
 
-    const landed: number[] = new Array(N_SITES).fill(0) // clean surface
+    // Start at equilibrium, so the simulation agrees with the equation from the first frame.
+    const landed = equilibriumStacks(modeRef.current, pressureRef.current, constsRef.current.K, constsRef.current.c)
     const columnTop = (x: number) => {
       const site = Math.floor(x - MARGIN)
       if (site < 0 || site >= N_SITES) return 0
@@ -140,17 +166,33 @@ export default function SurfaceView({ mode, pressure, K, c, paused, label, onSta
     const left = R
     const right = BOX_W - R
     const ceiling = top - R
-    // Start with an equilibrium gas: density proportional to pressure.
-    const particles: Particle[] = Array.from({ length: Math.round(GAS_DENSITY * pressureRef.current * (right - left) * (ceiling - R)) }, () =>
-      randomGas(left + Math.random() * (right - left), R + Math.random() * (ceiling - R)),
-    )
+    // Equilibrium gas: density proportional to pressure, placed above the stacks.
+    const particles: Particle[] = []
+    for (let n = Math.round(GAS_DENSITY * pressureRef.current * (right - left) * (ceiling - R)); particles.length < n; ) {
+      const px = left + Math.random() * (right - left)
+      const py = R + Math.random() * (ceiling - R)
+      if (py >= columnTop(px) + R) particles.push(randomGas(px, py))
+    }
     let spawnBudget = 0
     let lastPressure = pressureRef.current
     const waitExcess: number[] = new Array(MAX_LAYERS + 1).fill(0) // Σ (exposed time − 1/(RATE·P) per hit), by layer
     const hits: number[] = new Array(MAX_LAYERS + 1).fill(0)
-    let avgLoading = 0
+    let avgLoading = landed.reduce((a, b) => a + b, 0) / N_SITES
     let statsTimer = 0
     let time = 0
+    const report = () => {
+      let total = 0
+      let occupied = 0
+      let tallest = 0
+      for (const h of landed) {
+        total += h
+        if (h > 0) occupied++
+        tallest = Math.max(tallest, h)
+      }
+      onStatsRef.current?.({ occupied, total, tallest, avgLoading, time })
+      return total
+    }
+    report()
 
     const step = (dt: number) => {
       const mode = modeRef.current
@@ -233,20 +275,13 @@ export default function SurfaceView({ mode, pressure, K, c, paused, label, onSta
         if (p.y > ceiling) particles.splice(i, 1) // back into the reservoir
       }
 
-      // 4. Report a time-averaged loading (~3 s window) to the page.
-      let total = 0
-      let occupied = 0
-      let tallest = 0
-      for (const h of landed) {
-        total += h
-        if (h > 0) occupied++
-        tallest = Math.max(tallest, h)
-      }
+      // 4. Time-averaged loading (~3 s window), reported to the page four times a second.
+      const total = landed.reduce((a, b) => a + b, 0)
       avgLoading += ((total / N_SITES - avgLoading) * dt) / 3
       statsTimer += dt
       if (statsTimer > 0.25) {
         statsTimer = 0
-        onStatsRef.current?.({ occupied, total, tallest, avgLoading, time })
+        report()
       }
     }
 

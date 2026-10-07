@@ -1,68 +1,39 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import type { Annotation, Data, Layout, Shape } from 'plotly.js'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import type { Annotation, Data, Shape } from 'plotly.js'
 import Plot from '../components/Plot'
 import SurfaceView, { N_SITES, type SurfaceStats } from '../components/SurfaceView'
-import Tex, { Frac } from '../components/Tex'
-import { useThemeColors, type ThemeColors } from '../lib/themeColors'
-import { betLoading, C_DEFAULT, C_RANGE, K_DEFAULT, K_RANGE, langmuirTheta, loading, type Model } from '../lib/adsorption'
+import { LogSlider, Segmented, Slider } from '../components/Controls'
+import { useThemeColors } from '../lib/themeColors'
+import { axis, baseLayout, staticConfig } from '../lib/plotTheme'
+import {
+  AREA_PER_VM,
+  betLoading,
+  BET_FIT_RANGE,
+  C_DEFAULT,
+  C_RANGE,
+  K_DEFAULT,
+  K_RANGE,
+  kneeX,
+  langmuirTheta,
+  loading,
+  SAMPLES,
+  SAMPLE_DEFAULT,
+  type Model,
+} from '../lib/adsorption'
+import { insight, type View } from './adsorption/insight'
+import TryThis, { type Preset } from './adsorption/TryThis'
+import Equations from './adsorption/Equations'
+import SurfaceArea from './adsorption/SurfaceArea'
+import BeyondBet from './adsorption/BeyondBet'
 
 const X_MAX = 0.95
-const Y_MAX = 3 // same fixed y-axis for both models: shows the Langmuir plateau and the BET knee and rise
+const Y_ML = 3 // "monolayer region" y-axis: 0–3 layers shows the Langmuir plateau and the BET knee
 const N_POINTS = 300
 const X_DEFAULT = 0.3
 const SETTLE_MIN_TIME = 3 // simulated s at a setting (one averaging window) before it can count as settled
-const BET_RANGE: [number, number] = [0.05, 0.35] // usual fitting range of the BET equation
 
-// K and c sliders move on a log scale; values are rounded to two significant figures.
-const LOG_STEPS = 200
-const toLogPos = (v: number, [lo, hi]: [number, number]) => (Math.log(v / lo) / Math.log(hi / lo)) * LOG_STEPS
-const fromLogPos = (pos: number, [lo, hi]: [number, number]) => Number((lo * (hi / lo) ** (pos / LOG_STEPS)).toPrecision(2))
-const fmtConst = (v: number) => (v < 10 ? v.toFixed(1) : String(v))
-
-const baseLayout = (t: ThemeColors): Partial<Layout> => ({
-  autosize: true,
-  margin: { l: 56, r: 12, t: 12, b: 48 },
-  font: { family: 'Source Sans 3, system-ui, Helvetica, Arial, sans-serif', size: 13, color: t.text },
-  paper_bgcolor: 'rgba(0,0,0,0)',
-  plot_bgcolor: t.plotBg,
-  hovermode: false,
-  legend: { orientation: 'h', x: 0, y: 1.02, yanchor: 'bottom', bgcolor: 'rgba(0,0,0,0)' },
-  dragmode: false,
-})
-
-const axis = (t: ThemeColors) => ({
-  zeroline: false,
-  gridcolor: t.grid,
-  linecolor: t.axis,
-  tickcolor: t.axis,
-  showline: true,
-  ticks: 'outside' as const,
-})
-
-interface SliderProps {
-  id: string
-  label: ReactNode
-  value: string
-  min: number
-  max: number
-  step: number
-  pos: number
-  onChange: (v: number) => void
-  hint?: string
-}
-
-function Slider({ id, label, value, min, max, step, pos, onChange, hint }: SliderProps) {
-  return (
-    <div className="slider">
-      <label htmlFor={id}>
-        <span>{label}</span>
-        <output htmlFor={id}>{value}</output>
-      </label>
-      <input id={id} type="range" min={min} max={max} step={step} value={pos} onChange={(e) => onChange(Number(e.target.value))} />
-      {hint && <small>{hint}</small>}
-    </div>
-  )
-}
+const MODEL_NAME: Record<Model, string> = { langmuir: 'Langmuir', bet: 'BET' }
+const EMPTY_STATS: SurfaceStats = { occupied: 0, total: 0, tallest: 0, avgLoading: 0, time: 0 }
 
 const LEGEND = [
   { color: 'var(--layer-1)', label: 'layer 1 (on the solid)' },
@@ -71,64 +42,113 @@ const LEGEND = [
   { color: 'var(--gas)', label: 'gas molecule' },
 ]
 
-function Term({ sym, fallback, children }: { sym: string; fallback: ReactNode; children: ReactNode }) {
+/**
+ * "settling…" after a reset or any change of setting, until the simulation's running average has had at
+ * least SETTLE_MIN_TIME of simulated time and comes within ~5 % of the equation. Then the simulation
+ * diamond is drawn on the isotherm; any change hides it until the next settle.
+ */
+function useSettled(key: string, stats: SurfaceStats, target: number): boolean {
+  const start = useRef({ key, time: stats.time })
+  if (start.current.key !== key) start.current = { key, time: stats.time }
+  const [settledKey, setSettledKey] = useState('')
+  const near = Math.abs(stats.avgLoading - target) <= Math.max(0.05 * target, 0.02)
+  const ready = near && stats.time - start.current.time >= SETTLE_MIN_TIME
+  useEffect(() => {
+    if (ready && settledKey !== key) setSettledKey(key)
+  }, [ready, settledKey, key])
+  return settledKey === key
+}
+
+function Readout({ model, cov, stats, settled }: { model: Model; cov: number; stats: SurfaceStats; settled: boolean }) {
+  const { occupied, total, tallest } = stats
   return (
-    <>
-      <dt>
-        <Tex tex={sym} fallback={fallback} />
-      </dt>
-      <dd>{children}</dd>
-    </>
+    <div className="coverage">
+      <span className="coverage-label">
+        {MODEL_NAME[model]}:{' '}
+        {model === 'langmuir' ? (
+          <>
+            coverage <em>θ</em> = <em>V</em>/<em>V</em>
+            <sub>m</sub>
+          </>
+        ) : (
+          <>
+            loading <em>V</em>/<em>V</em>
+            <sub>m</sub>
+          </>
+        )}
+      </span>
+      <span className={`coverage-value ${model}`}>{cov.toFixed(2)}</span>
+      <span className="coverage-sub">
+        equation: {cov.toFixed(2)} · simulation (running average): {stats.avgLoading.toFixed(2)}{' '}
+        <span className={`tag sim-status${settled ? ' accent' : ''}`} role="status">
+          {settled ? 'settled' : 'settling…'}
+        </span>
+        <br />
+        {model === 'langmuir'
+          ? `${occupied} of ${N_SITES} sites occupied · 1 layer max`
+          : `${total} molecules on ${N_SITES} sites · ${N_SITES - occupied} bare · up to ${tallest} layer${tallest === 1 ? '' : 's'}`}
+      </span>
+    </div>
   )
 }
 
 export default function AdsorptionPage() {
   const [x, setX] = useState(X_DEFAULT)
-  const [mode, setMode] = useState<Model>('bet')
-  const [runId, setRunId] = useState(0) // bump to restart the animation on a clean surface
+  const [view, setView] = useState<View>('bet')
+  const [runId, setRunId] = useState(0) // bump to restart the simulation (it starts at equilibrium)
   const [K, setK] = useState(K_DEFAULT)
   const [c, setC] = useState(C_DEFAULT)
   const [paused, setPaused] = useState(false)
+  const [yRange, setYRange] = useState<'ml' | 'full'>('ml')
+  const [units, setUnits] = useState<'rel' | 'abs'>('rel')
+  const [sampleId, setSampleId] = useState(SAMPLE_DEFAULT)
+  const [stats, setStats] = useState<Record<Model, SurfaceStats>>({ langmuir: EMPTY_STATS, bet: EMPTY_STATS })
   const theme = useThemeColors()
   const COLORS = { langmuir: theme.data1, bet: theme.data2, ink: theme.text, muted: theme.muted }
-  const [stats, setStats] = useState<SurfaceStats>({ occupied: 0, total: 0, tallest: 0, avgLoading: 0, time: 0 })
-  const { occupied, total, tallest } = stats
-  const cov = loading(mode, x, K, c)
 
-  // "settling…" shows after a reset or a pressure/K/c change until the running average, after at least
-  // SETTLE_MIN_TIME of simulated time, first comes within ~5%. Once settled, the simulation diamond is
-  // drawn exactly on the current point of the isotherm; any change (pressure included) hides it until the next settle.
-  const runKey = `${runId}|${mode}|${K}|${c}|${x}`
-  const runStart = useRef({ key: runKey, time: 0 })
-  if (runStart.current.key !== runKey) runStart.current = { key: runKey, time: stats.time }
-  const [settledKey, setSettledKey] = useState('')
-  const near = Math.abs(stats.avgLoading - cov) <= Math.max(0.05 * cov, 0.02)
-  const settleReady = near && stats.time - runStart.current.time >= SETTLE_MIN_TIME
-  useEffect(() => {
-    if (!settleReady || settledKey === runKey) return
-    setSettledKey(runKey)
-  }, [settleReady, settledKey, runKey])
-  const settling = settledKey !== runKey
+  const models: Model[] = view === 'both' ? ['langmuir', 'bet'] : [view]
+  const shows = (m: Model) => models.includes(m)
+  const cov: Record<Model, number> = { langmuir: langmuirTheta(x, K), bet: betLoading(x, c) }
+  const settled: Record<Model, boolean> = {
+    langmuir: useSettled(`${runId}|${view}|${K}|${x}`, stats.langmuir, cov.langmuir),
+    bet: useSettled(`${runId}|${view}|${c}|${x}`, stats.bet, cov.bet),
+  }
+
+  const sample = SAMPLES.find((s) => s.id === sampleId) ?? SAMPLES[0]
+  const u = units === 'abs' ? sample.area / AREA_PER_VM : 1 // y scale: V/Vm → cm³(STP)/g
 
   const restart = () => {
-    setX(X_DEFAULT)
-    setStats({ occupied: 0, total: 0, tallest: 0, avgLoading: 0, time: 0 })
+    setStats({ langmuir: EMPTY_STATS, bet: EMPTY_STATS })
     setRunId((r) => r + 1)
   }
 
   const reset = () => {
+    setX(X_DEFAULT)
     setK(K_DEFAULT)
     setC(C_DEFAULT)
+    setYRange('ml')
+    setUnits('rel')
     restart()
   }
 
-  const switchMode = (m: Model) => {
-    if (m === mode) return
-    setMode(m)
-    restart()
+  const switchView = (v: View) => {
+    if (v === view) return
+    setView(v)
+    restart() // pressure, K and C are kept so the models can be compared at the same setting
   }
 
-  // ---------- Isotherm (secondary plot) ----------
+  const applyPreset = (p: Preset) => {
+    if (p.view) setView(p.view)
+    if (p.x !== undefined) setX(p.x)
+    if (p.K !== undefined) setK(p.K)
+    if (p.c !== undefined) setC(p.c)
+    if (p.yRange) setYRange(p.yRange)
+    setPaused(false)
+    restart()
+    document.getElementById(p.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  // ---------- Isotherm ----------
   const curves = useMemo(() => {
     const xs: number[] = []
     const lang: number[] = []
@@ -142,44 +162,51 @@ export default function AdsorptionPage() {
     return { xs, lang, bet }
   }, [K, c])
 
-  const curveStyle = (m: Model) =>
-    mode === m ? { color: COLORS[m], width: 3 } : { color: COLORS[m], width: 1.5, dash: 'dot' as const }
+  const yMax = (yRange === 'ml' ? Y_ML : Math.max(1.1, ...models.map((m) => loading(m, X_MAX, K, c))) * 1.05) * u
+  const scaled = (v: number) => v * u
+  const showKnee = shows('bet') && c >= 2
+
+  const curveStyle = (m: Model) => (shows(m) ? { color: COLORS[m], width: 3 } : { color: COLORS[m], width: 1.75 })
 
   const isoData: Data[] = [
+    ...(['langmuir', 'bet'] as Model[]).map(
+      (m): Data => ({
+        x: curves.xs,
+        y: (m === 'langmuir' ? curves.lang : curves.bet).map(scaled),
+        type: 'scatter',
+        mode: 'lines',
+        name: m === 'langmuir' ? 'Langmuir θ' : 'BET V/Vₘ',
+        line: curveStyle(m),
+        opacity: shows(m) ? 1 : 0.6,
+      }),
+    ),
+    ...models.map(
+      (m): Data => ({
+        x: [x],
+        y: [scaled(cov[m])],
+        type: 'scatter',
+        mode: 'markers',
+        showlegend: false,
+        marker: { size: 12, color: COLORS[m], line: { color: theme.plotBg, width: 2 } },
+      }),
+    ),
     {
-      x: curves.xs,
-      y: curves.lang,
-      type: 'scatter',
-      mode: 'lines',
-      name: 'Langmuir θ',
-      line: curveStyle('langmuir'),
-      opacity: mode === 'langmuir' ? 1 : 0.45,
-    },
-    {
-      x: curves.xs,
-      y: curves.bet,
-      type: 'scatter',
-      mode: 'lines',
-      name: 'BET n/nₘ',
-      line: curveStyle('bet'),
-      opacity: mode === 'bet' ? 1 : 0.45,
-    },
-    {
-      x: [x],
-      y: [cov],
-      type: 'scatter',
-      mode: 'markers',
-      showlegend: false,
-      marker: { size: 12, color: COLORS[mode], line: { color: theme.plotBg, width: 2 } },
-    },
-    {
-      x: settling ? [] : [x],
-      y: settling ? [] : [cov],
+      x: models.filter((m) => settled[m]).map(() => x),
+      y: models.filter((m) => settled[m]).map((m) => scaled(cov[m])),
       type: 'scatter',
       mode: 'markers',
       name: 'simulation',
-      showlegend: !settling,
+      showlegend: models.some((m) => settled[m]),
       marker: { size: 8, symbol: 'diamond', color: theme.plotBg, line: { color: COLORS.ink, width: 1.5 } },
+    },
+    {
+      x: showKnee ? [kneeX(c)] : [],
+      y: showKnee ? [u] : [],
+      type: 'scatter',
+      mode: 'markers',
+      name: 'B: monolayer complete',
+      showlegend: showKnee,
+      marker: { size: 10, symbol: 'circle-open', color: COLORS.ink, line: { width: 2 } },
     },
   ]
 
@@ -188,41 +215,83 @@ export default function AdsorptionPage() {
       type: 'rect',
       xref: 'x',
       yref: 'paper',
-      x0: BET_RANGE[0],
-      x1: BET_RANGE[1],
+      x0: BET_FIT_RANGE[0],
+      x1: BET_FIT_RANGE[1],
       y0: 0,
       y1: 1,
       layer: 'below',
       fillcolor: theme.data2Soft,
       line: { width: 0 },
     },
-    { type: 'line', xref: 'paper', x0: 0, x1: 1, y0: 1, y1: 1, line: { color: COLORS.muted, width: 1.2, dash: 'dash' } },
+    { type: 'line', xref: 'paper', x0: 0, x1: 1, y0: u, y1: u, line: { color: COLORS.muted, width: 1.2, dash: 'dash' } },
   ]
 
   const isoAnnotations: Partial<Annotation>[] = [
     {
       xref: 'x',
       yref: 'paper',
-      x: (BET_RANGE[0] + BET_RANGE[1]) / 2,
+      x: (BET_FIT_RANGE[0] + BET_FIT_RANGE[1]) / 2,
       y: 1,
       yanchor: 'top',
       yshift: -2,
-      text: 'BET valid range',
+      text: 'BET fit range',
       showarrow: false,
       font: { size: 11, color: COLORS.bet },
     },
     {
       xref: 'paper',
       x: 0.99,
-      y: 1,
+      y: u,
       xanchor: 'right',
       yanchor: 'bottom',
       yshift: 2,
-      text: 'one full monolayer',
+      text: 'one monolayer (Vₘ)',
       showarrow: false,
       font: { size: 11, color: COLORS.muted },
     },
+    // A marker above the visible range is pinned to the top edge with its value.
+    ...models
+      .filter((m) => scaled(cov[m]) > yMax)
+      .map(
+        (m, i): Partial<Annotation> => ({
+          x,
+          y: yMax,
+          yanchor: 'top',
+          xanchor: x > 0.8 ? 'right' : 'left',
+          xshift: x > 0.8 ? -6 : 6,
+          yshift: -i * 16,
+          text: `▲ ${scaled(cov[m]).toFixed(1)} (off scale)`,
+          showarrow: false,
+          font: { size: 12, color: COLORS[m] },
+        }),
+      ),
   ]
+
+  const yTitle = units === 'abs' ? 'V  [cm³(STP)/g]' : 'V/Vₘ  (layers)'
+  const plotLabel =
+    `Isotherm plot, relative pressure 0 to 1 against ${units === 'abs' ? 'adsorbed volume' : 'V over Vm'}. ` +
+    models.map((m) => `${MODEL_NAME[m]} at p/p₀ ${x.toFixed(2)}: ${scaled(cov[m]).toFixed(2)}`).join('; ') +
+    (showKnee ? `. Knee B at p/p₀ ${kneeX(c).toFixed(2)}.` : '.')
+
+  const surface = (m: Model) => (
+    <div key={m} className="surface-item">
+      {view === 'both' && <p className={`surface-name ${m === 'langmuir' ? 'lang-ink' : 'bet-ink'}`}>{MODEL_NAME[m]}</p>}
+      <SurfaceView
+        key={`${runId}-${m}`}
+        mode={m}
+        pressure={x}
+        K={K}
+        c={c}
+        paused={paused}
+        onStats={(s) => setStats((prev) => ({ ...prev, [m]: s }))}
+        label={
+          m === 'langmuir'
+            ? `Langmuir surface: ${stats.langmuir.occupied} of ${N_SITES} sites occupied, single layer`
+            : `BET surface: ${stats.bet.total} molecules on ${N_SITES} sites, up to ${stats.bet.tallest} layers`
+        }
+      />
+    </div>
+  )
 
   return (
     <article className="page">
@@ -233,37 +302,18 @@ export default function AdsorptionPage() {
         <h1>Langmuir vs BET Adsorption</h1>
         <p className="lede">
           Gas molecules adsorbing on a solid. Raise the pressure and watch the Langmuir surface fill up to a single
-          layer, while in BET molecules keep stacking into multilayers.
+          layer, while in BET molecules keep stacking into multilayers. Then turn the isotherm into a surface area in
+          m²/g, the number used to compare fuel-cell and electrolyzer catalysts.
         </p>
       </header>
 
-      {/* ---------- Hero: molecular view ---------- */}
-      <figure className="figure hero" aria-label="Molecular view and isotherm">
+      {/* ---------- Hero: molecular view + isotherm ---------- */}
+      <figure id="sim-figure" className="figure hero" aria-label="Molecular view and isotherm">
         <div className="hero-head">
-          <div className="coverage">
-            <span className="coverage-label">
-              {mode === 'langmuir' ? (
-                <>
-                  Coverage <em>θ</em>
-                </>
-              ) : (
-                <>
-                  Loading <em>n</em>/<em>n</em>
-                  <sub>m</sub>
-                </>
-              )}
-            </span>
-            <span className={`coverage-value ${mode}`}>{cov.toFixed(2)}</span>
-            <span className="coverage-sub">
-              equation: {cov.toFixed(2)} · simulation (running average): {stats.avgLoading.toFixed(2)}{' '}
-              <span className={`tag sim-status${settling ? '' : ' accent'}`} role="status">
-                {settling ? 'settling…' : 'settled'}
-              </span>
-              <br />
-              {mode === 'langmuir'
-                ? `${occupied} of ${N_SITES} sites occupied · 1 layer max`
-                : `${total} molecules on ${N_SITES} sites · ${N_SITES - occupied} bare · up to ${tallest} layer${tallest === 1 ? '' : 's'}`}
-            </span>
+          <div className="readouts">
+            {models.map((m) => (
+              <Readout key={m} model={m} cov={cov[m]} stats={stats[m]} settled={settled[m]} />
+            ))}
           </div>
           <ul className="layer-legend" aria-label="Legend">
             {LEGEND.map((l) => (
@@ -277,82 +327,94 @@ export default function AdsorptionPage() {
           </ul>
         </div>
 
-        <div className="sim-grid">
-          <SurfaceView
-            key={runId}
-            mode={mode}
-            pressure={x}
-            K={K}
-            c={c}
-            paused={paused}
-            onStats={setStats}
-            label={
-              mode === 'langmuir'
-                ? `Langmuir: ${occupied} of ${N_SITES} sites occupied, single layer, coverage ${stats.avgLoading.toFixed(2)}`
-                : `BET: ${total} molecules on ${N_SITES} sites, up to ${tallest} layers, n/nm ${stats.avgLoading.toFixed(2)}`
-            }
-          />
-          <Plot
-            data={isoData}
-            layout={{
-              ...baseLayout(theme),
-              xaxis: { ...axis(theme), title: { text: 'Relative pressure P/P₀' }, range: [0, 1] },
-              yaxis: { ...axis(theme), title: { text: 'θ  or  n/nₘ' }, range: [0, Y_MAX] },
-              shapes: isoShapes,
-              annotations: isoAnnotations,
-            }}
-            config={{ staticPlot: true, responsive: true }}
-            useResizeHandler
-            className="plot"
-          />
+        <div className={`sim-grid${view === 'both' ? ' both' : ''}`}>
+          <div className="surfaces">{models.map(surface)}</div>
+          <div className="plot-col">
+            <div className="plot-options">
+              <Segmented
+                small
+                label="y-axis range"
+                value={yRange}
+                onChange={setYRange}
+                options={[
+                  { value: 'ml', label: '0–3 layers' },
+                  { value: 'full', label: 'Full range' },
+                ]}
+              />
+              <Segmented
+                small
+                label="y-axis units"
+                value={units}
+                onChange={setUnits}
+                options={[
+                  { value: 'rel', label: 'V/Vₘ' },
+                  { value: 'abs', label: 'cm³/g' },
+                ]}
+              />
+            </div>
+            <div role="img" aria-label={plotLabel}>
+              <Plot
+                data={isoData}
+                layout={{
+                  ...baseLayout(theme),
+                  xaxis: { ...axis(theme), title: { text: 'Relative pressure p/p₀' }, range: [0, 1] },
+                  yaxis: { ...axis(theme), title: { text: yTitle }, range: [0, yMax] },
+                  shapes: isoShapes,
+                  annotations: isoAnnotations,
+                }}
+                config={staticConfig}
+                useResizeHandler
+                className="plot"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="figure-controls hero-controls">
           <div className="model-control">
-            <span className="control-label">Model</span>
-            <div className="segmented" role="radiogroup" aria-label="Model">
-              <button role="radio" aria-checked={mode === 'langmuir'} className={mode === 'langmuir' ? 'active lang' : ''} onClick={() => switchMode('langmuir')}>
-                Langmuir
-              </button>
-              <button role="radio" aria-checked={mode === 'bet'} className={mode === 'bet' ? 'active bet' : ''} onClick={() => switchMode('bet')}>
-                BET
-              </button>
-            </div>
+            <span className="control-label">
+              Model
+            </span>
+            <Segmented
+              label="Model"
+              value={view}
+              onChange={switchView}
+              options={[
+                { value: 'langmuir', label: 'Langmuir', activeClass: 'lang' },
+                { value: 'bet', label: 'BET', activeClass: 'bet' },
+                { value: 'both', label: 'Both' },
+              ]}
+            />
           </div>
           <Slider
             id="x"
-            label={<>Pressure P/P₀</>}
+            label={<>Pressure p/p₀</>}
             value={x.toFixed(2)}
             min={0}
             max={X_MAX}
             step={0.01}
             pos={x}
             onChange={setX}
-            hint="relative to the saturation pressure P₀"
+            hint="relative to the saturation pressure p₀"
           />
-          {mode === 'langmuir' ? (
-            <Slider
+          {shows('langmuir') && (
+            <LogSlider
               id="K"
               label={<>Langmuir constant <em>K</em></>}
-              value={fmtConst(K)}
-              min={0}
-              max={LOG_STEPS}
-              step={1}
-              pos={toLogPos(K, K_RANGE)}
-              onChange={(p) => setK(fromLogPos(p, K_RANGE))}
-              hint="larger K = stronger binding, fills at lower P/P₀"
+              range={K_RANGE}
+              value={K}
+              onChange={setK}
+              hint="larger K = stronger binding, fills at lower p/p₀"
             />
-          ) : (
-            <Slider
+          )}
+          {shows('bet') && (
+            <LogSlider
               id="c"
-              label={<>BET constant <em>c</em></>}
-              value={fmtConst(c)}
-              min={0}
-              max={LOG_STEPS}
-              step={1}
-              pos={toLogPos(c, C_RANGE)}
-              onChange={(p) => setC(fromLogPos(p, C_RANGE))}
-              hint={c < 2 ? 'c < 2: type III, weak first layer, no knee' : 'larger c = sharper knee (type II)'}
+              label={<>BET constant <em>C</em></>}
+              range={C_RANGE}
+              value={c}
+              onChange={setC}
+              hint={c < 2 ? 'C < 2: type III, weak first layer, no knee' : 'larger C = sharper knee (type II)'}
             />
           )}
           <div className="sim-buttons">
@@ -364,164 +426,44 @@ export default function AdsorptionPage() {
             </button>
           </div>
         </div>
+        <p className="insight" aria-live="polite">
+          {insight(view, x, K, c)}
+        </p>
         <figcaption>
           <span className="figure-label">Figure 1.</span> Left: cross-section of the surface, with gas above and the
-          adsorbent below. Right: the isotherm. The dot marks the current pressure; the simulation average should settle
-          near it, and once it has settled a diamond appears on that point (cleared as soon as you change a setting).
-          The shaded band (P/P₀ 0.05–0.35) is where the BET equation is normally fitted.
+          adsorbent below. Right: the isotherm. The dot marks the current pressure; the simulation average should stay
+          near it, and once it has settled a diamond appears on that point. The open circle B marks where one
+          monolayer’s worth is adsorbed, at p/p₀ = 1/(1 + √C). The shaded band (p/p₀ 0.05–0.35) is where the BET
+          equation is normally fitted.
+          {units === 'abs' && ` In cm³/g the curve is scaled by Vₘ of the sample chosen in Figure 2 (${sample.name}).`}
         </figcaption>
       </figure>
+
+      <TryThis onApply={applyPreset} />
 
       <section className="section iso-text" aria-labelledby="seeing-title">
         <h2 id="seeing-title" className="section-title">
           What you are seeing
         </h2>
         <p>
-          <strong className="lang-ink">Langmuir:</strong> each site holds at most one molecule. As P/P₀ rises the
-          surface fills up, and the curve levels off at θ = 1, a full monolayer.
+          <strong className="lang-ink">Langmuir:</strong> each site holds at most one molecule, and molecules ignore
+          their neighbours. As p/p₀ rises the free sites run out, and the curve levels off at θ = V/V<sub>m</sub> = 1,
+          a full monolayer.
         </p>
         <p>
-          <strong className="bet-ink">BET:</strong> molecules can also land on top of adsorbed ones. The first
-          layer sits on the solid and is bound more strongly (in the animation it rarely leaves), while upper layers
-          behave like a liquid and exchange with the gas often. As P/P₀ → 1 the stacks keep growing: the gas
-          condenses on the surface.
+          <strong className="bet-ink">BET:</strong> molecules can also land on top of adsorbed ones. The first layer
+          sits on the solid and is bound more strongly (in the animation it rarely leaves), while upper layers behave
+          like a liquid and exchange with the gas often. That difference in binding makes the knee: the first layer
+          fills quickly, then the curve flattens at point B. As p/p₀ → 1 the stacks keep growing: the gas condenses on
+          the surface.
         </p>
       </section>
 
-      {/* ---------- The equations ---------- */}
-      <section className="section equations" aria-labelledby="eq-title">
-        <h2 id="eq-title" className="section-title">
-          The equations
-        </h2>
-        <div className="eq-grid">
-          <div className={`card eq-card lang${mode === 'langmuir' ? ' current' : ''}`}>
-            <div className="eq-head">
-              <h3>Langmuir isotherm (monolayer)</h3>
-              {mode === 'langmuir' && <span className="tag">current model</span>}
-            </div>
-            <div className="formula">
-              <div className="formula-body eq-math">
-                <Tex
-                  display
-                  tex={String.raw`\theta = \frac{K\,x}{1 + K\,x}`}
-                  fallback={
-                    <>
-                      <i>θ</i> = <Frac n={<><i>K</i>·<i>x</i></>} d={<>1 + <i>K</i>·<i>x</i></>} />
-                    </>
-                  }
-                />
-                <Tex
-                  display
-                  tex={String.raw`\text{with}\quad x = \frac{P}{P_0}`}
-                  fallback={
-                    <>
-                      with <i>x</i> = <Frac n={<i>P</i>} d={<><i>P</i><sub>0</sub></>} />
-                    </>
-                  }
-                />
-              </div>
-              <span className="formula-number">(1)</span>
-            </div>
-            <dl className="terms">
-              <Term sym={String.raw`\theta`} fallback={<i>θ</i>}>
-                fractional surface coverage: share of adsorption sites that are occupied (0 = empty, 1 = full
-                monolayer)
-              </Term>
-              <Term sym="x = P/P_0" fallback={<><i>x</i> = <i>P</i>/<i>P</i><sub>0</sub></>}>
-                relative pressure: gas pressure P divided by the saturation pressure P₀ (0 to 1)
-              </Term>
-              <Term sym="K" fallback={<i>K</i>}>
-                Langmuir adsorption constant (equilibrium constant of adsorption ⇌ desorption), dimensionless, per
-                unit of P/P₀; larger K = stronger binding, surface fills at lower P/P₀
-              </Term>
-            </dl>
-            <h4>Assumptions</h4>
-            <ul className="assumptions">
-              <li>one molecule per site</li>
-              <li>only a single layer</li>
-              <li>all sites equivalent</li>
-              <li>no interaction between adsorbed molecules</li>
-            </ul>
-          </div>
+      <Equations view={view} />
 
-          <div className={`card eq-card bet${mode === 'bet' ? ' current' : ''}`}>
-            <div className="eq-head">
-              <h3>BET isotherm (multilayer)</h3>
-              {mode === 'bet' && <span className="tag">current model</span>}
-            </div>
-            <div className="formula">
-              <div className="formula-body eq-math">
-                <Tex
-                  display
-                  tex={String.raw`\frac{n}{n_m} = \frac{c\,x}{(1 - x)\,(1 - x + c\,x)}`}
-                  fallback={
-                    <>
-                      <Frac n={<i>n</i>} d={<><i>n</i><sub>m</sub></>} /> ={' '}
-                      <Frac n={<><i>c</i>·<i>x</i></>} d={<>(1 − <i>x</i>)(1 − <i>x</i> + <i>c</i>·<i>x</i>)</>} />
-                    </>
-                  }
-                />
-                <Tex
-                  display
-                  tex={String.raw`\text{with}\quad x = \frac{P}{P_0}`}
-                  fallback={
-                    <>
-                      with <i>x</i> = <Frac n={<i>P</i>} d={<><i>P</i><sub>0</sub></>} />
-                    </>
-                  }
-                />
-              </div>
-              <span className="formula-number">(2)</span>
-            </div>
-            <dl className="terms">
-              <Term sym="n" fallback={<i>n</i>}>
-                amount of gas adsorbed at pressure P
-              </Term>
-              <Term sym="n_m" fallback={<><i>n</i><sub>m</sub></>}>
-                amount needed to form one complete monolayer
-              </Term>
-              <Term sym="n/n_m" fallback={<><i>n</i>/<i>n</i><sub>m</sub></>}>
-                number of “layers’ worth” adsorbed (can exceed 1)
-              </Term>
-              <Term sym="P" fallback={<i>P</i>}>
-                equilibrium pressure of the gas
-              </Term>
-              <Term sym="P_0" fallback={<><i>P</i><sub>0</sub></>}>
-                saturation vapour pressure of the gas at that temperature
-              </Term>
-              <Term sym="x = P/P_0" fallback={<><i>x</i> = <i>P</i>/<i>P</i><sub>0</sub></>}>
-                relative pressure (0 to 1)
-              </Term>
-              <Term sym="c" fallback={<i>c</i>}>
-                BET constant, related to how much more strongly the first layer binds than the higher layers:{' '}
-                <Tex
-                  tex={String.raw`c \approx \exp\!\left(\frac{E_1 - E_L}{RT}\right)`}
-                  fallback={
-                    <>
-                      <i>c</i> ≈ exp((<i>E</i>
-                      <sub>1</sub> − <i>E</i>
-                      <sub>L</sub>)/<i>RT</i>)
-                    </>
-                  }
-                />
-                , where <Tex tex="E_1" fallback={<><i>E</i><sub>1</sub></>} /> = adsorption heat of the first layer
-                and <Tex tex="E_L" fallback={<><i>E</i><sub>L</sub></>} /> = heat of liquefaction
-              </Term>
-            </dl>
-            <h4>Assumptions</h4>
-            <ul className="assumptions">
-              <li>multiple layers allowed</li>
-              <li>first layer binds directly to the solid</li>
-              <li>higher layers behave like liquid condensation</li>
-              <li>no lateral interactions</li>
-            </ul>
-          </div>
-        </div>
-        <p className="callout">
-          <strong>How they relate:</strong> Langmuir describes a single layer and plateaus; BET extends the idea to
-          multiple layers, which is why its curve rises sharply as P → P₀.
-        </p>
-      </section>
+      <SurfaceArea c={c} setC={setC} sampleId={sampleId} setSampleId={setSampleId} theme={theme} />
+
+      <BeyondBet x={x} />
 
       <section className="section" aria-labelledby="why-title">
         <h2 id="why-title" className="section-title">
@@ -529,22 +471,29 @@ export default function AdsorptionPage() {
         </h2>
         <ul className="why-list">
           <li>
-            <strong>Fuel cells.</strong> H<sub>2</sub> and O<sub>2</sub> adsorb on Pt catalyst sites before they
-            react, so coverage (Langmuir θ) sets the reaction rate. CO binds more strongly and blocks sites
-            (CO poisoning).
+            <strong>Fuel-cell catalysts.</strong> H<sub>2</sub> oxidation and O<sub>2</sub> reduction on Pt run
+            through adsorbed intermediates. Rate laws such as Langmuir–Hinshelwood are written in terms of the
+            Langmuir coverage θ of each species. CO binds far more strongly (very large K), so even a few ppm take
+            over the sites: CO poisoning.
           </li>
           <li>
-            <strong>Catalysts and electrodes.</strong> BET surface area is the standard way to characterize
-            catalysts, fuel cell catalyst layers and battery/supercapacitor electrodes: more surface means more
-            active sites.
+            <strong>Catalyst layers and electrodes.</strong> The BET area of a carbon support (Vulcan ~240 m²/g,
+            Ketjenblack ~800 m²/g) sets how finely Pt can be spread, and for scarce Ir in electrolyzer anodes the area
+            per gram is a cost lever. Battery and supercapacitor electrodes are compared the same way.
           </li>
           <li>
-            <strong>Hydrogen storage.</strong> Porous materials (MOFs, activated carbon) store H<sub>2</sub> by
-            physisorption through multilayer adsorption and pore filling, i.e. BET-type behaviour.
+            <strong>Pore structure.</strong> Type IV hysteresis and mercury porosimetry measure the pores that carry
+            gas in and water out of catalyst layers and gas diffusion layers.
           </li>
           <li>
-            <strong>CO<sub>2</sub> capture.</strong> Zeolites and MOFs adsorb CO<sub>2</sub> from flue gas or air;
-            their uptake isotherm decides how much they capture and how easily they are regenerated.
+            <strong>Hydrogen storage.</strong> H<sub>2</sub> is above its critical temperature (33 K) even at 77 K,
+            so it cannot condense or build multilayers. MOFs and activated carbons store it by filling micropores, a
+            type I, Langmuir-like isotherm. Uptake grows roughly with BET area: about 1 wt% per 500 m²/g at 77 K.
+          </li>
+          <li>
+            <strong>CO<sub>2</sub> capture.</strong> Zeolites, MOFs and amine sorbents take CO<sub>2</sub> from flue
+            gas or air. The working capacity is the difference between the uptake at adsorption and at regeneration
+            conditions, read straight off the isotherm (often fitted with Langmuir or dual-site Langmuir).
           </li>
         </ul>
       </section>

@@ -1,12 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import UpcomingProjects from '../components/UpcomingProjects'
-
-interface Tool {
-  title: string
-  blurb: string
-  href: string
-  icon: ReactNode
-}
+import { PROJECTS } from '../data/upcomingProjects'
 
 const svg = (children: ReactNode) => (
   <svg viewBox="0 0 48 48" aria-hidden="true" className="tool-icon">
@@ -14,21 +8,18 @@ const svg = (children: ReactNode) => (
   </svg>
 )
 
-const TOOLS: Tool[] = [
-  {
-    title: 'Langmuir vs BET Adsorption',
-    blurb:
-      'Watch gas molecules adsorb on a surface: a single Langmuir monolayer vs stacking BET multilayers, with both isotherm equations explained.',
-    href: '#/adsorption',
-    icon: svg(
-      <>
-        <path d="M6 42 V6 M6 42 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />
-        <path className="series-1" d="M6 42 C10 24 14 22 26 21 S40 20 44 19" strokeWidth="3" fill="none" />
-        <path className="series-2" d="M6 42 C10 26 16 26 26 24 S36 18 42 6" strokeWidth="3" fill="none" />
-      </>,
-    ),
-  },
-]
+// Card icons of the live tools, keyed by project id (the tools themselves come from data/upcomingProjects.ts).
+const ICONS: Record<string, ReactNode> = {
+  'langmuir-bet': svg(
+    <>
+      <path d="M6 42 V6 M6 42 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />
+      <path className="series-1" d="M6 42 C10 24 14 22 26 21 S40 20 44 19" strokeWidth="3" fill="none" />
+      <path className="series-2" d="M6 42 C10 26 16 26 26 24 S36 18 42 6" strokeWidth="3" fill="none" />
+    </>,
+  ),
+}
+
+const TOOLS = PROJECTS.filter((p) => p.status === 'live' && p.href)
 
 type TabId = 'tools' | 'upcoming'
 const TABS: { id: TabId; label: string }[] = [
@@ -40,7 +31,6 @@ const TABS: { id: TabId; label: string }[] = [
 const tabFromHash = (): TabId => (window.location.hash === '#upcoming' ? 'upcoming' : 'tools')
 
 export default function HomePage() {
-
   const [tab, setTab] = useState<TabId>(tabFromHash)
   const tabRefs = useRef<Record<TabId, HTMLButtonElement | null>>({ tools: null, upcoming: null })
 
@@ -74,11 +64,11 @@ export default function HomePage() {
   return (
     <article className="page">
       <header className="page-intro">
-        <p className="eyebrow">Interface engineering for clean energy processes</p>
+        <p className="eyebrow">Interface Engineering in Clean Energy Processes (CEP)</p>
         <h1>Interface Engineering Lab</h1>
         <p className="lede">
           Interactive simulators for the surface and interface phenomena behind clean energy technologies: catalysts,
-          fuel cells, batteries and gas storage. Move a slider, see the physics.
+          fuel cells, electrolyzers, batteries and gas storage. Move a slider, see the physics.
         </p>
       </header>
 
@@ -111,12 +101,12 @@ export default function HomePage() {
           </h2>
           <ul className="tool-list">
             {TOOLS.map((t) => (
-              <li key={t.title}>
+              <li key={t.id}>
                 <a href={t.href} className="tool-card">
-                  {t.icon}
+                  {ICONS[t.id] ?? svg(<path d="M6 42 V6 M6 42 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />)}
                   <div>
                     <h3>{t.title}</h3>
-                    <p>{t.blurb}</p>
+                    <p>{t.description}</p>
                     <span className="tool-cta">Open simulator →</span>
                   </div>
                 </a>
