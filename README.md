@@ -1,8 +1,10 @@
 # Interface Engineering Lab
 
-Interactive educational tools for interface engineering in CEP.
+Course notes with small simulations for Interface Engineering (CEP).
 
-The homepage lists the tools as cards (more are marked "coming soon").
+The homepage is a numbered contents list (available simulations, plus a "Planned" tab).
+The visual style is a plain lab notebook: paper background with a 5 mm grid, ink colours,
+Source Serif 4 for text and IBM Plex Mono for numbers (see `src/design-tokens.css`).
 The first tool is a **Langmuir vs BET adsorption** simulator for bachelor students:
 
 - An animated **molecular view** (the main element of the page): a kinetic simulation where gas molecules
@@ -48,8 +50,9 @@ index.html                     HTML entry point
 vite.config.ts                 Vite config (sets base: "/interface-lab/")
 src/main.tsx                   React entry
 src/App.tsx                    Site layout: header, hash routing (#/ and #/adsorption), footer
-src/siteConfig.ts              Author and course name shown in the footer
-src/pages/HomePage.tsx         Homepage with tool cards
+src/siteConfig.ts              Author, course name and revision date shown in the footer
+src/pages/HomePage.tsx         Homepage: contents list and planned topics
+src/components/Entry.tsx       Numbered notebook section (margin number and note + content)
 src/lib/useHashRoute.ts        Tiny hash-based router (works on GitHub Pages)
 src/pages/AdsorptionPage.tsx   "Langmuir vs BET Adsorption" page (molecular view, controls, isotherm, equations)
 src/components/SurfaceView.tsx Animated canvas: gas molecules adsorbing on the surface
