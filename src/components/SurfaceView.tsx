@@ -306,11 +306,11 @@ export default function SurfaceView({ mode, pressure, K, c, paused, label, onSta
       ctx.stroke()
 
       const fontPx = Math.max(10, Math.min(13, scale * 0.42))
-      ctx.font = `${fontPx}px "IBM Plex Mono", ui-monospace, Menlo, monospace`
+      ctx.font = `600 ${fontPx}px "Source Sans 3", Helvetica, Arial, sans-serif`
       ctx.textBaseline = 'middle'
       ctx.textAlign = 'center'
       ctx.fillStyle = theme.muted
-      ctx.fillText('solid adsorbent', (MARGIN + N_SITES / 2) * scale, surfaceY + (cssH - surfaceY) / 2 + 1)
+      ctx.fillText('SOLID ADSORBENT', (MARGIN + N_SITES / 2) * scale, surfaceY + (cssH - surfaceY) / 2 + 1)
 
       // monolayer guide
       const mlY = (top - 1) * scale
@@ -324,7 +324,7 @@ export default function SurfaceView({ mode, pressure, K, c, paused, label, onSta
       ctx.stroke()
       ctx.restore()
       ctx.textAlign = 'left'
-      ctx.font = `${fontPx + 4}px Caveat, "Segoe Print", cursive`
+      ctx.font = `${fontPx}px "Source Sans 3", Helvetica, Arial, sans-serif`
       ctx.fillText(GUTTER * scale > 64 ? 'monolayer' : 'ML', sitesEnd + 6, mlY)
 
       // adsorbed molecules
@@ -341,7 +341,7 @@ export default function SurfaceView({ mode, pressure, K, c, paused, label, onSta
           const [px, py] = toPx(siteX(s), MAX_LAYERS + 0.45)
           ctx.textAlign = 'center'
           ctx.fillStyle = theme.data2
-          ctx.font = `600 ${fontPx}px "IBM Plex Mono", ui-monospace, Menlo, monospace`
+          ctx.font = `700 ${fontPx}px "Source Sans 3", Helvetica, Arial, sans-serif`
           ctx.fillText(`+${h - MAX_LAYERS}`, px, py)
         }
       }

@@ -1,8 +1,7 @@
 /*
- * Design tokens: "engineering lab notebook".
- * Off-white paper with a faint 5 mm grid, ink colours only (blue-black, ballpoint blue,
- * red pen, a green highlighter used for key equations). Serif text, monospace numbers.
- * No gradients, no shadows, square corners.
+ * Design tokens for Interface Engineering Lab.
+ * Calm, textbook-like: neutral paper background, one accent (deep teal),
+ * serif headings, sans-serif body. No gradients, no drop shadows.
  * Light values are the default; dark values apply when <html data-theme="dark">,
  * which index.html sets from the saved choice or the OS setting (see src/lib/theme.ts).
  */
@@ -12,97 +11,96 @@
 
   /* ---------- Type ---------- */
   --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
-  --font-hand: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
+  --font-sans: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 
-  --text-xs: 0.8125rem; /* 13px */
-  --text-sm: 0.9375rem; /* 15px */
-  --text-base: 1.0625rem; /* 17px */
-  --text-lg: 1.1875rem; /* 19px */
-  --text-xl: 1.375rem; /* 22px */
-  --text-2xl: 1.75rem; /* 28px */
+  /* Scale: ratio ≈ 1.2 on a 17px body */
+  --text-xs: 0.8125rem; /* 13px: plot labels, fine print */
+  --text-sm: 0.9375rem; /* 15px: captions, hints, UI */
+  --text-base: 1.0625rem; /* 17px: body */
+  --text-lg: 1.25rem; /* 20px: lede, h3 */
+  --text-xl: 1.5rem; /* 24px: h2 */
+  --text-2xl: 1.875rem; /* 30px: h1 on mobile, key values */
+  --text-3xl: 2.375rem; /* 38px: h1 */
 
-  --leading-tight: 1.25;
+  --leading-tight: 1.2;
   --leading-snug: 1.4;
-  --leading-body: 1.6;
-  --measure: 70ch;
+  --leading-body: 1.65;
+  --measure: 68ch; /* comfortable line length for prose */
 
-  /* ---------- Space ---------- */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.5rem;
-  --space-6: 2rem;
-  --space-7: 3rem;
+  /* ---------- Space (4px base) ---------- */
+  --space-1: 0.25rem; /* 4 */
+  --space-2: 0.5rem; /* 8 */
+  --space-3: 0.75rem; /* 12 */
+  --space-4: 1rem; /* 16 */
+  --space-5: 1.5rem; /* 24 */
+  --space-6: 2rem; /* 32 */
+  --space-7: 3rem; /* 48 */
+  --space-8: 4rem; /* 64 */
 
   --gutter: var(--space-4);
-  --sheet-width: 66rem;
-  --margin-col: 10.5rem; /* left notebook margin: section numbers and notes */
-  --radius: 2px;
-  --grid-size: 5mm;
+  --content-width: 60rem; /* 960px */
+  --radius-sm: 4px;
+  --radius: 6px;
 
   /* ---------- Color: light ---------- */
-  --color-bg: #f7f5ef; /* paper */
-  --color-grid: rgba(43, 79, 168, 0.07); /* graph-paper lines */
-  --color-surface: #ffffff; /* plot areas */
-  --color-text: #1d2a44; /* blue-black ink */
-  --color-text-muted: #4a5670;
-  --color-border: #1d2a44;
-  --color-border-faint: #c9ccd3;
+  --color-bg: #f8f8f6;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #f1f2ef;
+  --color-text: #1b1f23;
+  --color-text-muted: #565e66;
+  --color-border: #e0e1dc;
+  --color-border-strong: #c5c8c2;
 
-  --color-accent: #2b4fa8; /* ballpoint blue */
-  --color-red: #b3261e; /* red pen */
-  --color-highlight: rgba(150, 220, 120, 0.38); /* green highlighter */
-  --color-note: #fbf3c8; /* sticky note */
-  --color-note-border: #c9b65a;
-  --color-margin-rule: rgba(179, 38, 30, 0.35);
+  --color-accent: #0e6b68; /* deep teal */
+  --color-accent-strong: #0a5451;
+  --color-accent-soft: #e4efee;
+  --color-on-accent: #ffffff;
 
-  /* Data colors */
-  --data-1: #2b4fa8; /* Langmuir: blue ink */
-  --data-2: #b3261e; /* BET: red ink */
-  --data-2-soft: rgba(179, 38, 30, 0.07);
-  --data-grid: #e6e8ee;
-  --data-axis: #1d2a44;
+  /* Data colors: only inside figures and for the series they label */
+  --data-1: #2f6aa8; /* Langmuir */
+  --data-2: #b5502a; /* BET */
+  --data-1-soft: rgba(47, 106, 168, 0.1);
+  --data-2-soft: rgba(181, 80, 42, 0.08);
+  --data-grid: #ebece8;
+  --data-axis: #b9bcb5;
   --data-plot-bg: #ffffff;
 
-  /* Molecule colors (ink shades: first layer darkest) */
-  --layer-1: #1d2a44;
-  --layer-2: #2b4fa8;
-  --layer-3: #93a7d8;
-  --gas: #c3c7cf;
-  --solid: #eeece4;
-  --solid-line: #1d2a44;
+  /* Molecule colors (sequential teal: first layer darkest) */
+  --layer-1: #0e4f4c;
+  --layer-2: #2f8f88;
+  --layer-3: #93cbc4;
+  --gas: #b4bac2;
+  --solid: #ecebe6;
+  --solid-line: #8f9189;
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --color-bg: #141a26;
-  --color-grid: rgba(160, 180, 230, 0.06);
-  --color-surface: #1a2130;
-  --color-text: #e2e6ee;
-  --color-text-muted: #a9b2c4;
-  --color-border: #b9c2d6;
-  --color-border-faint: #39435a;
+  --color-bg: #131517;
+  --color-surface: #1a1d20;
+  --color-surface-sunken: #202427;
+  --color-text: #e4e6e8;
+  --color-text-muted: #a1a8af;
+  --color-border: #2b3034;
+  --color-border-strong: #42484d;
 
-  --color-accent: #93b0f0;
-  --color-red: #f0918a;
-  --color-highlight: rgba(120, 200, 110, 0.22);
-  --color-note: #2a2a1e;
-  --color-note-border: #7d7240;
-  --color-margin-rule: rgba(240, 145, 138, 0.3);
+  --color-accent: #5fbcb4;
+  --color-accent-strong: #84d2cb;
+  --color-accent-soft: #17302e;
+  --color-on-accent: #0c1716;
 
-  --data-1: #93b0f0;
-  --data-2: #f0918a;
-  --data-2-soft: rgba(240, 145, 138, 0.08);
-  --data-grid: #283043;
-  --data-axis: #b9c2d6;
-  --data-plot-bg: #1a2130;
+  --data-1: #74a7de;
+  --data-2: #e2885f;
+  --data-1-soft: rgba(116, 167, 222, 0.14);
+  --data-2-soft: rgba(226, 136, 95, 0.12);
+  --data-grid: #2a2e32;
+  --data-axis: #4b5157;
+  --data-plot-bg: #1a1d20;
 
-  --layer-1: #dfe6f7;
-  --layer-2: #7f9de4;
-  --layer-3: #3f5590;
-  --gas: #4b5468;
-  --solid: #222a3a;
-  --solid-line: #b9c2d6;
+  --layer-1: #84d2cb;
+  --layer-2: #3f9d96;
+  --layer-3: #23615d;
+  --gas: #5f666d;
+  --solid: #24282b;
+  --solid-line: #6b7177;
 }

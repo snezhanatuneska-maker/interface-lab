@@ -4,22 +4,35 @@ import { PROJECTS, type Project } from '../data/upcomingProjects'
 // Category order follows first appearance in the data file.
 const CATEGORIES = [...new Set(PROJECTS.map((p) => p.category))]
 
-function ProjectEntry({ p }: { p: Project }) {
+function ProjectCard({ p }: { p: Project }) {
   const live = p.status === 'live' && p.href
-  return (
-    <li className="project">
-      <h4>
-        {live ? <a href={p.href}>{p.title}</a> : p.title}{' '}
-        <span className={live ? 'status live' : 'status'}>[{live ? 'available' : 'planned'}]</span>
-      </h4>
+  const body = (
+    <>
+      <div className="project-head">
+        <h3>{p.title}</h3>
+        <span className={live ? 'tag accent' : 'tag'}>{live ? 'Live' : 'Coming soon'}</span>
+      </div>
       <p>{p.description}</p>
-      <p className="project-meta">
-        <span className="label">Concepts:</span> {p.concepts.join('; ')}
+      <ul className="project-concepts" aria-label="Key concepts">
+        {p.concepts.map((c) => (
+          <li key={c} className="tag">
+            {c}
+          </li>
+        ))}
+      </ul>
+      <p className="project-cep">
+        <span className="figure-label">Clean energy link:</span> {p.cepLink}
       </p>
-      <p className="project-meta">
-        <span className="label">CEP relevance:</span> {p.cepLink}
-      </p>
-    </li>
+      {live && <span className="tool-cta">Open simulator →</span>}
+    </>
+  )
+  // Planned cards are plain, non-interactive surfaces; only live tools link out.
+  return live ? (
+    <a href={p.href} className="project-card linked">
+      {body}
+    </a>
+  ) : (
+    <div className="project-card">{body}</div>
   )
 }
 
@@ -29,28 +42,32 @@ export default function UpcomingProjects() {
 
   return (
     <>
-      <p className="upcoming-intro">
-        Simulations I plan to add for the rest of the course, grouped by lecture topic. Only the adsorption one is
-        finished so far.
+      <p className="lede upcoming-intro">
+        Interactive tools in development for interface engineering in clean energy processes.
       </p>
 
-      <div className="filter-row" role="group" aria-label="Filter by topic">
-        <span className="label">Topic:</span>
+      <div className="filter-chips" role="group" aria-label="Filter by category">
         {[null, ...CATEGORIES].map((c) => (
-          <button key={c ?? 'all'} type="button" className="filter" aria-pressed={filter === c} onClick={() => setFilter(c)}>
-            {c ?? 'all'}
+          <button
+            key={c ?? 'all'}
+            type="button"
+            className="chip"
+            aria-pressed={filter === c}
+            onClick={() => setFilter(c)}
+          >
+            {c ?? 'All'}
           </button>
         ))}
       </div>
 
       {shown.map((cat) => (
         <section key={cat} className="project-group" aria-label={cat}>
-          <h3 className="category-title">
-            {CATEGORIES.indexOf(cat) + 1}. {cat}
-          </h3>
-          <ul className="project-list">
+          <h2 className="category-title">{cat}</h2>
+          <ul className="project-grid">
             {PROJECTS.filter((p) => p.category === cat).map((p) => (
-              <ProjectEntry key={p.id} p={p} />
+              <li key={p.id}>
+                <ProjectCard p={p} />
+              </li>
             ))}
           </ul>
         </section>

@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react'
 import HomePage from './pages/HomePage'
 import ThemeToggle from './components/ThemeToggle'
 import { useHashRoute } from './lib/useHashRoute'
-import { AUTHOR, COURSE, REVISED } from './siteConfig'
+import { AUTHOR, COURSE } from './siteConfig'
 
 // Loaded on demand so the homepage does not pull in Plotly.
 const AdsorptionPage = lazy(() => import('./pages/AdsorptionPage'))
@@ -13,18 +13,18 @@ export default function App() {
   return (
     <div className="app">
       <header className="site-header">
-        <div className="sheet-row">
+        <div className="container">
           <a className="site-title" href="#/">
             Interface Engineering Lab
           </a>
-          <span className="site-course">{COURSE} · course notes</span>
+          <span className="site-subtitle">Interactive tools for CEP</span>
           <ThemeToggle />
         </div>
       </header>
 
-      <main className="sheet">
+      <main className="container">
         {route === '/adsorption' ? (
-          <Suspense fallback={<p className="loading">Loading the simulation...</p>}>
+          <Suspense fallback={<p className="loading">Loading simulator…</p>}>
             <AdsorptionPage />
           </Suspense>
         ) : (
@@ -33,10 +33,9 @@ export default function App() {
       </main>
 
       <footer className="site-footer">
-        <div className="sheet-row">
+        <div className="container">
           <span>{AUTHOR}</span>
           <span>{COURSE}</span>
-          <span>rev. {REVISED}</span>
         </div>
       </footer>
     </div>
