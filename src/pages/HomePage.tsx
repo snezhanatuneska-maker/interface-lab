@@ -4,7 +4,7 @@ import UpcomingProjects from '../components/UpcomingProjects'
 interface Tool {
   title: string
   blurb: string
-  href?: string // undefined = coming soon
+  href: string
   icon: ReactNode
 }
 
@@ -28,37 +28,6 @@ const TOOLS: Tool[] = [
       </>,
     ),
   },
-  {
-    title: 'Contact Angle & Wetting',
-    blurb: 'Young’s equation, surface energies, and how droplets spread on electrodes and membranes.',
-    icon: svg(
-      <>
-        <path d="M4 38 H44" stroke="currentColor" strokeWidth="2.5" />
-        <path d="M10 38 A14 14 0 0 1 38 38" fill="currentColor" opacity="0.35" />
-      </>,
-    ),
-  },
-  {
-    title: 'DLVO Colloid Stability',
-    blurb: 'Van der Waals attraction plus double-layer repulsion: when do particles in a slurry or ink aggregate?',
-    icon: svg(
-      <>
-        <path d="M6 42 V6 M6 24 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />
-        <path d="M9 44 C11 18 14 12 20 14 S30 26 44 24" stroke="currentColor" strokeWidth="3" fill="none" />
-      </>,
-    ),
-  },
-  {
-    title: 'Nucleation & Growth',
-    blurb: 'Classical nucleation theory: the critical radius, the energy barrier, and how supersaturation controls particle size.',
-    icon: svg(
-      <>
-        <circle cx="14" cy="30" r="4" fill="currentColor" opacity="0.5" />
-        <circle cx="26" cy="24" r="7" fill="currentColor" opacity="0.5" />
-        <circle cx="38" cy="18" r="10" fill="currentColor" opacity="0.5" />
-      </>,
-    ),
-  },
 ]
 
 type TabId = 'tools' | 'upcoming'
@@ -71,8 +40,6 @@ const TABS: { id: TabId; label: string }[] = [
 const tabFromHash = (): TabId => (window.location.hash === '#upcoming' ? 'upcoming' : 'tools')
 
 export default function HomePage() {
-  const available = TOOLS.filter((t) => t.href)
-  const upcoming = TOOLS.filter((t) => !t.href)
 
   const [tab, setTab] = useState<TabId>(tabFromHash)
   const tabRefs = useRef<Record<TabId, HTMLButtonElement | null>>({ tools: null, upcoming: null })
@@ -143,7 +110,7 @@ export default function HomePage() {
             Simulators
           </h2>
           <ul className="tool-list">
-            {available.map((t) => (
+            {TOOLS.map((t) => (
               <li key={t.title}>
                 <a href={t.href} className="tool-card">
                   {t.icon}
@@ -153,23 +120,6 @@ export default function HomePage() {
                     <span className="tool-cta">Open simulator →</span>
                   </div>
                 </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="section" aria-labelledby="upcoming-title">
-          <h2 id="upcoming-title" className="section-title">
-            In preparation
-          </h2>
-          <ul className="upcoming-list">
-            {upcoming.map((t) => (
-              <li key={t.title}>
-                {t.icon}
-                <div>
-                  <h3>{t.title}</h3>
-                  <p>{t.blurb}</p>
-                </div>
               </li>
             ))}
           </ul>
