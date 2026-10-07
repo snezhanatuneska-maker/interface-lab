@@ -90,13 +90,3 @@ export const SAMPLES: Sample[] = [
   { id: 'ketjen', name: 'Ketjenblack EC-300J', role: 'high-area carbon support', area: 800 },
 ]
 export const SAMPLE_DEFAULT = 'vulcan'
-
-// ---------- Pores ----------
-
-// Kelvin equation for N₂ at 77 K: ln(p/p₀) = −2γ·V_L / (r_K·R·T), with γ = 8.85 mN/m and V_L = 34.7 cm³/mol.
-const KELVIN_N2_NM = ((2 * 8.85e-3 * 34.7e-6) / (8.314 * 77.35)) * 1e9
-
-/** Kelvin radius (nm) of the meniscus that condenses N₂ at relative pressure x. */
-export function kelvinRadius(x: number): number {
-  return KELVIN_N2_NM / -Math.log(x)
-}

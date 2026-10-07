@@ -224,12 +224,12 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
 
 .sim-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); align-items: center; }
 .sim-grid .plot { height: 250px; }
-.sim-grid.both .plot { height: 340px; }
-.surfaces { display: grid; gap: var(--space-2); min-width: 0; }
-.surface-name { margin: 0 0 2px; font-size: var(--text-sm); font-weight: 600; }
 .plot-col { min-width: 0; }
-.plot-options { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); margin-bottom: var(--space-1); }
-.readouts { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); }
+.plot-legend { display: flex; flex-wrap: wrap; gap: 2px var(--space-4); list-style: none; margin: 0 0 var(--space-1); padding: 0 0 0 var(--space-6); font-size: var(--text-xs); color: var(--color-text-muted); }
+.key-line { display: inline-block; width: 18px; border-top: 3px solid; vertical-align: 3px; margin-right: 2px; }
+.key-mark { display: inline-block; width: 14px; text-align: center; font-weight: 700; color: var(--color-text); }
+/* Fixed width so the status tag never reflows the readout (and with it the figure) when it changes. */
+.sim-status { min-width: 5.2em; text-align: center; }
 .insight {
   max-width: var(--measure); margin: var(--space-4) 0 0; padding: var(--space-2) var(--space-3);
   font-size: var(--text-sm); line-height: var(--leading-snug);
@@ -255,10 +255,8 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
 .segmented button + button { border-left: 1px solid var(--color-border-strong); }
 .segmented button:hover { color: var(--color-text); }
 .segmented button.active { background: var(--color-accent); color: var(--color-on-accent); }
-.segmented.small button { font-size: var(--text-xs); padding: 1px var(--space-3); }
 
 /* Prose sections */
-.iso-text p, .why-list li { max-width: var(--measure); }
 .why-list { margin: 0; padding-left: 1.2em; }
 .why-list li + li { margin-top: var(--space-2); }
 
@@ -284,7 +282,6 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
   .sim-grid, .eq-grid { grid-template-columns: minmax(0, 1fr); }
   .sim-grid { gap: var(--space-2); }
   .sim-grid .plot { height: 210px; }
-  .sim-grid.both .plot { height: 250px; }
 }
 
 @media (max-width: 600px) {
@@ -299,8 +296,6 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
   .hero-controls { flex-direction: column; align-items: stretch; gap: var(--space-2) var(--space-3); margin-top: var(--space-3); padding-top: var(--space-3); }
   .hero-controls .slider { flex: none; align-self: stretch; }
   .sim-buttons { align-self: flex-start; }
-  .sim-grid.both .plot { height: 260px; }
-  .plot-options { justify-content: flex-start; }
 
   .model-control { display: flex; align-items: center; gap: var(--space-3); }
   .model-control .control-label { margin: 0; }
@@ -319,9 +314,21 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
 .try-head h3 { margin: 0; font-size: var(--text-base); }
 .try-head h3::before { content: counter(try) '. '; color: var(--color-accent); }
 .try-card p { max-width: var(--measure); margin-bottom: var(--space-2); }
-.try-card details { font-size: var(--text-sm); line-height: var(--leading-snug); }
-.try-card summary { cursor: pointer; font-weight: 600; color: var(--color-accent); }
-.try-card details p { margin: var(--space-2) 0 0; }
+.choices { border: 0; margin: var(--space-3) 0 0; padding: 0; display: grid; gap: var(--space-2); }
+.choices legend { padding: 0; margin-bottom: var(--space-2); font-weight: 600; }
+.choice {
+  display: flex; gap: var(--space-3); align-items: baseline; width: 100%; text-align: left; cursor: pointer;
+  font: inherit; font-size: var(--text-sm); line-height: var(--leading-snug); color: var(--color-text);
+  background: var(--color-surface); border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+}
+.choice:hover { border-color: var(--color-accent); }
+.choice-letter { font-weight: 600; color: var(--color-text-muted); }
+.choice.correct { border-color: var(--color-accent); background: var(--color-accent-soft); }
+.choice.wrong { border-color: var(--data-2); background: var(--data-2-soft); }
+.feedback { margin: var(--space-3) 0 0; font-size: var(--text-sm); line-height: var(--leading-snug); }
+.feedback.correct strong { color: var(--color-accent); }
+.feedback.wrong strong { color: var(--data-2); }
 
 /* BET plot and surface area */
 .area-controls { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-5); align-items: flex-start; margin-bottom: var(--space-3); }
@@ -350,7 +357,6 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
 .type-curve { fill: none; stroke: var(--data-2); stroke-width: 2; stroke-linejoin: round; }
 .type-curve.desorb { stroke-dasharray: 4 3; }
 .type-label { font-size: 8px; fill: var(--color-text-muted); font-family: var(--font-sans); }
-.live-note { font-size: var(--text-sm); }
 
 @media (max-width: 820px) {
   .area-grid { grid-template-columns: minmax(0, 1fr); }

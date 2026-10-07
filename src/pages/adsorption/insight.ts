@@ -1,22 +1,12 @@
-import { betLoading, BET_FIT_RANGE, kneeX, langmuirTheta } from '../../lib/adsorption'
-
-export type View = 'langmuir' | 'bet' | 'both'
+import { BET_FIT_RANGE, kneeX, langmuirTheta, type Model } from '../../lib/adsorption'
 
 const f2 = (v: number) => v.toFixed(2)
 
 /** One-sentence explanation of what the current setting shows, shown under the controls. */
-export function insight(view: View, x: number, K: number, c: number): string {
+export function insight(mode: Model, x: number, K: number, c: number): string {
   if (x === 0) return 'No gas, no adsorption. Raise p/p₀ to let molecules in.'
 
-  if (view === 'both') {
-    const a = langmuirTheta(x, K)
-    const b = betLoading(x, c)
-    return b > a
-      ? `Same pressure, two models: Langmuir θ = ${f2(a)}, BET V/Vₘ = ${f2(b)}. The difference is molecules sitting on other molecules, which Langmuir does not allow.`
-      : `Same pressure, two models: Langmuir θ = ${f2(a)}, BET V/Vₘ = ${f2(b)}. Here the Langmuir surface binds more strongly (K is large compared with C), so it is fuller.`
-  }
-
-  if (view === 'langmuir') {
+  if (mode === 'langmuir') {
     const theta = langmuirTheta(x, K)
     if (theta > 0.9)
       return `Plateau: ${Math.round(theta * 100)} % of the sites are taken. More pressure barely adds anything, because each site holds one molecule and there is no second layer.`
@@ -35,6 +25,6 @@ export function insight(view: View, x: number, K: number, c: number): string {
   if (x <= BET_FIT_RANGE[1])
     return 'Past point B, inside the BET fit range: the second and third layers are growing, and the curve rises gently and almost linearly.'
   if (x < 0.8)
-    return 'Above the fit range the multilayer keeps thickening. In a real porous sample, capillary condensation in mesopores adds extra uptake here (see “Beyond BET” below).'
+    return 'Above the fit range the multilayer keeps thickening. In a real mesoporous sample, capillary condensation adds extra uptake here (a type IV isotherm, see below).'
   return 'Close to p₀ the film grows without limit: the gas is condensing into a liquid on the surface (V → ∞ as p → p₀).'
 }

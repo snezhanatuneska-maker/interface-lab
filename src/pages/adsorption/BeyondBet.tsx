@@ -1,5 +1,4 @@
-import Tex from '../../components/Tex'
-import { betLoading, kelvinRadius, langmuirTheta } from '../../lib/adsorption'
+import { betLoading, langmuirTheta } from '../../lib/adsorption'
 
 // Schematic IUPAC isotherm types, drawn as small SVG sketches (shape only, no scale).
 const W = 120
@@ -39,20 +38,20 @@ const TYPES = [
   {
     name: 'Type IV',
     curves: [path(typeIV(0.72), 4), path(typeIV(0.55), 4, 0.4)],
-    text: 'Mesopores (2–50 nm): catalyst layers, mesoporous carbons and oxides. Capillary condensation adds a step, and desorption (dashed) runs below adsorption: a hysteresis loop.',
+    text: 'Mesopores (2–50 nm): catalyst layers, mesoporous carbons. Above the BET range, pores fill by capillary condensation, and desorption (dashed) runs below adsorption. Pore filling gets its own upcoming tool.',
   },
 ]
 
-export default function BeyondBet({ x }: { x: number }) {
-  const rK = x > 0 ? kelvinRadius(x) : 0
+export default function BeyondBet() {
   return (
     <section className="section" aria-labelledby="beyond-title">
       <h2 id="beyond-title" className="section-title">
-        Beyond BET: pores, capillary condensation and hysteresis
+        Beyond BET: the isotherm types
       </h2>
       <p className="prose">
-        Real catalyst powders and electrodes are porous, and pores change the isotherm. IUPAC sorts the shapes into
-        types; the BET simulation above shows types II and III.
+        Measured isotherms do not all look like Langmuir or BET. IUPAC sorts them by shape, and the shape tells you what
+        kind of surface you have before you fit anything. The simulation above shows type II (BET, C &gt; 2), type III
+        (BET, C &lt; 2) and the Langmuir curve, whose shape matches type I.
       </p>
       <ul className="type-grid">
         {TYPES.map((t) => (
@@ -74,54 +73,10 @@ export default function BeyondBet({ x }: { x: number }) {
           </li>
         ))}
       </ul>
-
-      <h3>Capillary condensation: smallest pores fill first</h3>
-      <div className="prose">
-        <p>
-          Inside a narrow pore the liquid surface is curved, and a curved (concave) meniscus is stable below the
-          normal saturation pressure. The Kelvin equation gives the meniscus radius r<sub>K</sub> at which N₂
-          condenses:
-        </p>
-      </div>
-      <div className="formula">
-        <div className="formula-body">
-          <Tex
-            display
-            tex={String.raw`\ln\frac{p}{p_0} = -\frac{2\,\gamma\,V_L}{r_K\,R\,T}`}
-            fallback={<>ln(p/p₀) = −2γV<sub>L</sub> / (r<sub>K</sub>RT)</>}
-          />
-        </div>
-        <span className="formula-number">(5)</span>
-      </div>
-      <p className="callout live-note" aria-live="polite">
-        {x <= 0 ? (
-          <>Raise p/p₀ in the simulation above to see which pores are filled.</>
-        ) : rK < 1 ? (
-          <>
-            At the current p/p₀ = {x.toFixed(2)}, r<sub>K</sub> ≈ {rK.toFixed(2)} nm, about the size of a few
-            molecules. Here the Kelvin equation no longer applies: micropores fill by enhanced adsorption, not by a
-            meniscus.
-          </>
-        ) : (
-          <>
-            At the current p/p₀ = {x.toFixed(2)}, N₂ has condensed in every pore with r<sub>K</sub> below about{' '}
-            <strong>{rK.toFixed(1)} nm</strong> (the pore radius is this plus the adsorbed film on the wall). Raise
-            the pressure and wider pores fill.
-          </>
-        )}
-      </p>
       <p className="prose">
-        <strong>Hysteresis.</strong> On the way up, a pore fills only once the film on its walls is thick enough to
-        bridge it. On the way down it empties from a meniscus already in place, at a lower pressure; narrow-necked
-        “ink-bottle” pores stay full until the neck empties. So the desorption branch lies below the adsorption
-        branch, and the shape of the loop tells you about the pore network.
-      </p>
-      <p className="prose">
-        <strong>Mercury intrusion porosimetry.</strong> Mercury does not wet most solids (contact angle ≈ 140°), so
-        it must be pushed into pores. The Washburn equation, p = −2γ cos θ / r, gives the smallest pore entered at
-        each pressure: r ≈ 0.74 µm / p[MPa], so ~400 MPa reaches pores about 2 nm in radius. It covers the larger pores
-        that N₂ cannot. For fuel-cell catalyst layers it resolves the primary pores inside carbon agglomerates
-        (below ~20 nm) and the secondary pores between them (~20–200 nm), which carry the gas in and the water out.
+        Only types II and IV have a clear knee, so only for them does the BET area mean what it says. For type I
+        (microporous) solids the BET number is an “apparent” area, useful for comparing materials but not a true
+        geometric surface.
       </p>
     </section>
   )

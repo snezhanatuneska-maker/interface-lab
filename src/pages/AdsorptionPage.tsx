@@ -6,7 +6,6 @@ import { LogSlider, Segmented, Slider } from '../components/Controls'
 import { useThemeColors } from '../lib/themeColors'
 import { axis, baseLayout, staticConfig } from '../lib/plotTheme'
 import {
-  AREA_PER_VM,
   betLoading,
   BET_FIT_RANGE,
   C_DEFAULT,
@@ -15,24 +14,21 @@ import {
   K_RANGE,
   kneeX,
   langmuirTheta,
-  loading,
-  SAMPLES,
   SAMPLE_DEFAULT,
   type Model,
 } from '../lib/adsorption'
-import { insight, type View } from './adsorption/insight'
+import { insight } from './adsorption/insight'
 import TryThis, { type Preset } from './adsorption/TryThis'
 import Equations from './adsorption/Equations'
 import SurfaceArea from './adsorption/SurfaceArea'
 import BeyondBet from './adsorption/BeyondBet'
 
 const X_MAX = 0.95
-const Y_ML = 3 // "monolayer region" y-axis: 0–3 layers shows the Langmuir plateau and the BET knee
+const Y_MAX = 3 // 0–3 layers shows the Langmuir plateau and the BET knee; higher points get an "off scale" marker
 const N_POINTS = 300
 const X_DEFAULT = 0.3
 const SETTLE_MIN_TIME = 3 // simulated s at a setting (one averaging window) before it can count as settled
 
-const MODEL_NAME: Record<Model, string> = { langmuir: 'Langmuir', bet: 'BET' }
 const EMPTY_STATS: SurfaceStats = { occupied: 0, total: 0, tallest: 0, avgLoading: 0, time: 0 }
 
 const LEGEND = [
@@ -60,19 +56,17 @@ function useSettled(key: string, stats: SurfaceStats, target: number): boolean {
 }
 
 function Readout({ model, cov, stats, settled }: { model: Model; cov: number; stats: SurfaceStats; settled: boolean }) {
-  const { occupied, total, tallest } = stats
   return (
     <div className="coverage">
       <span className="coverage-label">
-        {MODEL_NAME[model]}:{' '}
         {model === 'langmuir' ? (
           <>
-            coverage <em>θ</em> = <em>V</em>/<em>V</em>
+            Coverage <em>θ</em> = <em>V</em>/<em>V</em>
             <sub>m</sub>
           </>
         ) : (
           <>
-            loading <em>V</em>/<em>V</em>
+            Loading <em>V</em>/<em>V</em>
             <sub>m</sub>
           </>
         )}
@@ -83,10 +77,6 @@ function Readout({ model, cov, stats, settled }: { model: Model; cov: number; st
         <span className={`tag sim-status${settled ? ' accent' : ''}`} role="status">
           {settled ? 'settled' : 'settling…'}
         </span>
-        <br />
-        {model === 'langmuir'
-          ? `${occupied} of ${N_SITES} sites occupied · 1 layer max`
-          : `${total} molecules on ${N_SITES} sites · ${N_SITES - occupied} bare · up to ${tallest} layer${tallest === 1 ? '' : 's'}`}
       </span>
     </div>
   )
@@ -94,31 +84,21 @@ function Readout({ model, cov, stats, settled }: { model: Model; cov: number; st
 
 export default function AdsorptionPage() {
   const [x, setX] = useState(X_DEFAULT)
-  const [view, setView] = useState<View>('bet')
+  const [mode, setMode] = useState<Model>('bet')
   const [runId, setRunId] = useState(0) // bump to restart the simulation (it starts at equilibrium)
   const [K, setK] = useState(K_DEFAULT)
   const [c, setC] = useState(C_DEFAULT)
   const [paused, setPaused] = useState(false)
-  const [yRange, setYRange] = useState<'ml' | 'full'>('ml')
-  const [units, setUnits] = useState<'rel' | 'abs'>('rel')
   const [sampleId, setSampleId] = useState(SAMPLE_DEFAULT)
-  const [stats, setStats] = useState<Record<Model, SurfaceStats>>({ langmuir: EMPTY_STATS, bet: EMPTY_STATS })
+  const [stats, setStats] = useState<SurfaceStats>(EMPTY_STATS)
   const theme = useThemeColors()
   const COLORS = { langmuir: theme.data1, bet: theme.data2, ink: theme.text, muted: theme.muted }
 
-  const models: Model[] = view === 'both' ? ['langmuir', 'bet'] : [view]
-  const shows = (m: Model) => models.includes(m)
-  const cov: Record<Model, number> = { langmuir: langmuirTheta(x, K), bet: betLoading(x, c) }
-  const settled: Record<Model, boolean> = {
-    langmuir: useSettled(`${runId}|${view}|${K}|${x}`, stats.langmuir, cov.langmuir),
-    bet: useSettled(`${runId}|${view}|${c}|${x}`, stats.bet, cov.bet),
-  }
-
-  const sample = SAMPLES.find((s) => s.id === sampleId) ?? SAMPLES[0]
-  const u = units === 'abs' ? sample.area / AREA_PER_VM : 1 // y scale: V/Vm → cm³(STP)/g
+  const cov = mode === 'langmuir' ? langmuirTheta(x, K) : betLoading(x, c)
+  const settled = useSettled(`${runId}|${mode}|${mode === 'langmuir' ? K : c}|${x}`, stats, cov)
 
   const restart = () => {
-    setStats({ langmuir: EMPTY_STATS, bet: EMPTY_STATS })
+    setStats(EMPTY_STATS)
     setRunId((r) => r + 1)
   }
 
@@ -126,23 +106,20 @@ export default function AdsorptionPage() {
     setX(X_DEFAULT)
     setK(K_DEFAULT)
     setC(C_DEFAULT)
-    setYRange('ml')
-    setUnits('rel')
     restart()
   }
 
-  const switchView = (v: View) => {
-    if (v === view) return
-    setView(v)
+  const switchMode = (m: Model) => {
+    if (m === mode) return
+    setMode(m)
     restart() // pressure, K and C are kept so the models can be compared at the same setting
   }
 
   const applyPreset = (p: Preset) => {
-    if (p.view) setView(p.view)
+    if (p.mode) setMode(p.mode)
     if (p.x !== undefined) setX(p.x)
     if (p.K !== undefined) setK(p.K)
     if (p.c !== undefined) setC(p.c)
-    if (p.yRange) setYRange(p.yRange)
     setPaused(false)
     restart()
     document.getElementById(p.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -162,50 +139,41 @@ export default function AdsorptionPage() {
     return { xs, lang, bet }
   }, [K, c])
 
-  const yMax = (yRange === 'ml' ? Y_ML : Math.max(1.1, ...models.map((m) => loading(m, X_MAX, K, c))) * 1.05) * u
-  const scaled = (v: number) => v * u
-  const showKnee = shows('bet') && c >= 2
+  const showKnee = mode === 'bet' && c >= 2
+  const curveStyle = (m: Model) => (mode === m ? { color: COLORS[m], width: 3 } : { color: COLORS[m], width: 1.75 })
 
-  const curveStyle = (m: Model) => (shows(m) ? { color: COLORS[m], width: 3 } : { color: COLORS[m], width: 1.75 })
-
+  // The legend is drawn in HTML above the plot (not by Plotly), so the plot area keeps its size when the
+  // simulation diamond or point B appears or disappears.
   const isoData: Data[] = [
     ...(['langmuir', 'bet'] as Model[]).map(
       (m): Data => ({
         x: curves.xs,
-        y: (m === 'langmuir' ? curves.lang : curves.bet).map(scaled),
+        y: m === 'langmuir' ? curves.lang : curves.bet,
         type: 'scatter',
         mode: 'lines',
-        name: m === 'langmuir' ? 'Langmuir θ' : 'BET V/Vₘ',
         line: curveStyle(m),
-        opacity: shows(m) ? 1 : 0.6,
-      }),
-    ),
-    ...models.map(
-      (m): Data => ({
-        x: [x],
-        y: [scaled(cov[m])],
-        type: 'scatter',
-        mode: 'markers',
-        showlegend: false,
-        marker: { size: 12, color: COLORS[m], line: { color: theme.plotBg, width: 2 } },
+        opacity: mode === m ? 1 : 0.6,
       }),
     ),
     {
-      x: models.filter((m) => settled[m]).map(() => x),
-      y: models.filter((m) => settled[m]).map((m) => scaled(cov[m])),
+      x: [x],
+      y: [cov],
       type: 'scatter',
       mode: 'markers',
-      name: 'simulation',
-      showlegend: models.some((m) => settled[m]),
+      marker: { size: 12, color: COLORS[mode], line: { color: theme.plotBg, width: 2 } },
+    },
+    {
+      x: settled ? [x] : [],
+      y: settled ? [cov] : [],
+      type: 'scatter',
+      mode: 'markers',
       marker: { size: 8, symbol: 'diamond', color: theme.plotBg, line: { color: COLORS.ink, width: 1.5 } },
     },
     {
       x: showKnee ? [kneeX(c)] : [],
-      y: showKnee ? [u] : [],
+      y: showKnee ? [1] : [],
       type: 'scatter',
       mode: 'markers',
-      name: 'B: monolayer complete',
-      showlegend: showKnee,
       marker: { size: 10, symbol: 'circle-open', color: COLORS.ink, line: { width: 2 } },
     },
   ]
@@ -223,7 +191,7 @@ export default function AdsorptionPage() {
       fillcolor: theme.data2Soft,
       line: { width: 0 },
     },
-    { type: 'line', xref: 'paper', x0: 0, x1: 1, y0: u, y1: u, line: { color: COLORS.muted, width: 1.2, dash: 'dash' } },
+    { type: 'line', xref: 'paper', x0: 0, x1: 1, y0: 1, y1: 1, line: { color: COLORS.muted, width: 1.2, dash: 'dash' } },
   ]
 
   const isoAnnotations: Partial<Annotation>[] = [
@@ -241,7 +209,7 @@ export default function AdsorptionPage() {
     {
       xref: 'paper',
       x: 0.99,
-      y: u,
+      y: 1,
       xanchor: 'right',
       yanchor: 'bottom',
       yshift: 2,
@@ -250,48 +218,26 @@ export default function AdsorptionPage() {
       font: { size: 11, color: COLORS.muted },
     },
     // A marker above the visible range is pinned to the top edge with its value.
-    ...models
-      .filter((m) => scaled(cov[m]) > yMax)
-      .map(
-        (m, i): Partial<Annotation> => ({
-          x,
-          y: yMax,
-          yanchor: 'top',
-          xanchor: x > 0.8 ? 'right' : 'left',
-          xshift: x > 0.8 ? -6 : 6,
-          yshift: -i * 16,
-          text: `▲ ${scaled(cov[m]).toFixed(1)} (off scale)`,
-          showarrow: false,
-          font: { size: 12, color: COLORS[m] },
-        }),
-      ),
+    ...(cov > Y_MAX
+      ? [
+          {
+            x,
+            y: Y_MAX,
+            yanchor: 'top' as const,
+            xanchor: x > 0.8 ? ('right' as const) : ('left' as const),
+            xshift: x > 0.8 ? -6 : 6,
+            text: `▲ ${cov.toFixed(1)} (off scale)`,
+            showarrow: false,
+            font: { size: 12, color: COLORS[mode] },
+          },
+        ]
+      : []),
   ]
 
-  const yTitle = units === 'abs' ? 'V  [cm³(STP)/g]' : 'V/Vₘ  (layers)'
   const plotLabel =
-    `Isotherm plot, relative pressure 0 to 1 against ${units === 'abs' ? 'adsorbed volume' : 'V over Vm'}. ` +
-    models.map((m) => `${MODEL_NAME[m]} at p/p₀ ${x.toFixed(2)}: ${scaled(cov[m]).toFixed(2)}`).join('; ') +
+    `Isotherm plot, relative pressure 0 to 1 against V over Vm, 0 to 3. ${mode === 'langmuir' ? 'Langmuir' : 'BET'} ` +
+    `at p/p₀ ${x.toFixed(2)}: ${cov.toFixed(2)}` +
     (showKnee ? `. Knee B at p/p₀ ${kneeX(c).toFixed(2)}.` : '.')
-
-  const surface = (m: Model) => (
-    <div key={m} className="surface-item">
-      {view === 'both' && <p className={`surface-name ${m === 'langmuir' ? 'lang-ink' : 'bet-ink'}`}>{MODEL_NAME[m]}</p>}
-      <SurfaceView
-        key={`${runId}-${m}`}
-        mode={m}
-        pressure={x}
-        K={K}
-        c={c}
-        paused={paused}
-        onStats={(s) => setStats((prev) => ({ ...prev, [m]: s }))}
-        label={
-          m === 'langmuir'
-            ? `Langmuir surface: ${stats.langmuir.occupied} of ${N_SITES} sites occupied, single layer`
-            : `BET surface: ${stats.bet.total} molecules on ${N_SITES} sites, up to ${stats.bet.tallest} layers`
-        }
-      />
-    </div>
-  )
 
   return (
     <article className="page">
@@ -310,11 +256,7 @@ export default function AdsorptionPage() {
       {/* ---------- Hero: molecular view + isotherm ---------- */}
       <figure id="sim-figure" className="figure hero" aria-label="Molecular view and isotherm">
         <div className="hero-head">
-          <div className="readouts">
-            {models.map((m) => (
-              <Readout key={m} model={m} cov={cov[m]} stats={stats[m]} settled={settled[m]} />
-            ))}
-          </div>
+          <Readout model={mode} cov={cov} stats={stats} settled={settled} />
           <ul className="layer-legend" aria-label="Legend">
             {LEGEND.map((l) => (
               <li key={l.label}>
@@ -327,38 +269,44 @@ export default function AdsorptionPage() {
           </ul>
         </div>
 
-        <div className={`sim-grid${view === 'both' ? ' both' : ''}`}>
-          <div className="surfaces">{models.map(surface)}</div>
+        <div className="sim-grid">
+          <SurfaceView
+            key={runId}
+            mode={mode}
+            pressure={x}
+            K={K}
+            c={c}
+            paused={paused}
+            onStats={setStats}
+            label={
+              mode === 'langmuir'
+                ? `Langmuir surface: ${stats.occupied} of ${N_SITES} sites occupied, single layer`
+                : `BET surface: ${stats.total} molecules on ${N_SITES} sites, up to ${stats.tallest} layers`
+            }
+          />
           <div className="plot-col">
-            <div className="plot-options">
-              <Segmented
-                small
-                label="y-axis range"
-                value={yRange}
-                onChange={setYRange}
-                options={[
-                  { value: 'ml', label: '0–3 layers' },
-                  { value: 'full', label: 'Full range' },
-                ]}
-              />
-              <Segmented
-                small
-                label="y-axis units"
-                value={units}
-                onChange={setUnits}
-                options={[
-                  { value: 'rel', label: 'V/Vₘ' },
-                  { value: 'abs', label: 'cm³/g' },
-                ]}
-              />
-            </div>
+            <ul className="plot-legend" aria-label="Plot legend">
+              <li>
+                <span className="key-line" style={{ borderColor: COLORS.langmuir }} /> Langmuir θ
+              </li>
+              <li>
+                <span className="key-line" style={{ borderColor: COLORS.bet }} /> BET V/V<sub>m</sub>
+              </li>
+              <li>
+                <span className="key-mark">◇</span> simulation (settled)
+              </li>
+              <li>
+                <span className="key-mark">○</span> B: monolayer complete
+              </li>
+            </ul>
             <div role="img" aria-label={plotLabel}>
               <Plot
                 data={isoData}
                 layout={{
                   ...baseLayout(theme),
+                  showlegend: false,
                   xaxis: { ...axis(theme), title: { text: 'Relative pressure p/p₀' }, range: [0, 1] },
-                  yaxis: { ...axis(theme), title: { text: yTitle }, range: [0, yMax] },
+                  yaxis: { ...axis(theme), title: { text: 'V/Vₘ  (layers)' }, range: [0, Y_MAX] },
                   shapes: isoShapes,
                   annotations: isoAnnotations,
                 }}
@@ -377,12 +325,11 @@ export default function AdsorptionPage() {
             </span>
             <Segmented
               label="Model"
-              value={view}
-              onChange={switchView}
+              value={mode}
+              onChange={switchMode}
               options={[
                 { value: 'langmuir', label: 'Langmuir', activeClass: 'lang' },
                 { value: 'bet', label: 'BET', activeClass: 'bet' },
-                { value: 'both', label: 'Both' },
               ]}
             />
           </div>
@@ -397,7 +344,7 @@ export default function AdsorptionPage() {
             onChange={setX}
             hint="relative to the saturation pressure p₀"
           />
-          {shows('langmuir') && (
+          {mode === 'langmuir' ? (
             <LogSlider
               id="K"
               label={<>Langmuir constant <em>K</em></>}
@@ -406,8 +353,7 @@ export default function AdsorptionPage() {
               onChange={setK}
               hint="larger K = stronger binding, fills at lower p/p₀"
             />
-          )}
-          {shows('bet') && (
+          ) : (
             <LogSlider
               id="c"
               label={<>BET constant <em>C</em></>}
@@ -427,15 +373,12 @@ export default function AdsorptionPage() {
           </div>
         </div>
         <p className="insight" aria-live="polite">
-          {insight(view, x, K, c)}
+          {insight(mode, x, K, c)}
         </p>
         <figcaption>
-          <span className="figure-label">Figure 1.</span> Left: cross-section of the surface, with gas above and the
-          adsorbent below. Right: the isotherm. The dot marks the current pressure; the simulation average should stay
-          near it, and once it has settled a diamond appears on that point. The open circle B marks where one
-          monolayer’s worth is adsorbed, at p/p₀ = 1/(1 + √C). The shaded band (p/p₀ 0.05–0.35) is where the BET
-          equation is normally fitted.
-          {units === 'abs' && ` In cm³/g the curve is scaled by Vₘ of the sample chosen in Figure 2 (${sample.name}).`}
+          <span className="figure-label">Figure 1.</span> Left: the surface in cross-section. Right: the isotherm. The
+          dot is the current pressure; the diamond appears once the simulation has settled on it. B marks one
+          monolayer; the shaded band is the BET fit range.
         </figcaption>
       </figure>
 
@@ -459,11 +402,11 @@ export default function AdsorptionPage() {
         </p>
       </section>
 
-      <Equations view={view} />
+      <Equations mode={mode} />
 
       <SurfaceArea c={c} setC={setC} sampleId={sampleId} setSampleId={setSampleId} theme={theme} />
 
-      <BeyondBet x={x} />
+      <BeyondBet />
 
       <section className="section" aria-labelledby="why-title">
         <h2 id="why-title" className="section-title">
@@ -480,10 +423,6 @@ export default function AdsorptionPage() {
             <strong>Catalyst layers and electrodes.</strong> The BET area of a carbon support (Vulcan ~240 m²/g,
             Ketjenblack ~800 m²/g) sets how finely Pt can be spread, and for scarce Ir in electrolyzer anodes the area
             per gram is a cost lever. Battery and supercapacitor electrodes are compared the same way.
-          </li>
-          <li>
-            <strong>Pore structure.</strong> Type IV hysteresis and mercury porosimetry measure the pores that carry
-            gas in and water out of catalyst layers and gas diffusion layers.
           </li>
           <li>
             <strong>Hydrogen storage.</strong> H<sub>2</sub> is above its critical temperature (33 K) even at 77 K,

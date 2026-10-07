@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import Tex, { Frac } from '../../components/Tex'
-import type { View } from './insight'
+import type { Model } from '../../lib/adsorption'
 
 function Term({ sym, fallback, children }: { sym: string; fallback: ReactNode; children: ReactNode }) {
   return (
@@ -27,9 +27,9 @@ const withX = (
 
 const VVm = <><i>V</i>/<i>V</i><sub>m</sub></>
 
-export default function Equations({ view }: { view: View }) {
-  const lang = view !== 'bet'
-  const bet = view !== 'langmuir'
+export default function Equations({ mode }: { mode: Model }) {
+  const lang = mode === 'langmuir'
+  const bet = mode === 'bet'
   return (
     <section className="section equations" aria-labelledby="eq-title">
       <h2 id="eq-title" className="section-title">

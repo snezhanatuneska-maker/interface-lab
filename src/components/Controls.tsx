@@ -65,11 +65,10 @@ interface SegmentedProps<T extends string> {
   options: SegmentOption<T>[]
   value: T
   onChange: (v: T) => void
-  small?: boolean
 }
 
 /** Radio group drawn as joined buttons. Arrow keys move the selection (WAI-ARIA radio group pattern). */
-export function Segmented<T extends string>({ label, options, value, onChange, small }: SegmentedProps<T>) {
+export function Segmented<T extends string>({ label, options, value, onChange }: SegmentedProps<T>) {
   const refs = useRef<(HTMLButtonElement | null)[]>([])
   const onKey = (e: KeyboardEvent<HTMLButtonElement>) => {
     const i = options.findIndex((o) => o.value === value)
@@ -81,7 +80,7 @@ export function Segmented<T extends string>({ label, options, value, onChange, s
     refs.current[next]?.focus()
   }
   return (
-    <div className={small ? 'segmented small' : 'segmented'} role="radiogroup" aria-label={label}>
+    <div className="segmented" role="radiogroup" aria-label={label}>
       {options.map((o, i) => {
         const on = o.value === value
         return (
