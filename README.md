@@ -1,7 +1,7 @@
 # Interface Engineering Lab
 
 Interactive educational tools for **Interface Engineering in Clean Energy Processes (CEP)**,
-by Snezhana Tuneska. The format is inspired by the Signal Processing Toolkit of FAU Erlangen-Nürnberg.
+by Snezhana Tuneska.
 
 Live site: <https://snezhanatuneska-maker.github.io/interface-lab/>
 
@@ -60,7 +60,7 @@ vite.config.ts                   Vite config (sets base: "/interface-lab/")
 public/                          favicon and og-image.png (link preview)
 src/main.tsx                     React entry
 src/App.tsx                      Site layout: header, hash routing (#/ and #/adsorption), footer
-src/siteConfig.ts                Author, course, credit line and repo link shown in the footer
+src/siteConfig.ts                Author, course and repo link shown in the footer
 src/design-tokens.css            Colours, type scale and spacing (light and dark)
 src/index.css                    Global and component styles
 src/data/upcomingProjects.ts     Every tool on the homepage (live and planned) in one list
