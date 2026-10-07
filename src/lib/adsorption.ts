@@ -35,6 +35,36 @@ export function kneeX(c: number): number {
   return 1 / (1 + Math.sqrt(c))
 }
 
+/** Below this C the BET isotherm has no knee (type III) and the BET area is not reliable. */
+export const C_MIN_VALID = 2
+
+/**
+ * Equilibrium share of sites by stack height: [bare, 1 layer, 2 layers, 3+ layers].
+ * Langmuir: a site is taken with probability θ. BET: a site is bare with probability
+ * s₀ = (1 − x)/(1 − x + Cx); a covered site has i layers with probability (1 − x)·x^(i−1).
+ */
+export function stackShares(model: Model, x: number, K: number, c: number): [number, number, number, number] {
+  if (model === 'langmuir') {
+    const theta = langmuirTheta(x, K)
+    return [1 - theta, theta, 0, 0]
+  }
+  const s0 = (1 - x) / (1 - x + c * x)
+  const covered = 1 - s0
+  return [s0, covered * (1 - x), covered * (1 - x) * x, covered * x * x]
+}
+
+/** Standard deviation of one site's stack height at equilibrium (layers). */
+export function siteHeightSd(model: Model, x: number, K: number, c: number): number {
+  if (model === 'langmuir') {
+    const theta = langmuirTheta(x, K)
+    return Math.sqrt(theta * (1 - theta))
+  }
+  const s0 = (1 - x) / (1 - x + c * x)
+  const mean = betLoading(x, c)
+  const meanSq = ((1 - s0) * (1 + x)) / (1 - x) ** 2
+  return Math.sqrt(Math.max(0, meanSq - mean * mean))
+}
+
 // ---------- BET plot and surface area ----------
 
 /** BET transform y = (p/p₀) / [V (1 − p/p₀)], which is linear in p/p₀. */
@@ -90,3 +120,12 @@ export const SAMPLES: Sample[] = [
   { id: 'ketjen', name: 'Ketjenblack EC-300J', role: 'high-area carbon support', area: 800 },
 ]
 export const SAMPLE_DEFAULT = 'vulcan'
+
+// ---------- Pt particle size ----------
+
+export const RHO_PT = 21.45 // g/cm³
+
+/** Surface area per gram of spherical Pt particles of diameter d (nm): 6/(ρ·d), in m²/g. */
+export function ptAreaPerGram(dNm: number): number {
+  return 6 / (RHO_PT * 1e6 * dNm * 1e-9)
+}

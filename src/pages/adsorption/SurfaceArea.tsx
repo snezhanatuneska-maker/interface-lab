@@ -1,8 +1,8 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { Data, Shape } from 'plotly.js'
 import Plot from '../../components/Plot'
-import Tex, { Frac } from '../../components/Tex'
-import { LogSlider } from '../../components/Controls'
+import Tex from '../../components/Tex'
+import { LogSlider, Slider } from '../../components/Controls'
 import { axis, baseLayout, staticConfig } from '../../lib/plotTheme'
 import type { ThemeColors } from '../../lib/themeColors'
 import {
@@ -11,8 +11,10 @@ import {
   betLoading,
   betTransform,
   BET_FIT_RANGE,
+  C_MIN_VALID,
   C_RANGE,
   fitLine,
+  ptAreaPerGram,
   SAMPLES,
   SIGMA_N2,
   surfaceArea,
@@ -33,9 +35,58 @@ interface Props {
 
 const sig = (v: number, digits = 3) => Number(v.toPrecision(digits)).toLocaleString('en')
 
+const PT_D_DEFAULT = 3 // nm, typical Pt/C fuel-cell catalyst
+
+/** Clean-energy hook: smaller Pt particles expose more surface per gram of metal. */
+function PtParticles() {
+  const [d, setD] = useState(PT_D_DEFAULT)
+  const area = ptAreaPerGram(d)
+  const black = SAMPLES[0].area
+  return (
+    <figure className="figure pt-figure">
+      <h3>How small should the Pt particles be?</h3>
+      <p className="prose">
+        For spheres of diameter d, the surface per gram of Pt is A/m = 6/(ρd), with ρ = 21.45 g/cm³. Pt black
+        ({black} m²/g) corresponds to particles of about {sig(ptAreaPerGram(1) / black, 2)} nm.
+      </p>
+      <div className="pt-row">
+        <Slider
+          id="pt-d"
+          label={<>Pt particle diameter d</>}
+          value={`${d.toFixed(1)} nm`}
+          min={1}
+          max={10}
+          step={0.5}
+          pos={d}
+          onChange={setD}
+          hint="fuel-cell Pt/C catalysts: typically 2–5 nm"
+        />
+        <dl className="results">
+          <div className="result-main">
+            <dt>Pt surface per gram of Pt</dt>
+            <dd>{sig(area, 2)} m²/g</dd>
+          </div>
+          <div>
+            <dt>compared with Pt black</dt>
+            <dd>×{sig(area / black, 2)}</dd>
+          </div>
+        </dl>
+      </div>
+      <figcaption>
+        <span className="figure-label">Langmuir link:</span> in a fuel-cell lab the Pt area is measured
+        electrochemically (ECSA): hydrogen adsorbs as one monolayer, one H atom per surface Pt atom, and the charge
+        to strip it (210 µC per cm² of Pt) counts the sites. Measured ECSA is lower than 6/(ρd) because particles
+        touch the support and each other.
+      </figcaption>
+    </figure>
+  )
+}
+
 export default function SurfaceArea({ c, setC, sampleId, setSampleId, theme }: Props) {
   const sample = SAMPLES.find((s) => s.id === sampleId) ?? SAMPLES[0]
   const VmTrue = sample.area / AREA_PER_VM
+
+  const valid = c >= C_MIN_VALID
 
   const fit = useMemo(() => {
     const V = FIT_XS.map((x) => VmTrue * betLoading(x, c)) // cm³(STP)/g
@@ -105,13 +156,6 @@ export default function SurfaceArea({ c, setC, sampleId, setSampleId, theme }: P
           <Tex
             display
             tex={String.raw`\frac{p/p_0}{V\,(1 - p/p_0)} = \underbrace{\frac{C - 1}{V_m\,C}}_{\text{slope}}\;\frac{p}{p_0} + \underbrace{\frac{1}{V_m\,C}}_{\text{intercept}}`}
-            fallback={
-              <>
-                <Frac n={<><i>p</i>/<i>p</i><sub>0</sub></>} d={<><i>V</i>(1 − <i>p</i>/<i>p</i><sub>0</sub>)</>} /> ={' '}
-                <Frac n={<><i>C</i> − 1</>} d={<><i>V</i><sub>m</sub><i>C</i></>} /> · <i>p</i>/<i>p</i><sub>0</sub> +{' '}
-                <Frac n="1" d={<><i>V</i><sub>m</sub><i>C</i></>} />
-              </>
-            }
           />
         </div>
         <span className="formula-number">(3)</span>
@@ -160,30 +204,39 @@ export default function SurfaceArea({ c, setC, sampleId, setSampleId, theme }: P
               className="plot"
             />
           </div>
-          <dl className="results" aria-live="polite">
-            <div>
-              <dt>Slope</dt>
-              <dd>{sig(fit.slope * Y_SCALE)} × 10⁻³ g/cm³</dd>
-            </div>
-            <div>
-              <dt>Intercept</dt>
-              <dd>{sig(fit.intercept * Y_SCALE)} × 10⁻³ g/cm³</dd>
-            </div>
-            <div>
-              <dt>
-                V<sub>m</sub> = 1/(slope + intercept)
-              </dt>
-              <dd>{sig(fit.Vm)} cm³(STP)/g</dd>
-            </div>
-            <div>
-              <dt>C = slope/intercept + 1</dt>
-              <dd>{sig(fit.C)}</dd>
-            </div>
-            <div className="result-main">
-              <dt>Specific surface area A/m</dt>
-              <dd>{sig(fit.area)} m²/g</dd>
-            </div>
-          </dl>
+          <div>
+            <dl className="results" aria-live="polite">
+              <div>
+                <dt>Slope</dt>
+                <dd>{sig(fit.slope * Y_SCALE)} × 10⁻³ g/cm³</dd>
+              </div>
+              <div>
+                <dt>Intercept</dt>
+                <dd>{sig(fit.intercept * Y_SCALE)} × 10⁻³ g/cm³</dd>
+              </div>
+              <div>
+                <dt>
+                  V<sub>m</sub> = 1/(slope + intercept)
+                </dt>
+                <dd>{sig(fit.Vm)} cm³(STP)/g</dd>
+              </div>
+              <div>
+                <dt>C = slope/intercept + 1</dt>
+                <dd>{sig(fit.C)}</dd>
+              </div>
+              <div className={`result-main${valid ? '' : ' invalid'}`}>
+                <dt>Specific surface area A/m</dt>
+                <dd>{sig(fit.area)} m²/g</dd>
+              </div>
+            </dl>
+            {!valid && (
+              <p className="result-warning" role="note">
+                <strong>⚠ Not a valid BET result.</strong> With C &lt; {C_MIN_VALID} the isotherm has no knee (type III)
+                {fit.slope < 0 ? ' and the BET line slopes downward' : ''}, so there is no monolayer to count. A lab
+                would not report this area.
+              </p>
+            )}
+          </div>
         </div>
         <figcaption>
           <span className="figure-label">Figure 2.</span> BET plot for {sample.name} ({sample.role}). The points
@@ -204,12 +257,6 @@ export default function SurfaceArea({ c, setC, sampleId, setSampleId, theme }: P
           <Tex
             display
             tex={String.raw`\frac{A}{m} = \frac{V_m\,N_A\,\sigma}{V_{mol}} = V_m \cdot \frac{6.022\times10^{23}\,\text{mol}^{-1}\cdot 0.162\times10^{-18}\,\text{m}^2}{${V_MOLAR_STP}\,\text{cm}^3/\text{mol}} \approx V_m \cdot ${AREA_PER_VM.toFixed(2)}\,\frac{\text{m}^2}{\text{cm}^3}`}
-            fallback={
-              <>
-                <i>A</i>/<i>m</i> = <i>V</i><sub>m</sub> <i>N</i><sub>A</sub> σ / <i>V</i><sub>mol</sub> ≈ <i>V</i>
-                <sub>m</sub> · {AREA_PER_VM.toFixed(2)} m²/cm³
-              </>
-            }
           />
         </div>
         <span className="formula-number">(4)</span>
@@ -221,6 +268,8 @@ export default function SurfaceArea({ c, setC, sampleId, setSampleId, theme }: P
         iridium in PEM electrolyzer anodes, area per gram is a direct cost lever. Values are typical and rounded;
         real powders vary by supplier and treatment.
       </p>
+
+      <PtParticles />
     </section>
   )
 }

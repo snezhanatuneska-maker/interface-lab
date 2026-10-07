@@ -116,6 +116,7 @@ main.container { flex: 1; padding-bottom: var(--space-7); }
   border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); padding: var(--space-1) var(--space-4);
 }
 .button:hover { border-color: var(--color-accent); }
+.button:disabled { cursor: default; color: var(--color-text-muted); border-color: var(--color-border); }
 .button[aria-pressed='true'], .button.primary { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-on-accent); }
 
 /* Small text label (status, tags) */
@@ -229,7 +230,25 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
 .key-line { display: inline-block; width: 18px; border-top: 3px solid; vertical-align: 3px; margin-right: 2px; }
 .key-mark { display: inline-block; width: 14px; text-align: center; font-weight: 700; color: var(--color-text); }
 /* Fixed width so the status tag never reflows the readout (and with it the figure) when it changes. */
-.sim-status { min-width: 5.2em; text-align: center; }
+.sim-status { min-width: 8.5em; text-align: center; }
+.coverage-note { font-weight: 400; }
+
+/* Sites by stack height, under the molecular view */
+.sim-col { min-width: 0; }
+.stack-bars { margin-top: var(--space-2); font-size: var(--text-xs); color: var(--color-text-muted); }
+.stack-title { margin: 0 0 2px; font-weight: 600; color: var(--color-text); }
+.stack-title span { font-weight: 400; color: var(--color-text-muted); }
+.stack-bars ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.stack-bars li { display: grid; grid-template-columns: 4.6em minmax(0, 1fr) 7.5em; align-items: center; gap: var(--space-2); }
+.stack-bars li.blocked { opacity: 0.6; }
+.stack-track { position: relative; height: 10px; border: 1px solid var(--color-border-strong); border-radius: 2px; background: var(--data-plot-bg); }
+.stack-fill { position: absolute; inset: 0 auto 0 0; transition: width 0.2s; }
+.stack-tick { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: var(--color-text); }
+.stack-value { font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
+
+.plot-zoom { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-1); }
+.plot-zoom .control-label { margin: 0; font-size: var(--text-xs); }
+.plot-zoom .segmented button { font-size: var(--text-xs); padding: 0 var(--space-3); }
 .insight {
   max-width: var(--measure); margin: var(--space-4) 0 0; padding: var(--space-2) var(--space-3);
   font-size: var(--text-sm); line-height: var(--leading-snug);
@@ -270,9 +289,6 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
 .tex-display { display: block; text-align: center; }
 .tex-display + .tex-display .katex-display { margin-top: 0; }
 .formula-body .katex-display { margin: var(--space-2) 0; }
-.tex-display.tex-fallback { font-family: var(--font-serif); font-size: 1.25rem; margin: var(--space-3) 0; white-space: nowrap; }
-.frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 2px; }
-.frac > span + span { border-top: 1px solid currentColor; padding-top: 1px; }
 .terms { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-2) var(--space-3); margin: 0; font-size: var(--text-sm); }
 .terms dt { white-space: nowrap; }
 .terms dd { margin: 0; }
@@ -292,10 +308,20 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
   .hero-head { margin-bottom: var(--space-1); }
   .coverage-value { font-size: var(--text-2xl); }
   .layer-legend { font-size: var(--text-xs); gap: 0 var(--space-3); }
-  .sim-grid .plot { height: 260px; }
-  .hero-controls { flex-direction: column; align-items: stretch; gap: var(--space-2) var(--space-3); margin-top: var(--space-3); padding-top: var(--space-3); }
+  .sim-grid .plot { height: 220px; }
+  /* Controls stay pinned to the bottom of the screen while the figure is in view, so the slider and the
+     plot can be used together. */
+  .hero-controls {
+    flex-direction: column; align-items: stretch; gap: var(--space-1) var(--space-3); margin-top: var(--space-3);
+    padding: var(--space-2) 0; position: sticky; bottom: 0; z-index: 2; background: var(--color-surface);
+    box-shadow: 0 -1px 0 var(--color-border);
+  }
+  .hero-controls .slider small { display: none; }
+  .hero-controls .slider input[type='range'] { margin: 0; }
+  .stack-bars li { grid-template-columns: 4.6em minmax(0, 1fr) 7em; }
   .hero-controls .slider { flex: none; align-self: stretch; }
   .sim-buttons { align-self: flex-start; }
+  .sim-buttons .button { padding: var(--space-1) var(--space-3); }
 
   .model-control { display: flex; align-items: center; gap: var(--space-3); }
   .model-control .control-label { margin: 0; }
@@ -324,6 +350,9 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
 }
 .choice:hover { border-color: var(--color-accent); }
 .choice-letter { font-weight: 600; color: var(--color-text-muted); }
+.choice-mark { margin-left: auto; font-weight: 700; }
+.choice.correct .choice-mark { color: var(--color-accent); }
+.choice.wrong .choice-mark { color: var(--data-2); }
 .choice.correct { border-color: var(--color-accent); background: var(--color-accent-soft); }
 .choice.wrong { border-color: var(--data-2); background: var(--data-2-soft); }
 .feedback { margin: var(--space-3) 0 0; font-size: var(--text-sm); line-height: var(--leading-snug); }
@@ -346,6 +375,16 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
 .results .result-main { border-bottom: 0; padding-top: var(--space-2); }
 .results .result-main dt { color: var(--color-text); font-weight: 600; }
 .results .result-main dd { font-family: var(--font-serif); font-size: var(--text-xl); color: var(--data-2); }
+.results .result-main.invalid dd { color: var(--color-text-muted); text-decoration: line-through; }
+.result-warning {
+  margin: var(--space-3) 0 0; padding: var(--space-2) var(--space-3); font-size: var(--text-sm); line-height: var(--leading-snug);
+  border-left: 3px solid var(--data-2); background: var(--data-2-soft); border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+/* Pt particle size */
+.pt-figure { margin-top: var(--space-5); }
+.pt-figure h3 { font-size: var(--text-base); }
+.pt-row { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--space-3) var(--space-5); align-items: center; }
 
 /* Isotherm types */
 .type-grid { list-style: none; margin: var(--space-4) 0 var(--space-5); padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); gap: var(--space-3); }
@@ -359,7 +398,7 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
 .type-label { font-size: 8px; fill: var(--color-text-muted); font-family: var(--font-sans); }
 
 @media (max-width: 820px) {
-  .area-grid { grid-template-columns: minmax(0, 1fr); }
+  .area-grid, .pt-row { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 600px) {
   .try-card { padding: var(--space-3) var(--space-4); }

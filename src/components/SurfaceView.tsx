@@ -57,6 +57,8 @@ export interface SurfaceStats {
   occupied: number // sites with at least one molecule
   total: number // adsorbed molecules
   tallest: number
+  /** Sites by stack height: [bare, 1, 2, 3+]. */
+  heights: [number, number, number, number]
   avgLoading: number // time-averaged θ or n/nm
   time: number // simulated seconds since the start of this run
 }
@@ -109,11 +111,13 @@ interface Props {
   K: number // Langmuir constant
   c: number // BET constant
   paused: boolean
+  /** Simulated seconds per real second (fast-forward while far from equilibrium). */
+  speed?: number
   label: string
   onStats?: (s: SurfaceStats) => void
 }
 
-export default function SurfaceView({ mode, pressure, K, c, paused, label, onStats }: Props) {
+export default function SurfaceView({ mode, pressure, K, c, paused, speed = 1, label, onStats }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const modeRef = useRef(mode)
@@ -126,6 +130,8 @@ export default function SurfaceView({ mode, pressure, K, c, paused, label, onSta
   constsRef.current = { K, c }
   const pausedRef = useRef(paused)
   pausedRef.current = paused
+  const speedRef = useRef(speed)
+  speedRef.current = speed
 
   useEffect(() => {
     const wrap = wrapRef.current!
@@ -184,12 +190,14 @@ export default function SurfaceView({ mode, pressure, K, c, paused, label, onSta
       let total = 0
       let occupied = 0
       let tallest = 0
+      const heights: SurfaceStats['heights'] = [0, 0, 0, 0]
       for (const h of landed) {
         total += h
         if (h > 0) occupied++
         tallest = Math.max(tallest, h)
+        heights[Math.min(h, 3)]++
       }
-      onStatsRef.current?.({ occupied, total, tallest, avgLoading, time })
+      onStatsRef.current?.({ occupied, total, tallest, heights, avgLoading, time })
       return total
     }
     report()
@@ -388,7 +396,7 @@ export default function SurfaceView({ mode, pressure, K, c, paused, label, onSta
     let raf = 0
     let last = performance.now()
     const frame = (now: number) => {
-      const dt = Math.min(0.05, (now - last) / 1000)
+      const dt = Math.min(0.05, (now - last) / 1000) * speedRef.current
       last = now
       if (!pausedRef.current) {
         const n = Math.ceil(dt / MAX_SUBSTEP)
