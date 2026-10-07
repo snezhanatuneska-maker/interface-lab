@@ -38,7 +38,7 @@ const TYPES = [
   {
     name: 'Type IV',
     curves: [path(typeIV(0.72), 4), path(typeIV(0.55), 4, 0.4)],
-    text: 'Mesopores (2–50 nm): catalyst layers, mesoporous carbons. Above the BET range, pores fill by capillary condensation, and desorption (dashed) runs below adsorption. Pore filling gets its own upcoming tool.',
+    text: 'Mesopores (2–50 nm): catalyst layers, mesoporous carbons. Above the BET range, pores fill by capillary condensation (smallest pores first, Kelvin equation). On desorption they empty only at a lower pressure, so the desorption branch (dashed) lies above the adsorption branch: a hysteresis loop. Pore filling gets its own upcoming tool.',
   },
 ]
 

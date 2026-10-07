@@ -10,6 +10,8 @@ export function insight(mode: Model, x: number, K: number, c: number): string {
     const theta = langmuirTheta(x, K)
     if (theta > 0.9)
       return `Plateau: ${Math.round(theta * 100)} % of the sites are taken. More pressure barely adds anything, because each site holds one molecule and there is no second layer.`
+    if (theta < 0.5 && K < 1)
+      return `Weak binding (K < 1): half the sites would only be taken at p/p₀ = 1/K = ${f2(1 / K)}, above p₀. The gas condenses before this surface can fill, so there is no plateau on this axis.`
     if (theta < 0.5)
       return `Low coverage: θ still grows almost in proportion to pressure. Half the sites are taken at p/p₀ = 1/K = ${f2(1 / K)}.`
     return `More than half the sites are taken. Each new molecule is harder to place, because it must find one of the remaining free sites, so the curve bends towards θ = 1.`

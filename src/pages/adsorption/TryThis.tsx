@@ -24,7 +24,7 @@ interface Prompt {
 const PROMPTS: Prompt[] = [
   {
     title: 'Find the knee',
-    task: 'Slowly drag p/p₀ from 0 up to 0.3 and watch layer 1 (darkest).',
+    task: 'Slowly drag p/p₀ from 0 up to 0.3 and watch layer 1 (on the solid).',
     question: 'Where does the BET curve bend?',
     options: [
       'At p/p₀ ≈ 0.12, when about one monolayer’s worth is adsorbed',
@@ -142,6 +142,11 @@ function Question({ p, onApply }: { p: Prompt; onApply: (p: Preset) => void }) {
             onClick={() => setPicked(i)}
           >
             <span className="choice-letter">{String.fromCharCode(65 + i)}</span> {o}
+            {picked === i && (
+              <span className="choice-mark" aria-hidden="true">
+                {right ? '✓' : '✗'}
+              </span>
+            )}
           </button>
         ))}
       </fieldset>
