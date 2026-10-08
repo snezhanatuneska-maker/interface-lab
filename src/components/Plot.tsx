@@ -1,9 +1,20 @@
-// Plotly wrapper built from the lightweight "basic" bundle (scatter, bar, pie)
-// instead of the full plotly.js, which keeps the JS payload much smaller.
-// Swap in another dist (e.g. plotly.js-cartesian-dist-min) if more trace types are needed.
-import Plotly from 'plotly.js-basic-dist-min'
-import createPlotlyComponent from 'react-plotly.js/factory'
+import { lazy, Suspense } from 'react'
+import type { PlotParams } from 'react-plotly.js'
 
-const Plot = createPlotlyComponent(Plotly)
+// Plotly is the biggest dependency, so it loads in its own chunk. Until it arrives, a quiet placeholder
+// of the same size (same className) holds the plot's place, so the layout does not jump.
+const PlotlyPlot = lazy(() => import('./PlotlyPlot'))
 
-export default Plot
+export default function Plot(props: PlotParams) {
+  return (
+    <Suspense
+      fallback={
+        <div className={`${props.className ?? ''} plot-loading`} aria-hidden="true">
+          Loading plot…
+        </div>
+      }
+    >
+      <PlotlyPlot {...props} />
+    </Suspense>
+  )
+}

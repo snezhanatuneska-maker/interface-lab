@@ -1,4 +1,4 @@
-import { useRef, type KeyboardEvent, type ReactNode } from 'react'
+import { useRef, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react'
 
 // Form controls shared by the simulators: a labelled slider and a segmented radio group.
 
@@ -19,6 +19,8 @@ interface SliderProps {
 }
 
 export function Slider({ id, label, value, min, max, step, pos, onChange, hint, className }: SliderProps) {
+  // Filled part of the track, drawn in CSS (index.css) from this percentage.
+  const fill = { '--fill': `${(Math.min(Math.max((pos - min) / (max - min), 0), 1) * 100).toFixed(2)}%` } as CSSProperties
   return (
     <div className={className ? `slider ${className}` : 'slider'}>
       <label htmlFor={id}>
@@ -32,6 +34,7 @@ export function Slider({ id, label, value, min, max, step, pos, onChange, hint, 
         max={max}
         step={step}
         value={pos}
+        style={fill}
         aria-valuetext={value}
         onChange={(e) => onChange(Number(e.target.value))}
       />

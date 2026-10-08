@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Annotation, Data, Shape } from 'plotly.js'
 import Plot from '../components/Plot'
 import SurfaceView, { N_SITES, type SurfaceStats } from '../components/SurfaceView'
@@ -30,6 +30,19 @@ const X_DEFAULT = 0.3
 
 const EMPTY_STATS: SurfaceStats = { occupied: 0, total: 0, tallest: 0, avgLoading: 0, time: 0 }
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+// On a phone the isotherm is too short for the full y-axis title, so it drops "(monolayers)".
+const NARROW = '(max-width: 600px)'
+function useNarrow(): boolean {
+  const [narrow, setNarrow] = useState(() => window.matchMedia(NARROW).matches)
+  useEffect(() => {
+    const mq = window.matchMedia(NARROW)
+    const onChange = () => setNarrow(mq.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+  return narrow
+}
 
 const LEGEND = [
   { color: 'var(--layer-1)', label: 'layer 1 (on the solid)' },
@@ -73,6 +86,7 @@ export default function AdsorptionPage() {
   const [sampleId, setSampleId] = useState(SAMPLE_DEFAULT)
   const [stats, setStats] = useState<SurfaceStats>(EMPTY_STATS)
   const theme = useThemeColors()
+  const narrow = useNarrow()
   const COLORS = { langmuir: theme.data1, bet: theme.data2, ink: theme.text, muted: theme.muted }
 
   const cov = mode === 'langmuir' ? langmuirTheta(x, K) : betLoading(x, c)
@@ -102,7 +116,8 @@ export default function AdsorptionPage() {
     if (p.c !== undefined) setC(p.c)
     setPaused(false)
     restart()
-    document.getElementById(p.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    // Scroll on the next frame, once the new setting has rendered: it can change the height of what is above the target.
+    requestAnimationFrame(() => document.getElementById(p.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
   }
 
   // ---------- Isotherm ----------
@@ -179,7 +194,7 @@ export default function AdsorptionPage() {
       yshift: -2,
       text: 'BET fit range',
       showarrow: false,
-      font: { size: 11, color: COLORS.bet },
+      font: { size: 12, color: COLORS.bet },
     },
     {
       xref: 'paper',
@@ -188,9 +203,9 @@ export default function AdsorptionPage() {
       xanchor: 'right',
       yanchor: 'bottom',
       yshift: 2,
-      text: 'one monolayer (Vₘ)',
+      text: 'one monolayer (V<sub>m</sub>)',
       showarrow: false,
-      font: { size: 11, color: COLORS.muted },
+      font: { size: 12, color: COLORS.muted },
     },
     {
       xref: 'x',
@@ -204,7 +219,7 @@ export default function AdsorptionPage() {
       textangle: -90,
       text: 'p₀: V → ∞',
       showarrow: false,
-      font: { size: 11, color: COLORS.bet },
+      font: { size: 12, color: COLORS.bet },
     },
     // A marker above the visible range is pinned to the top edge with its value.
     ...(cov > Y_MAX
@@ -291,7 +306,7 @@ export default function AdsorptionPage() {
                   ...baseLayout(theme),
                   showlegend: false,
                   xaxis: { ...axis(theme), title: { text: 'Relative pressure p/p₀' }, range: [0, 1] },
-                  yaxis: { ...axis(theme), title: { text: 'V/V<sub>m</sub>  (monolayers)' }, range: [0, Y_MAX] },
+                  yaxis: { ...axis(theme), title: { text: narrow ? 'V/V<sub>m</sub>' : 'V/V<sub>m</sub>  (monolayers)' }, range: [0, Y_MAX] },
                   shapes: isoShapes,
                   annotations: isoAnnotations,
                 }}
@@ -380,7 +395,7 @@ export default function AdsorptionPage() {
         </p>
         <figcaption>
           <span className="figure-label">Figure 1.</span> Left: the surface. Right: the isotherm; the dot is the
-          current pressure (▲ if off the top). After a big change the simulation lags; Jump to equilibrium catches it
+          current pressure (▲&nbsp;if off the top). After a big change the simulation lags; Jump to equilibrium catches it
           up. B is where V = V<sub>m</sub> (the knee, for large C). Shaded: BET fit range.
         </figcaption>
       </figure>

@@ -1,7 +1,8 @@
 # Interface Engineering Lab
 
-Interactive educational tools for **Interface Engineering in Clean Energy Processes (CEP)**,
-by Snezhana Tuneska.
+Interactive educational tools for **Interface Engineering in Clean Energy Processes (CEP)**.
+
+Author: **Snezhana Tuneska – CEP**
 
 Live site: <https://snezhanatuneska-maker.github.io/interface-lab/>
 
@@ -68,10 +69,11 @@ src/data/upcomingProjects.ts     Every tool on the homepage (live and planned) i
 src/pages/HomePage.tsx           Homepage: Tools and Upcoming Projects tabs
 src/pages/AdsorptionPage.tsx     Langmuir vs BET page: simulation, isotherm and controls
 src/pages/adsorption/            Sections of that page: Try this, equations, BET plot and surface area,
-                                 isotherm types, and the contextual explanations (insight.ts)
+                                 isotherm types, and the contextual explanations (insight.tsx)
 src/components/SurfaceView.tsx   Animated canvas: gas molecules adsorbing on the surface
 src/components/Controls.tsx      Shared controls: Slider, LogSlider, Segmented (radio group)
-src/components/Plot.tsx          Plotly wrapper (uses the smaller "basic" Plotly bundle)
+src/components/Plot.tsx          Loads Plotly on demand, with a same-size "Loading plot…" placeholder
+src/components/PlotlyPlot.tsx    Plotly component (uses the smaller "basic" Plotly bundle)
 src/components/Tex.tsx           KaTeX equation component
 src/components/ThemeToggle.tsx   Light/dark switch in the header
 src/components/UpcomingProjects.tsx  Upcoming Projects tab
@@ -79,7 +81,7 @@ src/lib/adsorption.ts            Isotherm equations, BET fit, surface area, exam
 src/lib/plotTheme.ts             Shared Plotly layout and axis styling
 src/lib/theme.ts, themeColors.ts Light/dark theme and its colours for canvas and Plotly
 src/lib/useHashRoute.ts          Tiny hash-based router (works on GitHub Pages)
-.github/workflows/deploy.yml     GitHub Pages deployment workflow
+.github/workflows/deploy.yml     GitHub Pages deployment workflow (tests, build, deploy)
 .github/workflows/ci.yml         Tests and build on every pull request
 ```
 
@@ -89,8 +91,9 @@ Deployment is automatic. On every push to `main`, the workflow in
 `.github/workflows/deploy.yml`:
 
 1. checks out the code and installs dependencies with `npm ci`,
-2. runs `npm run build` to produce the static site in `dist/`,
-3. uploads `dist/` as a Pages artifact and publishes it with `actions/deploy-pages`.
+2. runs `npm test`; if a test fails, nothing is deployed,
+3. runs `npm run build` to produce the static site in `dist/`,
+4. uploads `dist/` as a Pages artifact and publishes it with `actions/deploy-pages`.
 
 You can also run it by hand from the **Actions** tab (**Deploy to GitHub Pages** → **Run workflow**).
 

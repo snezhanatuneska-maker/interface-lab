@@ -60,10 +60,11 @@
   --data-1: #2f6aa8; /* Langmuir */
   --data-2: #b5502a; /* BET */
   --data-1-soft: rgba(47, 106, 168, 0.1);
-  --data-2-soft: rgba(181, 80, 42, 0.08);
-  --data-grid: #ebece8;
-  --data-axis: #b9bcb5;
+  --data-2-soft: rgba(181, 80, 42, 0.14);
+  --data-grid: #dfe1dc;
+  --data-axis: #8f938b;
   --data-plot-bg: #ffffff;
+  --slider-track: #c2c6bf;
 
   /* Molecule colors (sequential teal: first layer darkest) */
   --layer-1: #0e4f4c;
@@ -93,9 +94,10 @@
   --data-2: #e2885f;
   --data-1-soft: rgba(116, 167, 222, 0.14);
   --data-2-soft: rgba(226, 136, 95, 0.12);
-  --data-grid: #2a2e32;
-  --data-axis: #4b5157;
+  --data-grid: #353a3f;
+  --data-axis: #646b72;
   --data-plot-bg: #1a1d20;
+  --slider-track: #4a5056;
 
   --layer-1: #84d2cb;
   --layer-2: #3f9d96;

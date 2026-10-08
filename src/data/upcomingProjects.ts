@@ -40,7 +40,7 @@ export const PROJECTS: Project[] = [
     description:
       'Tune surface energy and roughness; watch a droplet wet or bead up.',
     concepts: ["Young's equation", 'Roughness amplifies wetting', 'Contact angle >150°', 'Lotus effect'],
-    cepLink: 'Water management in fuel-cell gas diffusion layers and bubble release on electrolyzer electrodes.',
+    cepLink: 'Water management in fuel-cell gas diffusion layers and bubble release on electrolyser electrodes.',
     status: 'planned',
   },
   {

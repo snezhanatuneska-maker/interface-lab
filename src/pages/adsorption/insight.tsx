@@ -1,9 +1,10 @@
+import type { ReactNode } from 'react'
 import { BET_FIT_RANGE, kneeX, langmuirTheta, type Model } from '../../lib/adsorption'
 
 const f2 = (v: number) => v.toFixed(2)
 
 /** One-sentence explanation of what the current setting shows, shown under the controls. */
-export function insight(mode: Model, x: number, K: number, c: number): string {
+export function insight(mode: Model, x: number, K: number, c: number): ReactNode {
   if (x === 0) return 'No gas, no adsorption. Raise p/p₀.'
 
   if (mode === 'langmuir') {
@@ -15,7 +16,12 @@ export function insight(mode: Model, x: number, K: number, c: number): string {
     return 'Over half full. Free sites get scarce, so the curve bends toward θ = 1.'
   }
 
-  if (c < 2) return 'C < 2: no knee (type III), so no point B to read Vₘ from.'
+  if (c < 2)
+    return (
+      <>
+        C &lt; 2: no knee (type III), so no point B to read V<sub>m</sub> from.
+      </>
+    )
   const xB = kneeX(c)
   if (x < 0.8 * xB) return `Below B (p/p₀ ≈ ${f2(xB)}): the first layer is still filling.`
   if (x <= 1.25 * xB) return 'At B: about one monolayer’s worth. Some sites are bare, some already two deep.'

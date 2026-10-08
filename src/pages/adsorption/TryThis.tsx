@@ -55,7 +55,7 @@ const PROMPTS: Prompt[] = [
     why: (
       <>
         Below C = 2 the solid holds the first layer barely better than the liquid holds itself, so molecules pile up
-        in islands (type III). No knee, no point B: Vₘ is unreliable.
+        in islands (type III). No knee, no point B: V<sub>m</sub> is unreliable.
       </>
     ),
     preset: { mode: 'bet', x: 0.3, c: 1, target: 'sim-figure' },
@@ -100,13 +100,17 @@ const PROMPTS: Prompt[] = [
   },
   {
     title: 'Surface area and C',
-    task: 'In the BET plot below, move C from 10 to 300. Watch Vₘ and the area.',
+    task: (
+      <>
+        In the BET plot below, move C from 10 to 300. Watch V<sub>m</sub> and the area.
+      </>
+    ),
     question: 'What happens to the specific surface area in m²/g?',
     options: ['It grows with C', 'It stays the same', 'It shrinks with C', 'It cannot be calculated once C > 100'],
     answer: 1,
     why: (
       <>
-        Slope and intercept change, but Vₘ = 1/(slope + intercept) does not. Vₘ belongs to the solid, C to how
+        Slope and intercept change, but V<sub>m</sub> = 1/(slope + intercept) does not. V<sub>m</sub> belongs to the solid, C to how
         strongly the gas binds to it.
       </>
     ),
@@ -157,6 +161,11 @@ function Question({ p, onApply }: { p: Prompt; onApply: (p: Preset) => void }) {
             </p>
           ))}
       </div>
+      {picked !== null && (
+        <button type="button" className="link-button" onClick={() => setPicked(null)}>
+          Reset
+        </button>
+      )}
     </li>
   )
 }

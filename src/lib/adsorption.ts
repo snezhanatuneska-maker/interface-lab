@@ -102,10 +102,10 @@ export interface Sample {
   area: number
 }
 
-/** Example powders from fuel cells and electrolyzers, with typical N₂ BET areas. */
+/** Example powders from fuel cells and electrolysers, with typical N₂ BET areas. */
 export const SAMPLES: Sample[] = [
   { id: 'pt-black', name: 'Pt black', role: 'fuel-cell catalyst', area: 25 },
-  { id: 'iro2', name: 'IrO₂ powder', role: 'electrolyzer catalyst', area: 30 },
+  { id: 'iro2', name: 'IrO₂ powder', role: 'electrolyser catalyst', area: 30 },
   { id: 'vulcan', name: 'Vulcan XC-72', role: 'Pt catalyst support', area: 240 },
   { id: 'ketjen', name: 'Ketjenblack EC-300J', role: 'high-area support', area: 800 },
 ]

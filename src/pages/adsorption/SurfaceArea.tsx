@@ -116,7 +116,7 @@ export default function SurfaceArea({ c, setC, sampleId, setSampleId, theme }: P
       y: [fit.intercept * Y_SCALE],
       type: 'scatter',
       mode: 'markers',
-      name: 'intercept 1/(VₘC)',
+      name: 'intercept 1/(V<sub>m</sub>C)',
       marker: { size: 9, symbol: 'diamond', color: theme.text },
     },
   ]
