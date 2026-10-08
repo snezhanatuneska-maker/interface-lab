@@ -13,9 +13,8 @@ The first tool is a **Langmuir vs BET adsorption** simulator for bachelor studen
   molecules stack into multilayers, coloured by layer (1, 2, 3+). The simulation starts at equilibrium, and its
   desorption rates follow K and C, so its running average matches the equation. Far from equilibrium (near p₀,
   or after the pressure drops to 0) it fast-forwards (×16, then ×64) until it catches up; **Jump to equilibrium**
-  restarts it at equilibrium for the current setting. Bars under it show the share of sites that are bare or
-  1, 2, 3+ layers deep, in the simulation and from the equation.
-- An **isotherm** plot (θ = V/Vₘ against p/p₀, 0–3 or 0–25 layers) with the current pressure marked, the knee
+  restarts it at equilibrium for the current setting.
+- An **isotherm** plot (θ = V/Vₘ against p/p₀, fixed 0–3 layers) with the current pressure marked, the knee
   **B** (one monolayer's worth, p/p₀ = 1/(1 + √C)), the BET fit range (0.05–0.35) shaded, p₀ marked, and an
   "off scale" marker when the point is above the plot.
 - Controls: model (Langmuir / BET; the pressure is kept when switching), pressure p/p₀, log-scale sliders for

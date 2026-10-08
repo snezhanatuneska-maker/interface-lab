@@ -16,7 +16,6 @@ import {
   langmuirTheta,
   SAMPLE_DEFAULT,
   siteHeightSd,
-  stackShares,
   type Model,
 } from '../lib/adsorption'
 import { insight } from './adsorption/insight'
@@ -26,10 +25,7 @@ import SurfaceArea from './adsorption/SurfaceArea'
 import BeyondBet from './adsorption/BeyondBet'
 
 const X_MAX = 0.95
-// 0–3 layers shows the Langmuir plateau and the BET knee; 0–25 shows the BET rise near p₀.
-// Points above the range get an "off scale" marker.
-const Y_RANGES = { knee: 3, full: 25 } as const
-type YRange = keyof typeof Y_RANGES
+const Y_MAX = 3 // 0–3 layers shows the Langmuir plateau and the BET knee; higher points get an "off scale" marker
 const N_POINTS = 300
 const X_DEFAULT = 0.3
 const SETTLE_MIN_TIME = 3 // simulated s at a setting (one averaging window) before it can count as settled
@@ -38,7 +34,7 @@ const SETTLE_MIN_TIME = 3 // simulated s at a setting (one averaging window) bef
 // ×16 after 1 simulated s at a setting (so dragging stays real-time), ×64 after 30 s.
 const fastForwardSpeed = (elapsed: number) => (elapsed < 1 ? 1 : elapsed < 30 ? 16 : 64)
 
-const EMPTY_STATS: SurfaceStats = { occupied: 0, total: 0, tallest: 0, heights: [0, 0, 0, 0], avgLoading: 0, time: 0 }
+const EMPTY_STATS: SurfaceStats = { occupied: 0, total: 0, tallest: 0, avgLoading: 0, time: 0 }
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const LEGEND = [
@@ -97,40 +93,6 @@ function Readout({ model, cov, stats, status, speed }: ReadoutProps) {
   )
 }
 
-const STACK_ROWS = ['bare', '1 layer', '2 layers', '3+ layers']
-const STACK_COLORS = ['var(--solid)', 'var(--layer-1)', 'var(--layer-2)', 'var(--layer-3)']
-
-/** Share of sites by stack height: bar = simulation now, tick = equation. */
-function StackBars({ model, heights, shares }: { model: Model; heights: SurfaceStats['heights']; shares: number[] }) {
-  const n = heights.reduce((a, b) => a + b, 0) || 1
-  const pct = (v: number) => `${Math.round(v * 100)} %`
-  return (
-    <div className="stack-bars">
-      <p className="stack-title">
-        Sites by stack height <span>(bar: simulation now · tick: equation)</span>
-      </p>
-      <ul>
-        {STACK_ROWS.map((label, i) => {
-          const blocked = model === 'langmuir' && i >= 2
-          const sim = heights[i] / n
-          return (
-            <li key={label} className={blocked ? 'blocked' : undefined}>
-              <span className="stack-label">{label}</span>
-              <span className="stack-track" aria-hidden="true">
-                <span className="stack-fill" style={{ width: pct(sim), background: STACK_COLORS[i] }} />
-                {!blocked && <span className="stack-tick" style={{ left: pct(shares[i]) }} />}
-              </span>
-              <span className="stack-value">
-                {blocked ? 'not allowed' : `${pct(sim)} (eq. ${pct(shares[i])})`}
-              </span>
-            </li>
-          )
-        })}
-      </ul>
-    </div>
-  )
-}
-
 export default function AdsorptionPage() {
   const [x, setX] = useState(X_DEFAULT)
   const [mode, setMode] = useState<Model>('bet')
@@ -138,8 +100,6 @@ export default function AdsorptionPage() {
   const [K, setK] = useState(K_DEFAULT)
   const [c, setC] = useState(C_DEFAULT)
   const [paused, setPaused] = useState(prefersReducedMotion)
-  const [yRange, setYRange] = useState<YRange>('knee')
-  const yMax = Y_RANGES[yRange]
   const [sampleId, setSampleId] = useState(SAMPLE_DEFAULT)
   const [stats, setStats] = useState<SurfaceStats>(EMPTY_STATS)
   const theme = useThemeColors()
@@ -206,8 +166,7 @@ export default function AdsorptionPage() {
         y: m === 'langmuir' ? curves.lang : curves.bet,
         type: 'scatter',
         mode: 'lines',
-        // Langmuir dotted, BET solid: the two curves differ by more than colour.
-        line: { ...curveStyle(m), dash: m === 'langmuir' ? 'dot' : 'solid' },
+        line: curveStyle(m),
         opacity: mode === m ? 1 : 0.6,
       }),
     ),
@@ -289,11 +248,11 @@ export default function AdsorptionPage() {
       font: { size: 11, color: COLORS.bet },
     },
     // A marker above the visible range is pinned to the top edge with its value.
-    ...(cov > yMax
+    ...(cov > Y_MAX
       ? [
           {
             x,
-            y: yMax,
+            y: Y_MAX,
             yanchor: 'top' as const,
             xanchor: x > 0.8 ? ('right' as const) : ('left' as const),
             xshift: x > 0.8 ? -6 : 6,
@@ -306,7 +265,7 @@ export default function AdsorptionPage() {
   ]
 
   const plotLabel =
-    `Isotherm plot, relative pressure 0 to 1 against V over Vm, 0 to ${yMax}. ${mode === 'langmuir' ? 'Langmuir' : 'BET'} ` +
+    `Isotherm plot, relative pressure 0 to 1 against V over Vm, 0 to ${Y_MAX}. ${mode === 'langmuir' ? 'Langmuir' : 'BET'} ` +
     `at p/p₀ ${x.toFixed(2)}: ${cov.toFixed(2)}` +
     (showKnee ? `. Knee B at p/p₀ ${kneeX(c).toFixed(2)}.` : '.')
 
@@ -341,28 +300,25 @@ export default function AdsorptionPage() {
         </div>
 
         <div className="sim-grid">
-          <div className="sim-col">
-            <SurfaceView
-              key={runId}
-              mode={mode}
-              pressure={x}
-              K={K}
-              c={c}
-              paused={paused}
-              speed={speed}
-              onStats={setStats}
-              label={
-                mode === 'langmuir'
-                  ? `Langmuir surface: ${stats.occupied} of ${N_SITES} sites occupied, single layer`
-                  : `BET surface: ${stats.total} molecules on ${N_SITES} sites, up to ${stats.tallest} layers`
-              }
-            />
-            <StackBars model={mode} heights={stats.heights} shares={stackShares(mode, x, K, c)} />
-          </div>
+          <SurfaceView
+            key={runId}
+            mode={mode}
+            pressure={x}
+            K={K}
+            c={c}
+            paused={paused}
+            speed={speed}
+            onStats={setStats}
+            label={
+              mode === 'langmuir'
+                ? `Langmuir surface: ${stats.occupied} of ${N_SITES} sites occupied, single layer`
+                : `BET surface: ${stats.total} molecules on ${N_SITES} sites, up to ${stats.tallest} layers`
+            }
+          />
           <div className="plot-col">
             <ul className="plot-legend" aria-label="Plot legend">
               <li>
-                <span className="key-line" style={{ borderColor: COLORS.langmuir, borderTopStyle: 'dotted' }} /> Langmuir θ
+                <span className="key-line" style={{ borderColor: COLORS.langmuir }} /> Langmuir θ
               </li>
               <li>
                 <span className="key-line" style={{ borderColor: COLORS.bet }} /> BET V/V<sub>m</sub>
@@ -381,25 +337,13 @@ export default function AdsorptionPage() {
                   ...baseLayout(theme),
                   showlegend: false,
                   xaxis: { ...axis(theme), title: { text: 'Relative pressure p/p₀' }, range: [0, 1] },
-                  yaxis: { ...axis(theme), title: { text: 'θ = V/V<sub>m</sub>  (layers)' }, range: [0, yMax] },
+                  yaxis: { ...axis(theme), title: { text: 'θ = V/V<sub>m</sub>  (layers)' }, range: [0, Y_MAX] },
                   shapes: isoShapes,
                   annotations: isoAnnotations,
                 }}
                 config={staticConfig}
                 useResizeHandler
                 className="plot"
-              />
-            </div>
-            <div className="plot-zoom">
-              <span className="control-label">y-axis</span>
-              <Segmented
-                label="y-axis range"
-                value={yRange}
-                onChange={setYRange}
-                options={[
-                  { value: 'knee', label: '0–3 layers' },
-                  { value: 'full', label: `0–${Y_RANGES.full} layers` },
-                ]}
               />
             </div>
           </div>
@@ -475,7 +419,7 @@ export default function AdsorptionPage() {
           <span className="figure-label">Figure 1.</span> Left: the surface in cross-section. Right: the isotherm. The
           dot is the current pressure; the diamond appears once the simulation has settled on it (far from
           equilibrium it fast-forwards). B marks one monolayer’s worth adsorbed, V = V<sub>m</sub>; even there some
-          sites are still bare and some already two deep (see the bars). The shaded band is the BET fit range.
+          sites are still bare and some already two deep. The shaded band is the BET fit range.
         </figcaption>
       </figure>
 

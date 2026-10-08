@@ -232,23 +232,6 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
 /* Fixed width so the status tag never reflows the readout (and with it the figure) when it changes. */
 .sim-status { min-width: 8.5em; text-align: center; }
 .coverage-note { font-weight: 400; }
-
-/* Sites by stack height, under the molecular view */
-.sim-col { min-width: 0; }
-.stack-bars { margin-top: var(--space-2); font-size: var(--text-xs); color: var(--color-text-muted); }
-.stack-title { margin: 0 0 2px; font-weight: 600; color: var(--color-text); }
-.stack-title span { font-weight: 400; color: var(--color-text-muted); }
-.stack-bars ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
-.stack-bars li { display: grid; grid-template-columns: 4.6em minmax(0, 1fr) 7.5em; align-items: center; gap: var(--space-2); }
-.stack-bars li.blocked { opacity: 0.6; }
-.stack-track { position: relative; height: 10px; border: 1px solid var(--color-border-strong); border-radius: 2px; background: var(--data-plot-bg); }
-.stack-fill { position: absolute; inset: 0 auto 0 0; transition: width 0.2s; }
-.stack-tick { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: var(--color-text); }
-.stack-value { font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
-
-.plot-zoom { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-1); }
-.plot-zoom .control-label { margin: 0; font-size: var(--text-xs); }
-.plot-zoom .segmented button { font-size: var(--text-xs); padding: 0 var(--space-3); }
 .insight {
   max-width: var(--measure); margin: var(--space-4) 0 0; padding: var(--space-2) var(--space-3);
   font-size: var(--text-sm); line-height: var(--leading-snug);
@@ -318,7 +301,6 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
   }
   .hero-controls .slider small { display: none; }
   .hero-controls .slider input[type='range'] { margin: 0; }
-  .stack-bars li { grid-template-columns: 4.6em minmax(0, 1fr) 7em; }
   .hero-controls .slider { flex: none; align-self: stretch; }
   .sim-buttons { align-self: flex-start; }
   .sim-buttons .button { padding: var(--space-1) var(--space-3); }

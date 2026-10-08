@@ -9,7 +9,6 @@ import {
   langmuirTheta,
   ptAreaPerGram,
   siteHeightSd,
-  stackShares,
   surfaceArea,
 } from './adsorption'
 
@@ -45,22 +44,7 @@ describe('BET', () => {
   })
 })
 
-describe('stack-height distribution', () => {
-  it('sums to 1 and has the isotherm as its mean', () => {
-    const [s0, s1, s2, s3] = stackShares('bet', 0.3, 10, 50)
-    expect(s0 + s1 + s2 + s3).toBeCloseTo(1, 12)
-    const lang = stackShares('langmuir', 0.3, 10, 50)
-    expect(lang[1]).toBeCloseTo(langmuirTheta(0.3, 10))
-    expect(lang[2] + lang[3]).toBe(0)
-  })
-
-  it('leaves sites bare even at one monolayer’s worth (point B)', () => {
-    const c = 50
-    const [bare, , two] = stackShares('bet', kneeX(c), 1, c)
-    expect(bare).toBeGreaterThan(0.1)
-    expect(two).toBeGreaterThan(0.05)
-  })
-
+describe('site-height spread', () => {
   it('has the variance of a Bernoulli site for Langmuir', () => {
     expect(siteHeightSd('langmuir', 0.1, 10, 1)).toBeCloseTo(0.5)
     expect(siteHeightSd('bet', 0, 1, 50)).toBe(0)
