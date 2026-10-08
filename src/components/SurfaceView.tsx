@@ -57,8 +57,6 @@ export interface SurfaceStats {
   occupied: number // sites with at least one molecule
   total: number // adsorbed molecules
   tallest: number
-  /** Sites by stack height: [bare, 1, 2, 3+]. */
-  heights: [number, number, number, number]
   avgLoading: number // time-averaged θ or n/nm
   time: number // simulated seconds since the start of this run
 }
@@ -190,14 +188,12 @@ export default function SurfaceView({ mode, pressure, K, c, paused, speed = 1, l
       let total = 0
       let occupied = 0
       let tallest = 0
-      const heights: SurfaceStats['heights'] = [0, 0, 0, 0]
       for (const h of landed) {
         total += h
         if (h > 0) occupied++
         tallest = Math.max(tallest, h)
-        heights[Math.min(h, 3)]++
       }
-      onStatsRef.current?.({ occupied, total, tallest, heights, avgLoading, time })
+      onStatsRef.current?.({ occupied, total, tallest, avgLoading, time })
       return total
     }
     report()

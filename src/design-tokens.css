@@ -3,7 +3,7 @@
  * Calm, textbook-like: neutral paper background, one accent (deep teal),
  * serif headings, sans-serif body. No gradients, no drop shadows.
  * Light values are the default; dark values apply when <html data-theme="dark">,
- * which index.html sets from the saved choice or the OS setting (see src/lib/theme.ts).
+ * which index.html sets from the saved choice (light by default; see src/lib/theme.ts).
  */
 
 :root {

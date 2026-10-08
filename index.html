@@ -15,11 +15,11 @@
     <meta property="og:url" content="https://snezhanatuneska-maker.github.io/interface-lab/" />
     <meta name="theme-color" content="#f8f8f6" />
     <script>
-      // Set the theme before first paint: saved choice, else the OS setting. Kept in sync with src/lib/theme.ts.
+      // Set the theme before first paint: saved choice, else light. Kept in sync with src/lib/theme.ts.
       (function () {
         var t
         try { t = localStorage.getItem('theme') } catch (e) {}
-        if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        if (t !== 'dark') t = 'light'
         document.documentElement.dataset.theme = t
         document.querySelector('meta[name="theme-color"]').content = t === 'dark' ? '#131517' : '#f8f8f6'
       })()
