@@ -8,7 +8,6 @@ import {
   kneeX,
   langmuirTheta,
   ptAreaPerGram,
-  siteHeightSd,
   surfaceArea,
 } from './adsorption'
 
@@ -41,13 +40,6 @@ describe('BET', () => {
     const fit = betFromLine(line.slope, line.intercept)
     expect(fit.Vm).toBeCloseTo(Vm, 8)
     expect(fit.C).toBeCloseTo(C, 6)
-  })
-})
-
-describe('site-height spread', () => {
-  it('has the variance of a Bernoulli site for Langmuir', () => {
-    expect(siteHeightSd('langmuir', 0.1, 10, 1)).toBeCloseTo(0.5)
-    expect(siteHeightSd('bet', 0, 1, 50)).toBe(0)
   })
 })
 

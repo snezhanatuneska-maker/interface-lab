@@ -109,13 +109,11 @@ interface Props {
   K: number // Langmuir constant
   c: number // BET constant
   paused: boolean
-  /** Simulated seconds per real second (fast-forward while far from equilibrium). */
-  speed?: number
   label: string
   onStats?: (s: SurfaceStats) => void
 }
 
-export default function SurfaceView({ mode, pressure, K, c, paused, speed = 1, label, onStats }: Props) {
+export default function SurfaceView({ mode, pressure, K, c, paused, label, onStats }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const modeRef = useRef(mode)
@@ -128,8 +126,6 @@ export default function SurfaceView({ mode, pressure, K, c, paused, speed = 1, l
   constsRef.current = { K, c }
   const pausedRef = useRef(paused)
   pausedRef.current = paused
-  const speedRef = useRef(speed)
-  speedRef.current = speed
 
   useEffect(() => {
     const wrap = wrapRef.current!
@@ -392,7 +388,7 @@ export default function SurfaceView({ mode, pressure, K, c, paused, speed = 1, l
     let raf = 0
     let last = performance.now()
     const frame = (now: number) => {
-      const dt = Math.min(0.05, (now - last) / 1000) * speedRef.current
+      const dt = Math.min(0.05, (now - last) / 1000)
       last = now
       if (!pausedRef.current) {
         const n = Math.ceil(dt / MAX_SUBSTEP)

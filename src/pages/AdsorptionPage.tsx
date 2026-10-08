@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { Annotation, Data, Shape } from 'plotly.js'
 import Plot from '../components/Plot'
 import SurfaceView, { N_SITES, type SurfaceStats } from '../components/SurfaceView'
@@ -15,7 +15,6 @@ import {
   kneeX,
   langmuirTheta,
   SAMPLE_DEFAULT,
-  siteHeightSd,
   type Model,
 } from '../lib/adsorption'
 import { insight } from './adsorption/insight'
@@ -28,11 +27,6 @@ const X_MAX = 0.95
 const Y_MAX = 3 // 0–3 layers shows the Langmuir plateau and the BET knee; higher points get an "off scale" marker
 const N_POINTS = 300
 const X_DEFAULT = 0.3
-const SETTLE_MIN_TIME = 3 // simulated s at a setting (one averaging window) before it can count as settled
-// Far from equilibrium (e.g. near p₀, or after the pressure drops to 0, where strongly bound first-layer
-// molecules take ~C/RATE ≈ 30 s or longer to leave) the simulation runs faster until it catches up:
-// ×16 after 1 simulated s at a setting (so dragging stays real-time), ×64 after 30 s.
-const fastForwardSpeed = (elapsed: number) => (elapsed < 1 ? 1 : elapsed < 30 ? 16 : 64)
 
 const EMPTY_STATS: SurfaceStats = { occupied: 0, total: 0, tallest: 0, avgLoading: 0, time: 0 }
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -44,33 +38,7 @@ const LEGEND = [
   { color: 'var(--gas)', label: 'gas molecule' },
 ]
 
-/**
- * "settling…" after a reset or any change of setting, until the simulation's running average has had at
- * least SETTLE_MIN_TIME of simulated time and comes within `tol` of the equation. Then the simulation
- * diamond is drawn on the isotherm; any change hides it until the next settle.
- */
-function useSettled(key: string, stats: SurfaceStats, target: number, tol: number) {
-  const start = useRef({ key, time: stats.time })
-  if (start.current.key !== key) start.current = { key, time: stats.time }
-  const [settledKey, setSettledKey] = useState('')
-  const elapsed = stats.time - start.current.time
-  const near = Math.abs(stats.avgLoading - target) <= tol
-  const ready = near && elapsed >= SETTLE_MIN_TIME
-  useEffect(() => {
-    if (ready && settledKey !== key) setSettledKey(key)
-  }, [ready, settledKey, key])
-  return { settled: settledKey === key, near, elapsed }
-}
-
-interface ReadoutProps {
-  model: Model
-  cov: number
-  stats: SurfaceStats
-  status: 'settled' | 'settling' | 'fast'
-  speed: number
-}
-
-function Readout({ model, cov, stats, status, speed }: ReadoutProps) {
+function Readout({ model, cov, stats }: { model: Model; cov: number; stats: SurfaceStats }) {
   return (
     <div className="coverage">
       <span className="coverage-label">
@@ -80,14 +48,7 @@ function Readout({ model, cov, stats, status, speed }: ReadoutProps) {
       </span>
       <span className={`coverage-value ${model}`}>{cov.toFixed(2)}</span>
       <span className="coverage-sub">
-        equation: {cov.toFixed(2)} · simulation (running average): {stats.avgLoading.toFixed(2)}{' '}
-        <span
-          className={`tag sim-status${status === 'settled' ? ' accent' : ''}`}
-          role="status"
-          title={status === 'fast' ? 'Far from equilibrium: the simulation runs faster until it catches up' : undefined}
-        >
-          {status === 'settled' ? 'settled' : status === 'fast' ? `fast-forward ×${speed}` : 'settling…'}
-        </span>
+        equation: {cov.toFixed(2)} · simulation (running average): {stats.avgLoading.toFixed(2)}
       </span>
     </div>
   )
@@ -106,11 +67,6 @@ export default function AdsorptionPage() {
   const COLORS = { langmuir: theme.data1, bet: theme.data2, ink: theme.text, muted: theme.muted }
 
   const cov = mode === 'langmuir' ? langmuirTheta(x, K) : betLoading(x, c)
-  // "Agrees with the equation" means within the statistical noise of a 24-site surface (or 5 %).
-  const tol = Math.max(0.05 * cov, 0.02, (0.5 * siteHeightSd(mode, x, K, c)) / Math.sqrt(N_SITES))
-  const { settled, near, elapsed } = useSettled(`${runId}|${mode}|${mode === 'langmuir' ? K : c}|${x}`, stats, cov, tol)
-  const speed = settled || near || paused ? 1 : fastForwardSpeed(elapsed)
-  const fast = speed > 1
 
   const restart = () => {
     setStats(EMPTY_STATS)
@@ -157,8 +113,8 @@ export default function AdsorptionPage() {
   const showKnee = mode === 'bet' && c >= 2
   const curveStyle = (m: Model) => (mode === m ? { color: COLORS[m], width: 3 } : { color: COLORS[m], width: 1.75 })
 
-  // The legend is drawn in HTML above the plot (not by Plotly), so the plot area keeps its size when the
-  // simulation diamond or point B appears or disappears.
+  // The legend is drawn in HTML above the plot (not by Plotly), so the plot area keeps its size when
+  // point B appears or disappears.
   const isoData: Data[] = [
     ...(['langmuir', 'bet'] as Model[]).map(
       (m): Data => ({
@@ -176,13 +132,6 @@ export default function AdsorptionPage() {
       type: 'scatter',
       mode: 'markers',
       marker: { size: 12, color: COLORS[mode], line: { color: theme.plotBg, width: 2 } },
-    },
-    {
-      x: settled ? [x] : [],
-      y: settled ? [cov] : [],
-      type: 'scatter',
-      mode: 'markers',
-      marker: { size: 8, symbol: 'diamond', color: theme.plotBg, line: { color: COLORS.ink, width: 1.5 } },
     },
     {
       x: showKnee ? [kneeX(c)] : [],
@@ -238,9 +187,9 @@ export default function AdsorptionPage() {
       xref: 'x',
       yref: 'paper',
       x: 1,
-      y: 1,
+      y: 0,
       xanchor: 'right',
-      yanchor: 'top',
+      yanchor: 'bottom',
       xshift: -2,
       textangle: -90,
       text: 'p₀: V → ∞',
@@ -254,9 +203,9 @@ export default function AdsorptionPage() {
             x,
             y: Y_MAX,
             yanchor: 'top' as const,
-            xanchor: x > 0.8 ? ('right' as const) : ('left' as const),
-            xshift: x > 0.8 ? -6 : 6,
-            text: `▲ ${cov.toFixed(1)} (off scale)`,
+            xanchor: x > 0.85 ? ('right' as const) : ('left' as const),
+            xshift: x > 0.85 ? -6 : 6,
+            text: `▲ ${cov.toFixed(1)}`,
             showarrow: false,
             font: { size: 12, color: COLORS[mode] },
           },
@@ -286,7 +235,7 @@ export default function AdsorptionPage() {
       {/* ---------- Hero: molecular view + isotherm ---------- */}
       <figure id="sim-figure" className="figure hero" aria-label="Molecular view and isotherm">
         <div className="hero-head">
-          <Readout model={mode} cov={cov} stats={stats} status={settled ? 'settled' : fast ? 'fast' : 'settling'} speed={speed} />
+          <Readout model={mode} cov={cov} stats={stats} />
           <ul className="layer-legend" aria-label="Legend">
             {LEGEND.map((l) => (
               <li key={l.label}>
@@ -307,7 +256,6 @@ export default function AdsorptionPage() {
             K={K}
             c={c}
             paused={paused}
-            speed={speed}
             onStats={setStats}
             label={
               mode === 'langmuir'
@@ -322,9 +270,6 @@ export default function AdsorptionPage() {
               </li>
               <li>
                 <span className="key-line" style={{ borderColor: COLORS.bet }} /> BET V/V<sub>m</sub>
-              </li>
-              <li>
-                <span className="key-mark">◇</span> simulation (settled)
               </li>
               <li>
                 <span className="key-mark">○</span> B: one monolayer’s worth (V = V<sub>m</sub>)
@@ -402,7 +347,6 @@ export default function AdsorptionPage() {
               type="button"
               className="button"
               onClick={restart}
-              disabled={settled}
               title="Restart the simulation at equilibrium for the current setting"
             >
               Jump to equilibrium
@@ -417,8 +361,8 @@ export default function AdsorptionPage() {
         </p>
         <figcaption>
           <span className="figure-label">Figure 1.</span> Left: the surface in cross-section. Right: the isotherm. The
-          dot is the current pressure; the diamond appears once the simulation has settled on it (far from
-          equilibrium it fast-forwards). B marks one monolayer’s worth adsorbed, V = V<sub>m</sub>; even there some
+          dot is the current pressure (▲ with its value when it is above the plot). After a big change the simulation needs time to catch up with the equation;
+          Jump to equilibrium restarts it there at once. B marks one monolayer’s worth adsorbed, V = V<sub>m</sub>; even there some
           sites are still bare and some already two deep. The shaded band is the BET fit range.
         </figcaption>
       </figure>
