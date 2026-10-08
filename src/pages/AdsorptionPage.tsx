@@ -51,13 +51,13 @@ function Readout({ model, cov, stats }: { model: Model; cov: number; stats: Surf
           <>
             Loading <em>V</em>/<em>V</em>
             <sub>m</sub>
-            <span className="coverage-note"> (monolayers’ worth; can exceed 1)</span>
+            <span className="coverage-note"> (can exceed 1)</span>
           </>
         )}
       </span>
       <span className={`coverage-value ${model}`}>{cov.toFixed(2)}</span>
       <span className="coverage-sub">
-        equation: {cov.toFixed(2)} · simulation (running average): {stats.avgLoading.toFixed(2)}
+        equation {cov.toFixed(2)} · simulation {stats.avgLoading.toFixed(2)}
       </span>
     </div>
   )
@@ -236,9 +236,8 @@ export default function AdsorptionPage() {
         </a>
         <h1>Langmuir vs BET Adsorption</h1>
         <p className="lede">
-          Gas molecules adsorbing on a solid. Raise the pressure and watch the Langmuir surface fill up to a single
-          layer, while in BET molecules keep stacking into multilayers. Then turn the isotherm into a surface area in
-          m²/g, the number used to compare fuel-cell and electrolyzer catalysts.
+          Gas molecules sticking to a solid. Langmuir stops at one layer; BET keeps stacking. Then turn the curve into
+          a surface area in m²/g.
         </p>
       </header>
 
@@ -282,7 +281,7 @@ export default function AdsorptionPage() {
                 <span className="key-line" style={{ borderColor: COLORS.bet }} /> BET V/V<sub>m</sub>
               </li>
               <li>
-                <span className="key-mark">○</span> B: one monolayer’s worth (V = V<sub>m</sub>)
+                <span className="key-mark">○</span> B: one monolayer (V = V<sub>m</sub>)
               </li>
             </ul>
             <div role="img" aria-label={plotLabel}>
@@ -328,7 +327,7 @@ export default function AdsorptionPage() {
             step={0.01}
             pos={x}
             onChange={setX}
-            hint="relative to the saturation pressure p₀"
+            hint="p₀ = saturation pressure"
           />
           {/* Both constants stay adjustable, since both curves are always drawn; the other model's is dimmed. */}
           <LogSlider
@@ -340,8 +339,8 @@ export default function AdsorptionPage() {
             className={mode === 'langmuir' ? undefined : 'inactive'}
             hint={
               mode === 'langmuir'
-                ? 'per unit p/p₀ (K = K′p₀); larger K = stronger binding, fills at lower p/p₀'
-                : 'sets the dimmed Langmuir curve'
+                ? 'K = K′p₀; higher K = stronger binding'
+                : 'sets the faded Langmuir curve'
             }
           />
           <LogSlider
@@ -353,10 +352,10 @@ export default function AdsorptionPage() {
             className={[mode === 'bet' ? '' : 'inactive', c < 2 ? 'warn' : ''].join(' ').trim() || undefined}
             hint={
               c < 2
-                ? 'C < 2: type III, weak first layer, no knee'
+                ? 'C < 2: no knee (type III)'
                 : mode === 'bet'
-                  ? 'larger C = sharper knee (type II)'
-                  : 'sets the dimmed BET curve'
+                  ? 'higher C = sharper knee'
+                  : 'sets the faded BET curve'
             }
           />
           <div className="sim-buttons">
@@ -380,11 +379,9 @@ export default function AdsorptionPage() {
           {insight(mode, x, K, c)}
         </p>
         <figcaption>
-          <span className="figure-label">Figure 1.</span> Left: the surface in cross-section. Right: the isotherm. The
-          dot is the current pressure (▲ with its value when it is above the plot). After a big change the simulation needs time to catch up with the equation;
-          Jump to equilibrium restarts it there at once. B marks one monolayer’s worth adsorbed, V = V<sub>m</sub>; even there some
-          sites are still bare and some already two deep. (Brunauer and Emmett read their point B off the measured
-          curve, at the start of its straight middle part; it lies close to V = V<sub>m</sub> only when C is large.) The shaded band is the BET fit range.
+          <span className="figure-label">Figure 1.</span> Left: the surface. Right: the isotherm; the dot is the
+          current pressure (▲ if off the top). After a big change the simulation lags; Jump to equilibrium catches it
+          up. B is where V = V<sub>m</sub> (the knee, for large C). Shaded: BET fit range.
         </figcaption>
       </figure>
 
@@ -393,16 +390,12 @@ export default function AdsorptionPage() {
           What you are seeing
         </h2>
         <p>
-          <strong className="lang-ink">Langmuir:</strong> each site holds at most one molecule, and molecules ignore
-          their neighbours. As p/p₀ rises the free sites run out, and the curve levels off at θ = V/V<sub>m</sub> = 1,
-          a full monolayer.
+          <strong className="lang-ink">Langmuir:</strong> one molecule per site. The sites run out, so the curve levels
+          off at θ = 1, one full layer.
         </p>
         <p>
-          <strong className="bet-ink">BET:</strong> molecules can also land on top of adsorbed ones. The first layer
-          sits on the solid and is bound more strongly (in the animation it rarely leaves), while upper layers behave
-          like a liquid and exchange with the gas often. That difference in binding makes the knee: the first layer
-          fills quickly, then the curve flattens at point B. As p/p₀ → 1 the stacks keep growing: the gas condenses on
-          the surface.
+          <strong className="bet-ink">BET:</strong> molecules also stack on each other. The first layer binds more
+          strongly, so it fills first: that is the knee at B. Near p₀ the gas condenses and the stacks keep growing.
         </p>
       </section>
 
@@ -416,29 +409,24 @@ export default function AdsorptionPage() {
 
       <section className="section" aria-labelledby="why-title">
         <h2 id="why-title" className="section-title">
-          Why it matters for clean energy
+          Why it matters
         </h2>
         <ul className="why-list">
           <li>
-            <strong>Fuel-cell catalysts.</strong> H<sub>2</sub> oxidation and O<sub>2</sub> reduction on Pt run
-            through adsorbed intermediates. Rate laws such as Langmuir–Hinshelwood are written in terms of the
-            Langmuir coverage θ of each species. CO binds far more strongly (very large K), so even a few ppm take
-            over the sites: CO poisoning.
+            <strong>Fuel cells.</strong> Reactions on Pt go through adsorbed species, described by the Langmuir θ. CO
+            binds very strongly (huge K), so a few ppm block the sites.
           </li>
           <li>
-            <strong>Catalyst layers and electrodes.</strong> The BET area of a carbon support (Vulcan ~240 m²/g,
-            Ketjenblack ~800 m²/g) sets how finely Pt can be spread, and for scarce Ir in electrolyzer anodes the area
-            per gram is a cost lever. Battery and supercapacitor electrodes are compared the same way.
+            <strong>Electrodes.</strong> More BET area (Vulcan ~240, Ketjenblack ~800 m²/g) spreads Pt and Ir
+            thinner, so less metal does the job.
           </li>
           <li>
-            <strong>Hydrogen storage.</strong> H<sub>2</sub> is above its critical temperature (33 K) even at 77 K,
-            so it cannot condense or build multilayers. MOFs and activated carbons store it by filling micropores, a
-            type I, Langmuir-like isotherm. Uptake grows roughly with BET area: about 1 wt% per 500 m²/g at 77 K.
+            <strong>H<sub>2</sub> storage.</strong> H<sub>2</sub> cannot condense at 77 K, so MOFs and carbons store
+            it in micropores (type I). Rule of thumb: ~1 wt% per 500 m²/g.
           </li>
           <li>
-            <strong>CO<sub>2</sub> capture.</strong> Zeolites, MOFs and amine sorbents take CO<sub>2</sub> from flue
-            gas or air. The working capacity is the difference between the uptake at adsorption and at regeneration
-            conditions, read straight off the isotherm (often fitted with Langmuir or dual-site Langmuir).
+            <strong>CO<sub>2</sub> capture.</strong> A sorbent's working capacity is its uptake at adsorption minus
+            its uptake at regeneration, read off the isotherm.
           </li>
         </ul>
       </section>

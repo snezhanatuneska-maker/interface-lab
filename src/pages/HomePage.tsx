@@ -67,8 +67,7 @@ export default function HomePage() {
         <p className="eyebrow">Interface Engineering in Clean Energy Processes (CEP)</p>
         <h1>Interface Engineering Lab</h1>
         <p className="lede">
-          Interactive simulators for the surface and interface phenomena behind clean energy technologies: catalysts,
-          fuel cells, electrolyzers, batteries and gas storage. Move a slider, see the physics.
+          Simulators for the surfaces behind clean energy. Move a slider, see the physics.
         </p>
       </header>
 

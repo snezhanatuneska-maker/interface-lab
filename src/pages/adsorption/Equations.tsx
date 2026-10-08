@@ -38,35 +38,28 @@ export default function Equations({ mode }: { mode: Model }) {
           </div>
           <dl className="terms">
             <Term sym={String.raw`\theta`}>
-              fractional surface coverage: share of sites that are occupied (0 = empty, 1 = full monolayer)
+              share of sites taken (0 = empty, 1 = full layer)
             </Term>
-            <Term sym="V">amount adsorbed, usually as gas volume at STP per gram of solid, cm³(STP)/g</Term>
-            <Term sym="V_m">amount that forms one complete monolayer (all sites taken)</Term>
+            <Term sym="V">amount adsorbed, cm³(STP)/g</Term>
+            <Term sym="V_m">amount in one full layer</Term>
             <Term sym="K">
-              Langmuir constant: ratio of the adsorption and desorption rate constants. Larger K = stronger binding,
-              the surface fills at lower pressure.
+              binding strength (adsorption ÷ desorption rate). Higher K = fills at lower pressure
             </Term>
           </dl>
           <p className="note">
-            Straight-line form, the Langmuir counterpart of the BET plot (equation 3 below): plotting x/V against x gives slope
-            1/V<sub>m</sub> and intercept 1/(K·V<sub>m</sub>).
+            Straight line: slope 1/V<sub>m</sub>, intercept 1/(K·V<sub>m</sub>).
           </p>
           <div className="formula-body eq-math">
             <Tex display tex={String.raw`\frac{x}{V} = \frac{1}{K\,V_m} + \frac{x}{V_m}`} />
           </div>
           <p className="note">
-            Langmuir is normally written with the pressure itself, θ = K′p/(1 + K′p), with K′ in 1/Pa. Here p is
-            divided by p₀ so both models share one axis: K = K′p₀. For chemisorption above the gas’s critical
-            temperature there is no p₀, and only the K′p form applies.
+            Usually written θ = K′p/(1 + K′p). Here K = K′p₀, so both models share the p/p₀ axis.
           </p>
           <h4>Assumptions</h4>
           <ul className="assumptions">
-            <li>one molecule per site, so only a single layer</li>
+            <li>one molecule per site: one layer</li>
             <li>all sites identical</li>
-            <li>
-              no interaction between adsorbed molecules: a “distanced dance party”, everyone on their own spot,
-              nobody cares who is next to them
-            </li>
+            <li>no interaction between neighbours</li>
           </ul>
         </div>
 
@@ -84,32 +77,28 @@ export default function Equations({ mode }: { mode: Model }) {
           </div>
           <dl className="terms">
             <Term sym="V">
-              amount adsorbed at pressure p, cm³(STP)/g. Plotting the surface excess Γ (amount per area) instead of V
-              gives the same curve shape.
+              amount adsorbed, cm³(STP)/g
             </Term>
-            <Term sym="V_m">monolayer capacity: amount needed to cover the surface with one layer</Term>
-            <Term sym="V/V_m">number of “layers’ worth” adsorbed (can exceed 1)</Term>
-            <Term sym="p_0">saturation vapour pressure of the gas at that temperature; at p = p₀ the gas condenses</Term>
+            <Term sym="V_m">amount in one full layer</Term>
+            <Term sym="V/V_m">layers’ worth adsorbed (can exceed 1)</Term>
+            <Term sym="p_0">saturation pressure: the gas condenses here</Term>
             <Term sym="C">
-              BET constant, related to how much more strongly the first layer binds than the higher layers:{' '}
+              how much more strongly layer 1 binds than the rest:{' '}
               <Tex tex={String.raw`C \approx \exp\!\left(\frac{E_1 - E_L}{RT}\right)`} />
-              , where <Tex tex="E_1" /> = adsorption heat of the first layer and{' '}
-              <Tex tex="E_L" /> = heat of liquefaction
             </Term>
           </dl>
           <h4>Assumptions</h4>
           <ul className="assumptions">
-            <li>each layer is a Langmuir layer for the one on top of it; any number of layers</li>
-            <li>first layer binds directly to the solid (energy E₁)</li>
-            <li>all higher layers bind like the liquid (energy E<sub>L</sub>)</li>
-            <li>no lateral interactions</li>
+            <li>each layer is a Langmuir layer for the next; no limit</li>
+            <li>layer 1 binds to the solid (E₁)</li>
+            <li>higher layers bind like a liquid (E<sub>L</sub>)</li>
+            <li>no interaction between neighbours</li>
           </ul>
         </div>
       </div>
       <p className="callout">
-        <strong>How they relate:</strong> Langmuir allows one layer and plateaus at V = V<sub>m</sub>. BET lets every
-        adsorbed molecule act as a site for the next, so the curve has a knee where the first layer completes and
-        then rises steeply as p → p₀, where the gas condenses.
+        <strong>In short:</strong> Langmuir stops at V = V<sub>m</sub>. BET has a knee when layer 1 fills, then rises
+        steeply toward p₀.
       </p>
     </section>
   )

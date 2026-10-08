@@ -23,22 +23,22 @@ const TYPES = [
   {
     name: 'Type I',
     curves: [path((x) => langmuirTheta(x, 60), 1.15)],
-    text: 'Micropores (< 2 nm): zeolites, MOFs, activated carbons. Pores fill at low p/p₀; the plateau looks like Langmuir but is pore filling. Typical of H₂ and CO₂ sorbents.',
+    text: 'Micropores (< 2 nm): zeolites, MOFs, carbons. Pores fill early; looks like Langmuir.',
   },
   {
     name: 'Type II',
     curves: [path((x) => betLoading(x, 100), 5)],
-    text: 'Non-porous or macroporous solids: Pt black, carbon blacks. The classic BET case: knee at B, steep rise near p₀.',
+    text: 'Non-porous solids: Pt black, carbon black. Classic BET: knee, then a steep rise.',
   },
   {
     name: 'Type III',
     curves: [path((x) => betLoading(x, 0.7), 5)],
-    text: 'Weak gas–solid attraction (C < 2): no knee, molecules cluster instead of forming a monolayer first.',
+    text: 'Weak binding (C < 2): no knee; molecules cluster.',
   },
   {
     name: 'Type IV',
     curves: [path(typeIV(0.72), 4), path(typeIV(0.55), 4, 0.4)],
-    text: 'Mesopores (2–50 nm): catalyst layers, mesoporous carbons. Above the BET range, pores fill by capillary condensation (smallest pores first, Kelvin equation). On desorption they empty only at a lower pressure, so the desorption branch (dashed) lies above the adsorption branch: a hysteresis loop. Pore filling gets its own upcoming tool.',
+    text: 'Mesopores (2–50 nm): pores fill by capillary condensation and empty later (dashed), giving a hysteresis loop.',
   },
 ]
 
@@ -46,12 +46,11 @@ export default function BeyondBet() {
   return (
     <section className="section" aria-labelledby="beyond-title">
       <h2 id="beyond-title" className="section-title">
-        Beyond BET: the isotherm types
+        Isotherm types
       </h2>
       <p className="prose">
-        Measured isotherms do not all look like Langmuir or BET. IUPAC sorts them by shape, and the shape tells you what
-        kind of surface you have before you fit anything. The simulation above shows type II (BET, C &gt; 2), type III
-        (BET, C &lt; 2) and the Langmuir curve, whose shape matches type I.
+        The shape of an isotherm tells you the kind of surface. The simulation shows types I (Langmuir), II (BET,
+        C &gt; 2) and III (BET, C &lt; 2).
       </p>
       <ul className="type-grid">
         {TYPES.map((t) => (
@@ -74,9 +73,7 @@ export default function BeyondBet() {
         ))}
       </ul>
       <p className="prose">
-        Only types II and IV have a clear knee, so only for them does the BET area mean what it says. For type I
-        (microporous) solids the BET number is an “apparent” area, useful for comparing materials but not a true
-        geometric surface.
+        Only types II and IV give a true BET area. For type I it is only an “apparent” area, fine for comparing.
       </p>
     </section>
   )
