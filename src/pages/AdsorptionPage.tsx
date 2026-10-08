@@ -42,9 +42,18 @@ function Readout({ model, cov, stats }: { model: Model; cov: number; stats: Surf
   return (
     <div className="coverage">
       <span className="coverage-label">
-        Coverage <em>θ</em> = <em>V</em>/<em>V</em>
-        <sub>m</sub>
-        {model === 'bet' && <span className="coverage-note"> (layers’ worth; can exceed 1 in BET)</span>}
+        {model === 'langmuir' ? (
+          <>
+            Coverage <em>θ</em> = <em>V</em>/<em>V</em>
+            <sub>m</sub>
+          </>
+        ) : (
+          <>
+            Loading <em>V</em>/<em>V</em>
+            <sub>m</sub>
+            <span className="coverage-note"> (monolayers’ worth; can exceed 1)</span>
+          </>
+        )}
       </span>
       <span className={`coverage-value ${model}`}>{cov.toFixed(2)}</span>
       <span className="coverage-sub">
@@ -186,10 +195,11 @@ export default function AdsorptionPage() {
     {
       xref: 'x',
       yref: 'paper',
+      // Top corner, clear of the Langmuir curve, which ends just below V = Vm at the right edge.
       x: 1,
-      y: 0,
+      y: 1,
       xanchor: 'right',
-      yanchor: 'bottom',
+      yanchor: 'top',
       xshift: -2,
       textangle: -90,
       text: 'p₀: V → ∞',
@@ -214,7 +224,7 @@ export default function AdsorptionPage() {
   ]
 
   const plotLabel =
-    `Isotherm plot, relative pressure 0 to 1 against V over Vm, 0 to ${Y_MAX}. ${mode === 'langmuir' ? 'Langmuir' : 'BET'} ` +
+    `Isotherm plot, relative pressure 0 to 1 against V over Vm, 0 to ${Y_MAX} monolayers. ${mode === 'langmuir' ? 'Langmuir' : 'BET'} ` +
     `at p/p₀ ${x.toFixed(2)}: ${cov.toFixed(2)}` +
     (showKnee ? `. Knee B at p/p₀ ${kneeX(c).toFixed(2)}.` : '.')
 
@@ -282,7 +292,7 @@ export default function AdsorptionPage() {
                   ...baseLayout(theme),
                   showlegend: false,
                   xaxis: { ...axis(theme), title: { text: 'Relative pressure p/p₀' }, range: [0, 1] },
-                  yaxis: { ...axis(theme), title: { text: 'θ = V/V<sub>m</sub>  (layers)' }, range: [0, Y_MAX] },
+                  yaxis: { ...axis(theme), title: { text: 'V/V<sub>m</sub>  (monolayers)' }, range: [0, Y_MAX] },
                   shapes: isoShapes,
                   annotations: isoAnnotations,
                 }}
@@ -320,25 +330,35 @@ export default function AdsorptionPage() {
             onChange={setX}
             hint="relative to the saturation pressure p₀"
           />
-          {mode === 'langmuir' ? (
-            <LogSlider
-              id="K"
-              label={<>Langmuir constant <em>K</em></>}
-              range={K_RANGE}
-              value={K}
-              onChange={setK}
-              hint="larger K = stronger binding, fills at lower p/p₀"
-            />
-          ) : (
-            <LogSlider
-              id="c"
-              label={<>BET constant <em>C</em></>}
-              range={C_RANGE}
-              value={c}
-              onChange={setC}
-              hint={c < 2 ? 'C < 2: type III, weak first layer, no knee' : 'larger C = sharper knee (type II)'}
-            />
-          )}
+          {/* Both constants stay adjustable, since both curves are always drawn; the other model's is dimmed. */}
+          <LogSlider
+            id="K"
+            label={<>Langmuir constant <em>K</em></>}
+            range={K_RANGE}
+            value={K}
+            onChange={setK}
+            className={mode === 'langmuir' ? undefined : 'inactive'}
+            hint={
+              mode === 'langmuir'
+                ? 'per unit p/p₀ (K = K′p₀); larger K = stronger binding, fills at lower p/p₀'
+                : 'sets the dimmed Langmuir curve'
+            }
+          />
+          <LogSlider
+            id="c"
+            label={<>BET constant <em>C</em></>}
+            range={C_RANGE}
+            value={c}
+            onChange={setC}
+            className={[mode === 'bet' ? '' : 'inactive', c < 2 ? 'warn' : ''].join(' ').trim() || undefined}
+            hint={
+              c < 2
+                ? 'C < 2: type III, weak first layer, no knee'
+                : mode === 'bet'
+                  ? 'larger C = sharper knee (type II)'
+                  : 'sets the dimmed BET curve'
+            }
+          />
           <div className="sim-buttons">
             <button type="button" className="button" onClick={() => setPaused((p) => !p)}>
               {paused ? 'Play' : 'Pause'}
@@ -363,11 +383,10 @@ export default function AdsorptionPage() {
           <span className="figure-label">Figure 1.</span> Left: the surface in cross-section. Right: the isotherm. The
           dot is the current pressure (▲ with its value when it is above the plot). After a big change the simulation needs time to catch up with the equation;
           Jump to equilibrium restarts it there at once. B marks one monolayer’s worth adsorbed, V = V<sub>m</sub>; even there some
-          sites are still bare and some already two deep. The shaded band is the BET fit range.
+          sites are still bare and some already two deep. (Brunauer and Emmett read their point B off the measured
+          curve, at the start of its straight middle part; it lies close to V = V<sub>m</sub> only when C is large.) The shaded band is the BET fit range.
         </figcaption>
       </figure>
-
-      <TryThis onApply={applyPreset} />
 
       <section className="section iso-text" aria-labelledby="seeing-title">
         <h2 id="seeing-title" className="section-title">
@@ -388,6 +407,8 @@ export default function AdsorptionPage() {
       </section>
 
       <Equations mode={mode} />
+
+      <TryThis onApply={applyPreset} />
 
       <SurfaceArea c={c} setC={setC} sampleId={sampleId} setSampleId={setSampleId} theme={theme} />
 

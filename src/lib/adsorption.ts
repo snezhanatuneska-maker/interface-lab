@@ -4,8 +4,11 @@
 
 export type Model = 'langmuir' | 'bet'
 
-/** Default model constants: Langmuir K (per unit p/p₀) and BET C. Both are adjustable on the page. */
-export const K_DEFAULT = 10
+/**
+ * Default model constants: Langmuir K (per unit p/p₀) and BET C. Both are adjustable on the page.
+ * They start equal because BET reduces to Langmuir with K = C at low pressure, so the overlay compares like with like.
+ */
+export const K_DEFAULT = 50
 export const C_DEFAULT = 50
 
 /** Slider ranges (log scale). C below 2 gives a type III isotherm (no knee). */
@@ -15,14 +18,26 @@ export const C_RANGE: [number, number] = [0.5, 500]
 /** Usual fitting range of the BET equation (p/p₀). */
 export const BET_FIT_RANGE: [number, number] = [0.05, 0.35]
 
+/** Largest p/p₀ BET is evaluated at: it diverges at p = p₀, so x is kept just below 1. (Langmuir has no such limit.) */
+export const X_LIMIT = 0.999
+
+/** Pressure cannot be negative; non-finite input counts as no gas. */
+const clampX = (x: number) => (Number.isFinite(x) ? Math.max(x, 0) : 0)
+/** Model constants must be finite and positive; anything else counts as no binding. */
+const clampConst = (k: number) => (Number.isFinite(k) && k > 0 ? k : 0)
+
 /** Langmuir (monolayer) coverage θ = V/Vm = K·x / (1 + K·x). Bounded by 1. */
 export function langmuirTheta(x: number, K: number): number {
-  return (K * x) / (1 + K * x)
+  const kx = clampConst(K) * clampX(x)
+  return kx / (1 + kx)
 }
 
-/** BET (multilayer) loading V/Vm = C·x / [(1 − x)(1 − x + C·x)]. Diverges as x → 1. */
+/** BET (multilayer) loading V/Vm = C·x / [(1 − x)(1 − x + C·x)]. Diverges as x → 1 (finite here, since x ≤ X_LIMIT). */
 export function betLoading(x: number, c: number): number {
-  return (c * x) / ((1 - x) * (1 - x + c * x))
+  const xc = Math.min(clampX(x), X_LIMIT)
+  const cc = clampConst(c)
+  if (xc === 0 || cc === 0) return 0
+  return (cc * xc) / ((1 - xc) * (1 - xc + cc * xc))
 }
 
 /** Loading V/Vm of the given model. */
@@ -48,6 +63,7 @@ export function betTransform(x: number, V: number): number {
 /** Least-squares straight line through the points. */
 export function fitLine(xs: number[], ys: number[]): { slope: number; intercept: number } {
   const n = xs.length
+  if (n === 0) return { slope: 0, intercept: 0 }
   const mx = xs.reduce((a, b) => a + b, 0) / n
   const my = ys.reduce((a, b) => a + b, 0) / n
   let sxy = 0
@@ -56,7 +72,8 @@ export function fitLine(xs: number[], ys: number[]): { slope: number; intercept:
     sxy += (xs[i] - mx) * (ys[i] - my)
     sxx += (xs[i] - mx) ** 2
   }
-  const slope = sxy / sxx
+  // All points at the same x (or only one point): no slope can be fitted, so return a flat line through the mean.
+  const slope = sxx > 0 ? sxy / sxx : 0
   return { slope, intercept: my - slope * mx }
 }
 
