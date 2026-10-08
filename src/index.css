@@ -245,6 +245,8 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
 .slider output { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .slider input[type='range'] { width: 100%; accent-color: var(--color-accent); margin: var(--space-1) 0; }
 .slider small { color: var(--color-text-muted); font-size: var(--text-xs); }
+.slider.inactive { opacity: 0.6; }
+.slider.inactive:focus-within, .slider.inactive:hover { opacity: 1; }
 
 .segmented { display: inline-flex; border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); overflow: hidden; }
 .segmented button {
@@ -297,6 +299,9 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
     box-shadow: 0 -1px 0 var(--color-border);
   }
   .hero-controls .slider small { display: none; }
+  .hero-controls .slider.warn small { display: block; } /* the C < 2 warning matters even on a phone */
+  /* The sticky bar must stay short: the other model's constant is reached by switching the model. */
+  .hero-controls .slider.inactive { display: none; }
   .hero-controls .slider input[type='range'] { margin: 0; }
   .hero-controls .slider { flex: none; align-self: stretch; }
   .sim-buttons { align-self: flex-start; }

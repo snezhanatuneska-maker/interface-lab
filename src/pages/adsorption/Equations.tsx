@@ -48,6 +48,13 @@ export default function Equations({ mode }: { mode: Model }) {
             </Term>
           </dl>
           <p className="note">
+            Straight-line form, the Langmuir counterpart of the BET plot (equation 3 below): plotting x/V against x gives slope
+            1/V<sub>m</sub> and intercept 1/(K·V<sub>m</sub>).
+          </p>
+          <div className="formula-body eq-math">
+            <Tex display tex={String.raw`\frac{x}{V} = \frac{1}{K\,V_m} + \frac{x}{V_m}`} />
+          </div>
+          <p className="note">
             Langmuir is normally written with the pressure itself, θ = K′p/(1 + K′p), with K′ in 1/Pa. Here p is
             divided by p₀ so both models share one axis: K = K′p₀. For chemisorption above the gas’s critical
             temperature there is no p₀, and only the K′p form applies.

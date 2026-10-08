@@ -14,11 +14,13 @@ interface SliderProps {
   pos: number
   onChange: (pos: number) => void
   hint?: ReactNode
+  /** Extra class on the wrapper (e.g. to dim a control or keep a warning hint visible). */
+  className?: string
 }
 
-export function Slider({ id, label, value, min, max, step, pos, onChange, hint }: SliderProps) {
+export function Slider({ id, label, value, min, max, step, pos, onChange, hint, className }: SliderProps) {
   return (
-    <div className="slider">
+    <div className={className ? `slider ${className}` : 'slider'}>
       <label htmlFor={id}>
         <span>{label}</span>
         <output htmlFor={id}>{value}</output>
@@ -51,7 +53,8 @@ export function LogSlider({ range, value, onChange, ...rest }: Omit<SliderProps,
 }
 
 const LOG_STEPS = 200
-export const fmtConst = (v: number) => (v < 10 ? v.toFixed(1) : String(v))
+/** Shows the value the slider actually set (two significant figures), e.g. 0.52 rather than 0.5. */
+export const fmtConst = (v: number) => (v < 10 ? v.toPrecision(2) : String(v))
 
 export interface SegmentOption<T extends string> {
   value: T

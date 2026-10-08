@@ -22,7 +22,7 @@ import {
 } from '../../lib/adsorption'
 
 // "Measured" points: the BET equation evaluated at the usual pressures of a BET measurement.
-const FIT_XS = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3]
+const FIT_XS = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35]
 const Y_SCALE = 1000 // plot the BET transform in 10⁻³ g/cm³
 
 interface Props {
@@ -185,7 +185,7 @@ export default function SurfaceArea({ c, setC, sampleId, setSampleId, theme }: P
         <div className="area-grid">
           <div
             role="img"
-            aria-label={`BET plot: six points between p/p₀ 0.05 and 0.30 on a straight line with slope ${sig(fit.slope * Y_SCALE)} and intercept ${sig(fit.intercept * Y_SCALE)}, in 10⁻³ g/cm³.`}
+            aria-label={`BET plot: seven points between p/p₀ 0.05 and 0.35 on a straight line with slope ${sig(fit.slope * Y_SCALE)} and intercept ${sig(fit.intercept * Y_SCALE)}, in 10⁻³ g/cm³.`}
           >
             <Plot
               data={data}
