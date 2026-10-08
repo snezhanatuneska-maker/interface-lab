@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react'
 import HomePage from './pages/HomePage'
 import ThemeToggle from './components/ThemeToggle'
 import { useHashRoute } from './lib/useHashRoute'
-import { AUTHOR, COURSE } from './siteConfig'
+import { COURSE } from './siteConfig'
 
 // Loaded on demand so the homepage does not pull in Plotly.
 const AdsorptionPage = lazy(() => import('./pages/AdsorptionPage'))
@@ -34,7 +34,6 @@ export default function App() {
 
       <footer className="site-footer">
         <div className="container">
-          <span className="footer-author">{AUTHOR}</span>
           <span>{COURSE}</span>
         </div>
       </footer>
