@@ -46,7 +46,7 @@ export default function UpcomingProjects() {
   return (
     <>
       <p className="lede upcoming-intro">
-        Interactive tools in development for interface engineering in clean energy processes.
+        Tools in progress.
       </p>
 
       <section className="project-group" aria-labelledby="next-title">

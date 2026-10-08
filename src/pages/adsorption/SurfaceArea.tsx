@@ -46,8 +46,8 @@ function PtParticles() {
     <figure className="figure pt-figure">
       <h3>How small should the Pt particles be?</h3>
       <p className="prose">
-        For spheres of diameter d, the surface per gram of Pt is A/m = 6/(ρd), with ρ = 21.45 g/cm³. Pt black
-        ({black} m²/g) corresponds to particles of about {sig(ptAreaPerGram(1) / black, 2)} nm.
+        Spheres of diameter d: A/m = 6/(ρd), ρ = 21.45 g/cm³. Pt black ({black} m²/g) ≈{' '}
+        {sig(ptAreaPerGram(1) / black, 2)} nm particles.
       </p>
       <div className="pt-row">
         <Slider
@@ -59,7 +59,7 @@ function PtParticles() {
           step={0.5}
           pos={d}
           onChange={setD}
-          hint="fuel-cell Pt/C catalysts: typically 2–5 nm"
+          hint="fuel-cell catalysts: 2–5 nm"
         />
         <dl className="results">
           <div className="result-main">
@@ -73,10 +73,8 @@ function PtParticles() {
         </dl>
       </div>
       <figcaption>
-        <span className="figure-label">Langmuir link:</span> in a fuel-cell lab the Pt area is measured
-        electrochemically (ECSA): hydrogen adsorbs as one monolayer, one H atom per surface Pt atom, and the charge
-        to strip it (210 µC per cm² of Pt) counts the sites. Measured ECSA is lower than 6/(ρd) because particles
-        touch the support and each other.
+        <span className="figure-label">Langmuir link:</span> labs measure Pt area (ECSA) from one monolayer of H, 210
+        µC per cm² of Pt. It comes out below 6/(ρd), since particles touch the support and each other.
       </figcaption>
     </figure>
   )
@@ -146,9 +144,8 @@ export default function SurfaceArea({ c, setC, sampleId, setSampleId, theme }: P
       </h2>
       <div className="prose">
         <p>
-          In the lab a weighed powder is cooled to 77 K and N₂ is dosed step by step. At each relative pressure the
-          instrument records the adsorbed volume V in cm³(STP) per gram. Rearranging the BET equation gives a
-          straight line:
+          In the lab, N₂ is dosed onto a powder at 77 K and V is measured at each p/p₀. Rearranged, BET is a straight
+          line:
         </p>
       </div>
       <div className="formula">
@@ -179,7 +176,7 @@ export default function SurfaceArea({ c, setC, sampleId, setSampleId, theme }: P
             range={C_RANGE}
             value={c}
             onChange={setC}
-            hint="same C as in the simulation above"
+            hint="same C as above"
           />
         </div>
         <div className="area-grid">
@@ -231,25 +228,22 @@ export default function SurfaceArea({ c, setC, sampleId, setSampleId, theme }: P
             </dl>
             {!valid && (
               <p className="result-warning" role="note">
-                <strong>⚠ Not a valid BET result.</strong> With C &lt; {C_MIN_VALID} the isotherm has no knee (type III)
-                {fit.slope < 0 ? ' and the BET line slopes downward' : ''}, so there is no monolayer to count. A lab
-                would not report this area.
+                <strong>⚠ Not valid.</strong> C &lt; {C_MIN_VALID}: no knee{fit.slope < 0 ? ', line slopes down' : ''}.
+                Don’t report this area.
               </p>
             )}
           </div>
         </div>
         <figcaption>
-          <span className="figure-label">Figure 2.</span> BET plot for {sample.name} ({sample.role}). The points
-          are the BET equation itself, so they fall exactly on a line. Real data bend away below p/p₀ ≈ 0.05
-          (uneven, high-energy sites fill first) and above ≈ 0.35 (capillary condensation in pores), which is why
-          only the shaded range is fitted.
+          <span className="figure-label">Figure 2.</span> BET plot for {sample.name}. These points come from the
+          equation, so they lie on a line. Real data curve below 0.05 and above 0.35, so only the shaded range is
+          fitted.
         </figcaption>
       </figure>
 
       <div className="prose">
         <p>
-          From V<sub>m</sub> to area: V<sub>m</sub> cm³(STP) of gas is V<sub>m</sub>/V<sub>mol</sub> moles of
-          molecules, each covering σ = {SIGMA_N2} nm² (N₂ at 77 K):
+          From V<sub>m</sub> to area (each N₂ covers σ = {SIGMA_N2} nm²):
         </p>
       </div>
       <div className="formula">
@@ -262,11 +256,8 @@ export default function SurfaceArea({ c, setC, sampleId, setSampleId, theme }: P
         <span className="formula-number">(4)</span>
       </div>
       <p className="callout">
-        <strong>Why the number matters:</strong> unsupported Pt black offers only about {SAMPLES[0].area} m²/g. Spread
-        the same Pt as 2–5 nm particles over a high-area carbon such as Vulcan ({SAMPLES[2].area} m²/g) or
-        Ketjenblack ({SAMPLES[3].area} m²/g) and far more of the expensive metal touches the reactants. For scarce
-        iridium in PEM electrolyzer anodes, area per gram is a direct cost lever. Values are typical and rounded;
-        real powders vary by supplier and treatment.
+        <strong>Why it matters:</strong> Pt black has ~{SAMPLES[0].area} m²/g. Spread as small particles on Vulcan
+        ({SAMPLES[2].area} m²/g) or Ketjenblack ({SAMPLES[3].area} m²/g), far more of the Pt is exposed. Values are typical.
       </p>
 
       <PtParticles />
