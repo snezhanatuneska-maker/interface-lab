@@ -60,8 +60,8 @@ export const CapillaryTryThis: React.FC = () => {
   }, [radius, contactAngle, mode]);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-      <h2 className="text-2xl font-bold mb-4">Interactive Pore Simulator</h2>
+    <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm border-l-4 border-l-blue-600">
+      <h2 className="text-xl font-bold text-gray-900 mb-4">Interactive Pore Simulator</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
         <div className="space-y-4">
           <div>
@@ -83,7 +83,7 @@ export const CapillaryTryThis: React.FC = () => {
               <option value="drainage">Drainage (Emptying)</option>
             </select>
           </div>
-          <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-lg space-y-1 text-sm">
+          <div className="bg-blue-50/60 border border-blue-100 p-4 rounded-lg space-y-1 text-sm">
             <p><strong>Capillary Pressure (P<sub>c</sub>):</strong> {pcKPa} kPa</p>
             <p><strong>Jurin Rise Height (<span className="italic font-serif">h</span>):</strong> {jurinHeight} µm</p>
             <p><strong>Kelvin Saturation (P/P<sub>0</sub>):</strong> {kelvinRatio}</p>
