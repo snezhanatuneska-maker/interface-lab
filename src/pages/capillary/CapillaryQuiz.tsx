@@ -64,33 +64,33 @@ export const CapillaryQuiz: React.FC = () => {
 
         return (
           <div key={q.id} className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm space-y-4">
-            <div className="flex justify-between items-start">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-gray-100 pb-3">
               <div>
                 <h4 className="font-bold text-gray-900 text-lg">
                   {q.id}. {q.title}
                 </h4>
-                <p className="text-sm text-gray-600 mt-1">{q.description}</p>
+                <p className="text-sm text-gray-600">{q.description}</p>
               </div>
               <button 
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                className="text-xs bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium px-3 py-1.5 rounded-lg border border-gray-300 transition-colors"
+                className="text-xs bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium px-3 py-1.5 rounded-lg border border-gray-300 transition-colors shrink-0"
               >
                 Set it up
               </button>
             </div>
 
-            <p className="font-medium text-sm text-gray-800 pt-2">{q.prompt}</p>
+            <p className="font-medium text-sm text-gray-900 pt-1">{q.prompt}</p>
 
-            <div className="space-y-2">
+            <div className="flex flex-col space-y-2">
               {q.options.map((opt, optIdx) => {
-                let style = "w-full text-left p-3 rounded-lg border text-sm transition-all ";
+                let style = "w-full text-left p-3 rounded-lg border text-sm transition-all block ";
                 if (revealed) {
                   if (optIdx === q.correct) {
                     style += "bg-emerald-50 border-emerald-400 text-emerald-900 font-medium";
                   } else if (optIdx === selected) {
                     style += "bg-rose-50 border-rose-300 text-rose-900";
                   } else {
-                    style += "bg-gray-50 border-gray-200 text-gray-500";
+                    style += "bg-gray-50 border-gray-200 text-gray-500 opacity-60";
                   }
                 } else {
                   style += "bg-white hover:bg-gray-50 border-gray-200 text-gray-800";
