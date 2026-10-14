@@ -1,15 +1,15 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense } from 'react';
 import { CapillaryPage } from './pages/capillary/CapillaryPage';
-import HomePage from './pages/HomePage'
-import ThemeToggle from './components/ThemeToggle'
-import { useHashRoute } from './lib/useHashRoute'
-import { COURSE } from './siteConfig'
+import HomePage from './pages/HomePage';
+import ThemeToggle from './components/ThemeToggle';
+import { useHashRoute } from './lib/useHashRoute';
+import { COURSE } from './siteConfig';
 
-// Loaded on demand so the homepage does not pull in Plotly.
-const CapillaryPage = lazy(() => import('./pages/capillary/CapillaryPage'))
+// Loaded on demand
+const AdsorptionPage = lazy(() => import('./pages/AdsorptionPage'));
 
 export default function App() {
-  const route = useHashRoute()
+  const route = useHashRoute();
 
   return (
     <div className="app">
@@ -29,19 +29,20 @@ export default function App() {
           <ThemeToggle />
         </div>
       </header>
+
       <main className="container">
-  {route === '/capillary' ? (
-    <Suspense fallback={<p className="loading">Loading simulator...</p>}>
-      <CapillaryPage />
-    </Suspense>
-  ) : route === '/adsorption' ? (
-    <Suspense fallback={<p className="loading">Loading simulator...</p>}>
-      <AdsorptionPage />
-    </Suspense>
-  ) : (
-    <HomePage />
-  )}
-</main>
+        {route === '/capillary' ? (
+          <Suspense fallback={<p className="loading">Loading simulator...</p>}>
+            <CapillaryPage />
+          </Suspense>
+        ) : route === '/adsorption' ? (
+          <Suspense fallback={<p className="loading">Loading simulator...</p>}>
+            <AdsorptionPage />
+          </Suspense>
+        ) : (
+          <HomePage />
+        )}
+      </main>
 
       <footer className="site-footer">
         <div className="container">
@@ -49,5 +50,5 @@ export default function App() {
         </div>
       </footer>
     </div>
-  )
+  );
 }
