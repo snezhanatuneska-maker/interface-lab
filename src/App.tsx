@@ -6,6 +6,7 @@ import { COURSE } from './siteConfig'
 
 // Loaded on demand so the homepage does not pull in Plotly.
 const AdsorptionPage = lazy(() => import('./pages/AdsorptionPage'))
+const CapillaryPage = lazy(() => import('./pages/capillary/CapillaryPage'))
 
 export default function App() {
   const route = useHashRoute()
@@ -18,19 +19,29 @@ export default function App() {
             Interface Engineering Lab
           </a>
           <span className="site-subtitle">Interactive tools for Clean Energy Processes (CEP)</span>
+          
+          {/* Navigation Links */}
+          <nav className="mt-2 space-x-4">
+            <a href="#/adsorption" className="text-blue-600 hover:underline font-medium">Adsorption Lab</a>
+            <a href="#/capillary" className="text-blue-600 hover:underline font-medium">Capillary Pressure</a>
+          </nav>
+
           <ThemeToggle />
         </div>
       </header>
-
       <main className="container">
-        {route === '/adsorption' ? (
-          <Suspense fallback={<p className="loading">Loading simulator…</p>}>
-            <AdsorptionPage />
-          </Suspense>
-        ) : (
-          <HomePage />
-        )}
-      </main>
+  {route === '/capillary' ? (
+    <Suspense fallback={<p className="loading">Loading simulator...</p>}>
+      <CapillaryPage />
+    </Suspense>
+  ) : route === '/adsorption' ? (
+    <Suspense fallback={<p className="loading">Loading simulator...</p>}>
+      <AdsorptionPage />
+    </Suspense>
+  ) : (
+    <HomePage />
+  )}
+</main>
 
       <footer className="site-footer">
         <div className="container">
