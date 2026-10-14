@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import Tex from '../../components/Tex';
 
 export const CapillaryTryThis: React.FC = () => {
   const [radius, setRadius] = useState<number>(15);
@@ -67,13 +66,13 @@ export const CapillaryTryThis: React.FC = () => {
         <div className="space-y-4">
           <div>
             <label className="block font-medium text-sm text-gray-700 mb-1">
-              Pore Radius (<Tex math="r" />): {radius} nm
+              Pore Radius (<span className="italic font-serif">r</span>): {radius} nm
             </label>
             <input type="range" min={2} max={50} value={radius} onChange={(e) => setRadius(Number(e.target.value))} className="w-full accent-blue-600" />
           </div>
           <div>
             <label className="block font-medium text-sm text-gray-700 mb-1">
-              Contact Angle (<Tex math="\theta" />): {contactAngle}°
+              Contact Angle (<span className="italic font-serif">θ</span>): {contactAngle}°
             </label>
             <input type="range" min={0} max={85} value={contactAngle} onChange={(e) => setContactAngle(Number(e.target.value))} className="w-full accent-blue-600" />
           </div>
@@ -85,9 +84,9 @@ export const CapillaryTryThis: React.FC = () => {
             </select>
           </div>
           <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-lg space-y-1 text-sm">
-            <p><strong>Capillary Pressure (<Tex math="P_c" />):</strong> {pcKPa} kPa</p>
-            <p><strong>Jurin Rise Height (<Tex math="h" />):</strong> {jurinHeight} µm</p>
-            <p><strong>Kelvin Saturation (<Tex math="P/P_0" />):</strong> {kelvinRatio}</p>
+            <p><strong>Capillary Pressure (P<sub>c</sub>):</strong> {pcKPa} kPa</p>
+            <p><strong>Jurin Rise Height (<span className="italic font-serif">h</span>):</strong> {jurinHeight} µm</p>
+            <p><strong>Kelvin Saturation (P/P<sub>0</sub>):</strong> {kelvinRatio}</p>
           </div>
         </div>
         <div className="flex flex-col items-center">
