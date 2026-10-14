@@ -1,11 +1,11 @@
 import { lazy, Suspense } from 'react'
+import { CapillaryPage } from './pages/capillary/CapillaryPage';
 import HomePage from './pages/HomePage'
 import ThemeToggle from './components/ThemeToggle'
 import { useHashRoute } from './lib/useHashRoute'
 import { COURSE } from './siteConfig'
 
 // Loaded on demand so the homepage does not pull in Plotly.
-const AdsorptionPage = lazy(() => import('./pages/AdsorptionPage'))
 const CapillaryPage = lazy(() => import('./pages/capillary/CapillaryPage'))
 
 export default function App() {
