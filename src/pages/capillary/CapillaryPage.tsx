@@ -1,6 +1,8 @@
 import React from 'react';
 import { CapillaryTryThis } from './CapillaryTryThis';
 import { CapillaryEquations } from './CapillaryEquations';
+import { CapillaryTheory } from './CapillaryTheory';
+import { CapillaryQuiz } from './CapillaryQuiz';
 import { CapillaryInsight } from './capillaryInsight';
 
 export const CapillaryPage: React.FC = () => {
@@ -16,11 +18,19 @@ export const CapillaryPage: React.FC = () => {
       </header>
 
       <section>
+        <CapillaryTheory />
+      </section>
+
+      <section>
         <CapillaryTryThis />
       </section>
 
       <section>
         <CapillaryEquations />
+      </section>
+
+      <section>
+        <CapillaryQuiz />
       </section>
 
       <section>
