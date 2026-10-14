@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tex } from '../../components/Tex';
+import  Tex  from '../../components/Tex';
 
 export const CapillaryEquations: React.FC = () => {
   return (
