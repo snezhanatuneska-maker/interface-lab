@@ -1,5 +1,4 @@
 import React from 'react';
-import  Tex  from '../../components/Tex';
 
 export const CapillaryEquations: React.FC = () => {
   return (
@@ -9,15 +8,15 @@ export const CapillaryEquations: React.FC = () => {
         <div className="p-4 bg-gray-50 rounded-lg space-y-2">
           <h4 className="font-semibold text-gray-900">Young–Laplace Equation</h4>
           <p>Defines the pressure jump across a curved liquid-gas interface inside confinements:</p>
-          <div className="p-2 bg-white rounded border border-gray-100 text-center font-mono">
-            <Tex math="P_c = \frac{2\gamma \cos\theta}{r}" />
+          <div className="p-2 bg-white rounded border border-gray-100 text-center font-mono font-medium text-blue-700">
+            Pc = (2 * γ * cos(θ)) / r
           </div>
         </div>
         <div className="p-4 bg-gray-50 rounded-lg space-y-2">
           <h4 className="font-semibold text-gray-900">Kelvin Equation</h4>
           <p>Governs capillary condensation, explaining vapor condensation at reduced relative pressures:</p>
-          <div className="p-2 bg-white rounded border border-gray-100 text-center font-mono">
-            <Tex math="\ln\left(\frac{P}{P_0}\right) = -\frac{2\gamma V_m \cos\theta}{r R T}" />
+          <div className="p-2 bg-white rounded border border-gray-100 text-center font-mono font-medium text-blue-700">
+            ln(P / P₀) = (-2 * γ * V_m * cos(θ)) / (r * R * T)
           </div>
         </div>
       </div>
