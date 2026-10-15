@@ -1,10 +1,19 @@
 import { useMemo, useState } from 'react'
 import type { Annotation, Data, Shape } from 'plotly.js'
 import Plot from '../components/Plot'
-import { LogSlider, Slider } from '../components/Controls'
+import { LogSlider, Segmented, Slider } from '../components/Controls'
 import { useThemeColors } from '../lib/themeColors'
 import { axis, baseLayout, staticConfig } from '../lib/plotTheme'
-import { capillaryPressure, jurinHeight, R_DEFAULT, R_RANGE, THETA_DEFAULT, THETA_RANGE } from '../lib/capillary'
+import {
+  capillaryPressure,
+  jurinHeight,
+  LIQUIDS,
+  R_DEFAULT,
+  R_RANGE,
+  THETA_DEFAULT,
+  THETA_RANGE,
+  type LiquidId,
+} from '../lib/capillary'
 import PoreView from './capillary/PoreView'
 import { insight } from './capillary/insight'
 import Equations from './capillary/Equations'
@@ -26,11 +35,7 @@ function fmtHeight(h: number): string {
   return `${sig(a * 1000)} mm`
 }
 
-const LEGEND = [
-  { color: 'var(--pore-liquid)', label: 'water' },
-  { color: 'var(--solid)', label: 'pore wall' },
-  { color: 'var(--data-plot-bg)', label: 'vapour' },
-]
+const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 function Readout({ pc, h }: { pc: number; h: number }) {
   const wetting = pc > 0
@@ -51,21 +56,40 @@ function Readout({ pc, h }: { pc: number; h: number }) {
 export default function CapillaryPage() {
   const [r, setR] = useState(R_DEFAULT)
   const [theta, setTheta] = useState(THETA_DEFAULT)
+  const [liquidId, setLiquidId] = useState<LiquidId>('water')
+  const [paused, setPaused] = useState(prefersReducedMotion)
+  // Bump runId to restart the pore view; atEquilibrium says whether it restarts settled or at the reservoir level.
+  const [run, setRun] = useState(() => ({ id: 0, atEquilibrium: prefersReducedMotion() }))
   const theme = useThemeColors()
+  const liquid = LIQUIDS[liquidId]
 
-  const pc = capillaryPressure(r, theta)
-  const h = jurinHeight(r, theta)
+  const pc = capillaryPressure(r, theta, liquid)
+  const h = jurinHeight(r, theta, liquid)
   const wetting = pc >= 0
   const color = wetting ? theme.data1 : theme.data2
 
+  const restart = (atEquilibrium = false) => setRun((p) => ({ id: p.id + 1, atEquilibrium }))
+
   const reset = () => {
     setR(R_DEFAULT)
+    setLiquidId('water')
     setTheta(THETA_DEFAULT)
+    restart()
+  }
+
+  const switchLiquid = (id: LiquidId) => {
+    if (id === liquidId) return
+    setLiquidId(id)
+    setTheta(LIQUIDS[id].thetaDefault)
+    restart() // a fresh pore dipped into the new liquid
   }
 
   const applyPreset = (p: Preset) => {
     if (p.r !== undefined) setR(p.r)
     if (p.theta !== undefined) setTheta(p.theta)
+    setLiquidId(p.liquid ?? 'water')
+    setPaused(false)
+    restart()
     // Scroll on the next frame, once the new setting has rendered: it can change the height of what is above the target.
     requestAnimationFrame(() => document.getElementById(p.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
   }
@@ -79,11 +103,11 @@ export default function CapillaryPage() {
     for (let i = 0; i <= N_POINTS; i++) {
       const ri = lo * (hi / lo) ** (i / N_POINTS)
       rs.push(ri)
-      now.push(Math.abs(capillaryPressure(ri, theta)))
-      max.push(capillaryPressure(ri, 0))
+      now.push(Math.abs(capillaryPressure(ri, theta, liquid)))
+      max.push(capillaryPressure(ri, 0, liquid))
     }
     return { rs, now, max }
-  }, [theta])
+  }, [theta, liquid])
 
   const data: Data[] = [
     {
@@ -152,8 +176,8 @@ export default function CapillaryPage() {
         </a>
         <h1>Capillary Pressure &amp; Pore Filling</h1>
         <p className="lede">
-          Water in a narrow pore. Smaller pores and wetting walls pull harder; past 90° the liquid has to be pushed in.
-          Then see why pores fill and empty at different vapour pressures.
+          Liquid in a narrow pore. Smaller pores and wetting walls pull harder; past 90° the liquid has to be pushed in,
+          as mercury is. Then see why pores fill and empty at different vapour pressures.
         </p>
       </header>
 
@@ -162,19 +186,27 @@ export default function CapillaryPage() {
         <div className="hero-head">
           <Readout pc={pc} h={h} />
           <ul className="layer-legend" aria-label="Legend">
-            {LEGEND.map((l) => (
-              <li key={l.label}>
-                <span className="dot" style={{ background: l.color }} /> {l.label}
-              </li>
-            ))}
+            <li>
+              <span className={`dot liquid-dot ${liquidId}`} /> {liquid.name}
+            </li>
+            <li>
+              <span className="dot" style={{ background: 'var(--solid)' }} /> pore wall
+            </li>
+            <li>
+              <span className="dot" style={{ background: 'var(--data-plot-bg)' }} /> vapour
+            </li>
           </ul>
         </div>
 
         <div className="sim-grid">
           <PoreView
+            key={run.id}
             r={r}
             theta={theta}
-            label={`Pore of radius ${r} nm, contact angle ${Math.round(theta)}°: the water ${
+            paused={paused}
+            atEquilibrium={run.atEquilibrium}
+            liquid={liquidId}
+            label={`Pore of radius ${r} nm, contact angle ${Math.round(theta)}°: the ${liquid.name} ${
               wetting ? 'rises' : 'is pushed down'
             }. Not to scale.`}
           />
@@ -207,6 +239,18 @@ export default function CapillaryPage() {
         </div>
 
         <div className="figure-controls hero-controls">
+          <div className="model-control">
+            <span className="control-label">Liquid</span>
+            <Segmented
+              label="Liquid"
+              value={liquidId}
+              onChange={switchLiquid}
+              options={[
+                { value: 'water', label: 'Water' },
+                { value: 'mercury', label: 'Mercury' },
+              ]}
+            />
+          </div>
           <LogSlider
             id="r"
             label={<>Pore radius <em>r</em> (nm)</>}
@@ -228,17 +272,28 @@ export default function CapillaryPage() {
             hint={theta < 90 ? 'θ < 90°: wetting, liquid is pulled in' : theta > 90 ? 'θ > 90°: non-wetting, must be pushed in' : 'θ = 90°: flat meniscus'}
           />
           <div className="sim-buttons">
+            <button type="button" className="button" onClick={() => setPaused((p) => !p)}>
+              {paused ? 'Play' : 'Pause'}
+            </button>
+            <button
+              type="button"
+              className="button"
+              onClick={() => restart(true)}
+              title="Show the column at its equilibrium height for the current setting"
+            >
+              Jump to equilibrium
+            </button>
             <button type="button" className="button" onClick={reset}>
               Reset
             </button>
           </div>
         </div>
         <p className="insight" aria-live="polite">
-          {insight(r, theta)}
+          {insight(r, theta, liquid)}
         </p>
         <figcaption>
-          <span className="figure-label">Figure 1.</span> Left: one pore dipped in water (schematic; heights not to
-          scale). Right: |P<sub>c</sub>| against r on log–log axes; the dot is the current pore. Blue: wetting (pulled
+          <span className="figure-label">Figure 1.</span> Left: one pore dipped in {liquid.name}; the column climbs or
+          sinks to its equilibrium height (schematic, not to scale; Jurin heights in nanopores are kilometres). Right: |P<sub>c</sub>| against r on log–log axes; the dot is the current pore. Blue: wetting (pulled
           in); orange: non-wetting (pushed in). Shaded: mesopores.
         </figcaption>
       </figure>
@@ -262,7 +317,7 @@ export default function CapillaryPage() {
 
       <TryThis onApply={applyPreset} />
 
-      <Condensation r={r} setR={setR} theta={theta} theme={theme} />
+      <Condensation r={r} setR={setR} theta={theta} liquid={liquid} theme={theme} />
 
       <section className="section" aria-labelledby="why-title">
         <h2 id="why-title" className="section-title">

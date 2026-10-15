@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { capillaryPressure, jurinHeight, KELVIN_LENGTH, kelvinEmpty, kelvinFill } from './capillary'
+import { capillaryPressure, jurinHeight, KELVIN_LENGTH, kelvinEmpty, kelvinFill, LIQUIDS } from './capillary'
 
 describe('Young–Laplace', () => {
   it('gives 2γ/r for a fully wetting liquid and scales as 1/r', () => {
@@ -10,6 +10,13 @@ describe('Young–Laplace', () => {
   it('is zero at 90° and changes sign for a non-wetting liquid', () => {
     expect(Math.abs(capillaryPressure(10, 90))).toBeLessThan(1e-9)
     expect(capillaryPressure(10, 140)).toBeLessThan(0)
+  })
+})
+
+describe('mercury', () => {
+  it('needs about 1 MPa to enter a 0.6 µm pore at 140° (Washburn)', () => {
+    expect(capillaryPressure(600, 140, LIQUIDS.mercury)).toBeCloseTo(-1.24, 2)
+    expect(jurinHeight(1000, 140, LIQUIDS.mercury)).toBeLessThan(0)
   })
 })
 

@@ -5,7 +5,7 @@ import Tex from '../../components/Tex'
 import { LogSlider } from '../../components/Controls'
 import type { ThemeColors } from '../../lib/themeColors'
 import { axis, baseLayout, staticConfig } from '../../lib/plotTheme'
-import { KELVIN_LENGTH, kelvinEmpty, kelvinFill, R_RANGE } from '../../lib/capillary'
+import { kelvinEmpty, kelvinFill, kelvinLength, R_RANGE, type Liquid } from '../../lib/capillary'
 
 const N_POINTS = 200
 const f2 = (v: number) => v.toFixed(2)
@@ -14,10 +14,11 @@ interface Props {
   r: number
   setR: (r: number) => void
   theta: number
+  liquid: Liquid
   theme: ThemeColors
 }
 
-export default function Condensation({ r, setR, theta, theme }: Props) {
+export default function Condensation({ r, setR, theta, liquid, theme }: Props) {
   const curves = useMemo(() => {
     const rs: number[] = []
     const fill: number[] = []
@@ -26,14 +27,14 @@ export default function Condensation({ r, setR, theta, theme }: Props) {
     for (let i = 0; i <= N_POINTS; i++) {
       const ri = lo * (hi / lo) ** (i / N_POINTS)
       rs.push(ri)
-      fill.push(kelvinFill(ri, theta))
-      empty.push(kelvinEmpty(ri, theta))
+      fill.push(kelvinFill(ri, theta, liquid))
+      empty.push(kelvinEmpty(ri, theta, liquid))
     }
     return { rs, fill, empty }
-  }, [theta])
+  }, [theta, liquid])
 
-  const xFill = kelvinFill(r, theta)
-  const xEmpty = kelvinEmpty(r, theta)
+  const xFill = kelvinFill(r, theta, liquid)
+  const xEmpty = kelvinEmpty(r, theta, liquid)
   const condenses = xFill < 1
 
   // Emptying is drawn first so the filling trace can shade the loop between the two ("tonexty").
@@ -70,7 +71,7 @@ export default function Condensation({ r, setR, theta, theme }: Props) {
       </h2>
       <div className="prose">
         <p>
-          A curved meniscus also changes the vapour pressure. Over a concave meniscus water is stable below p₀, so
+          A curved meniscus also changes the vapour pressure. Over a concave meniscus the liquid is stable below p₀, so
           small pores fill with liquid from the vapour (Kelvin equation). A pore fills through a cylindrical film on
           its wall and empties through a hemispherical meniscus, which is twice as curved:
         </p>
@@ -88,7 +89,7 @@ export default function Condensation({ r, setR, theta, theme }: Props) {
         <span className="formula-number">(4)</span>
       </div>
       <p className="prose note">
-        For water at 25 °C, γV<sub>m</sub>/RT = {KELVIN_LENGTH.toFixed(2)} nm (V<sub>m</sub> is the molar volume of the
+        For {liquid.name} at 25 °C, γV<sub>m</sub>/RT = {kelvinLength(liquid).toFixed(2)} nm (V<sub>m</sub> is the molar volume of the
         liquid).
       </p>
 
@@ -100,7 +101,7 @@ export default function Condensation({ r, setR, theta, theme }: Props) {
             range={R_RANGE}
             value={r}
             onChange={setR}
-            hint={`same r as above · θ = ${Math.round(theta)}°`}
+            hint={`same r as above · ${liquid.name}, θ = ${Math.round(theta)}°`}
           />
         </div>
         <div className="area-grid">

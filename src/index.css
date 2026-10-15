@@ -432,6 +432,9 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
 .pore-svg { display: block; width: 100%; height: auto; }
 .pore-gas { fill: var(--data-plot-bg); }
 .pore-liquid { fill: var(--pore-liquid); }
+.pore-svg.mercury, .liquid-dot.mercury { --pore-liquid: color-mix(in srgb, var(--solid-line) 70%, var(--data-plot-bg)); }
+.pore-svg.mercury .pore-meniscus, .pore-svg.mercury .pore-surface { stroke: var(--color-text-muted); }
+.liquid-dot { background: var(--pore-liquid); }
 .pore-meniscus { fill: none; stroke: var(--data-1); stroke-width: 2.5; }
 .pore-surface { stroke: var(--data-1); stroke-width: 1.5; }
 .pore-wall { fill: var(--solid); stroke: var(--solid-line); stroke-width: 1; }

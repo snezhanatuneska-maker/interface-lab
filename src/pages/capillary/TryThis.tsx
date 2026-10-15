@@ -1,6 +1,8 @@
 import { useState, type ReactNode } from 'react'
+import type { LiquidId } from '../../lib/capillary'
 
 export interface Preset {
+  liquid?: LiquidId
   r?: number
   theta?: number
   /** Section to scroll to after applying. */

@@ -1,8 +1,10 @@
+import { useEffect, useRef, useState } from 'react'
 import { R_RANGE } from '../../lib/capillary'
 
-// Schematic cross-section of one pore dipped in a water reservoir. The meniscus meets the wall at the contact
+// Schematic cross-section of one pore dipped in a liquid reservoir. The meniscus meets the wall at the contact
 // angle θ; the column rises (wetting) or is pushed down (non-wetting). Heights are not to scale: real rise heights
 // in nanopores are kilometres, so the drawn height only grows with smaller r on a log scale.
+// The column moves toward its equilibrium height (Jurin) like a damped rise; remount it (new key) to restart.
 
 const W = 320
 const H = 240
@@ -13,13 +15,50 @@ const INNER_L = 130
 const INNER_R = 190
 const A = (INNER_R - INNER_L) / 2 // drawn pore radius
 const MAX_RISE = 140
+const TAU = 0.6 // s, time constant of the drawn approach to equilibrium
 
-export default function PoreView({ r, theta, label }: { r: number; theta: number; label: string }) {
-  const cos = Math.cos((theta * Math.PI) / 180)
-  const sin = Math.sin((theta * Math.PI) / 180)
+interface Props {
+  r: number
+  theta: number
+  paused: boolean
+  /** Start with the column already at its equilibrium height instead of at the reservoir level. */
+  atEquilibrium: boolean
+  /** Liquid colour class: water is drawn blue, mercury grey. */
+  liquid: string
+  label: string
+}
+
+/** Drawn equilibrium level of the column top (SVG y). */
+function equilibriumTop(r: number, cos: number): number {
   const [lo, hi] = R_RANGE
   const s = 0.25 + 0.75 * (Math.log(hi / r) / Math.log(hi / lo))
-  const top = Math.min(Math.max(LEVEL - MAX_RISE * cos * s, 24), WALL_BOTTOM - 8)
+  return Math.min(Math.max(LEVEL - MAX_RISE * cos * s, 24), WALL_BOTTOM - 8)
+}
+
+export default function PoreView({ r, theta, paused, atEquilibrium, liquid, label }: Props) {
+  const cos = Math.cos((theta * Math.PI) / 180)
+  const sin = Math.sin((theta * Math.PI) / 180)
+  const target = equilibriumTop(r, cos)
+  const [top, setTop] = useState(() => (atEquilibrium ? target : LEVEL))
+  const topRef = useRef(top)
+
+  // Exponential approach to the target; the loop stops once the column has settled.
+  useEffect(() => {
+    if (paused || Math.abs(topRef.current - target) < 0.1) return
+    let raf = 0
+    let last = performance.now()
+    const tick = (now: number) => {
+      const dt = Math.min((now - last) / 1000, 0.1)
+      last = now
+      const diff = topRef.current - target
+      topRef.current = Math.abs(diff) < 0.1 ? target : target + diff * Math.exp(-dt / TAU)
+      setTop(topRef.current)
+      if (topRef.current !== target) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [paused, target])
+
   // Sag of a circular meniscus that meets the walls at θ: d = a(1 − sin θ)/cos θ; positive = centre lower (concave).
   const sag = Math.abs(cos) < 1e-6 ? 0 : Math.max(-A, Math.min(A, (A * (1 - sin)) / cos))
   const meniscus = `M${INNER_L} ${top} Q${(INNER_L + INNER_R) / 2} ${top + 2 * sag} ${INNER_R} ${top}`
@@ -28,7 +67,7 @@ export default function PoreView({ r, theta, label }: { r: number; theta: number
 
   return (
     <div className="surface-wrap">
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label} className="pore-svg">
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label} className={`pore-svg ${liquid}`}>
         <rect width={W} height={H} className="pore-gas" />
         {/* reservoir, leaving the inside of the tube to the column below */}
         <rect x={0} y={LEVEL} width={INNER_L} height={H - LEVEL} className="pore-liquid" />
