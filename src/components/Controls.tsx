@@ -16,9 +16,10 @@ interface SliderProps {
   hint?: ReactNode
   /** Extra class on the wrapper (e.g. to dim a control or keep a warning hint visible). */
   className?: string
+  disabled?: boolean
 }
 
-export function Slider({ id, label, value, min, max, step, pos, onChange, hint, className }: SliderProps) {
+export function Slider({ id, label, value, min, max, step, pos, onChange, hint, className, disabled }: SliderProps) {
   // Filled part of the track, drawn in CSS (index.css) from this percentage.
   const fill = { '--fill': `${(Math.min(Math.max((pos - min) / (max - min), 0), 1) * 100).toFixed(2)}%` } as CSSProperties
   return (
@@ -36,6 +37,7 @@ export function Slider({ id, label, value, min, max, step, pos, onChange, hint, 
         value={pos}
         style={fill}
         aria-valuetext={value}
+        disabled={disabled}
         onChange={(e) => onChange(Number(e.target.value))}
       />
       {hint && <small>{hint}</small>}

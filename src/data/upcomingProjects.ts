@@ -31,7 +31,8 @@ export const PROJECTS: Project[] = [
       'Add surfactant and watch micelles form at the CMC.',
     concepts: ['CMC', 'Anionic/cationic/non-ionic/zwitterionic (SDS, CTAB, Tween 20, betaine)', 'Tail length', 'Ionic repulsion'],
     cepLink: 'Surfactants control wetting and foaming in electrolytes and catalyst inks.',
-    status: 'planned',
+    status: 'live',
+    href: '#/surfactants',
   },
   {
     id: 'wetting-contact-angle',
