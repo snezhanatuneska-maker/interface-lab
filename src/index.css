@@ -509,3 +509,85 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
   .data-table th, .data-table td { padding: var(--space-2); }
 }
 .cmc-controls .slider { align-self: stretch; }
+
+/* ================= Wetting simulator ================= */
+
+.wet-eq-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); }
+.wet-eq-grid h3 { font-size: var(--text-base); }
+.wet-eq-grid .formula { padding: var(--space-2) var(--space-3); }
+.wet-eq-grid .formula-body { font-size: 1rem; }
+.eq-card.wet-wenzel h3, .wenzel-ink { color: var(--data-1); }
+.eq-card.wet-cassie h3, .cassie-ink { color: var(--data-2); }
+.wenzel-ink, .cassie-ink { font-weight: 600; }
+
+/* Three droplets side by side, also on a phone */
+.drop-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
+.drop-panel { min-width: 0; display: flex; flex-direction: column; align-items: center; text-align: center; border: 1px solid transparent; border-radius: var(--radius); padding: var(--space-2); transition: border-color 0.15s; }
+.drop-panel h3 { font-family: var(--font-sans); font-size: var(--text-sm); margin: 0 0 var(--space-2); }
+.drop-panel.smooth h3 { color: var(--color-text-muted); }
+.drop-panel.wenzel h3 { color: var(--data-1); }
+.drop-panel.cassie h3 { color: var(--data-2); }
+.drop-panel.wenzel.favored { border-color: var(--data-1); }
+.drop-panel.cassie.favored { border-color: var(--data-2); }
+.drop-sub { display: block; font-weight: 400; font-size: var(--text-xs); color: var(--color-text-muted); }
+.drop-angle { font-family: var(--font-serif); font-size: var(--text-xl); font-weight: 600; margin: var(--space-2) 0 var(--space-1); font-variant-numeric: tabular-nums; }
+.drop-fav { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: var(--space-1); }
+.wet-badge { display: inline-block; font-size: var(--text-xs); font-weight: 600; line-height: 1.6; padding: 0 var(--space-2); border-radius: var(--radius-sm); }
+.wet-badge.hydrophilic { color: var(--wet-philic); background: color-mix(in srgb, var(--wet-philic) 14%, transparent); }
+.wet-badge.hydrophobic { color: var(--wet-phobic); background: color-mix(in srgb, var(--wet-phobic) 16%, transparent); }
+.wet-badge.superhydrophobic { color: var(--wet-super); background: color-mix(in srgb, var(--wet-super) 16%, transparent); }
+
+.drop-svg { display: block; width: 100%; height: auto; }
+.drop-bg { fill: var(--data-plot-bg); }
+.drop-solid { fill: var(--solid); stroke: none; }
+.drop-air { fill: var(--data-plot-bg); }
+.drop-liquid { fill: color-mix(in srgb, var(--data-1) 35%, var(--data-plot-bg)); }
+.drop-outline { stroke: var(--data-1); stroke-width: 1.5; }
+.drop-baseline { stroke: var(--solid-line); stroke-width: 1; stroke-dasharray: 3 3; }
+.drop-tangent { stroke: var(--color-text); stroke-width: 1.5; }
+.drop-arc { fill: none; stroke: var(--color-text); stroke-width: 1.2; }
+.drop-contact { fill: var(--color-text); }
+.drop-label { font-family: var(--font-sans); font-size: 14px; font-weight: 600; fill: var(--color-text); paint-order: stroke; stroke: var(--data-plot-bg); stroke-width: 4px; stroke-linejoin: round; }
+
+.wet-state p { margin: 0; }
+.wet-state p + p { margin-top: var(--space-1); color: var(--color-text-muted); }
+
+.wet-controls { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-5); align-items: flex-start; }
+.wet-controls .slider { flex: 1 1 12rem; }
+.wet-control-row { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+.wet-control-row .control-label { margin: 0; }
+.wet-young { flex: 1 1 100%; margin: 0; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.wet-young.limit strong { color: var(--data-2); }
+.wet-presets { flex: 1 1 100%; }
+
+.wet-chart { margin-top: var(--space-4); }
+.wet-chart .plot { height: 320px; }
+.key-line.dashed { border-top-style: dashed; }
+.key-swatch { display: inline-block; width: 14px; height: 10px; background: var(--data-2-soft); border: 1px solid var(--data-2); vertical-align: -1px; margin-right: 2px; }
+
+.wet-cep-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); }
+.wet-cep-card { display: flex; flex-direction: column; min-width: 0; }
+.wet-cep-card h3 { font-size: var(--text-base); }
+.wet-cep-card p { font-size: var(--text-sm); line-height: var(--leading-snug); color: var(--color-text-muted); }
+.wet-cep-card .button { margin-top: auto; align-self: flex-start; }
+
+.quiz-card { max-width: 44rem; }
+.quiz-progress { font-size: var(--text-sm); color: var(--color-text-muted); }
+.quiz-score { font-family: var(--font-serif); font-size: var(--text-xl); font-weight: 600; }
+.quiz-next { margin-top: var(--space-3); }
+.choice[aria-disabled='true'] { cursor: default; }
+
+@media (max-width: 820px) {
+  .wet-eq-grid, .wet-cep-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .drop-grid { gap: var(--space-1); }
+  .drop-panel { padding: var(--space-1) 0; }
+  .drop-angle { font-size: var(--text-lg); }
+  .drop-sub, .drop-label { display: none; }
+  .wet-badge { font-size: 0.6875rem; padding: 0 var(--space-1); white-space: normal; }
+  .wet-chart .plot { height: 280px; }
+  .wet-controls { gap: var(--space-2); }
+  .wet-controls .slider { flex: 1 1 100%; }
+  .wet-presets .button { padding: var(--space-1) var(--space-3); }
+}

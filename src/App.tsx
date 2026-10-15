@@ -8,6 +8,7 @@ import { COURSE } from './siteConfig';
 const AdsorptionPage = lazy(() => import('./pages/AdsorptionPage'));
 const CapillaryPage = lazy(() => import('./pages/CapillaryPage'));
 const SurfactantPage = lazy(() => import('./pages/SurfactantPage'));
+const WettingPage = lazy(() => import('./pages/WettingPage'));
 
 export default function App() {
   const route = useHashRoute();
@@ -33,6 +34,10 @@ export default function App() {
         ) : route === '/surfactants' ? (
           <Suspense fallback={<p className="loading">Loading simulator...</p>}>
             <SurfactantPage />
+          </Suspense>
+        ) : route === '/wetting' ? (
+          <Suspense fallback={<p className="loading">Loading simulator...</p>}>
+            <WettingPage />
           </Suspense>
         ) : route === '/adsorption' ? (
           <Suspense fallback={<p className="loading">Loading simulator...</p>}>
