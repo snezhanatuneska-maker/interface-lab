@@ -118,7 +118,8 @@ export const PROJECTS: Project[] = [
       'Compare the three van der Waals forces with kT.',
     concepts: ['Dipole moment', 'Polarisability', 'C_vdW = C_Keesom + C_Debye + C_London', 'Thermal energy kT'],
     cepLink: 'Why molecules stick to electrode and catalyst surfaces.',
-    status: 'planned',
+    status: 'live',
+    href: '#/van-der-waals',
   },
   {
     id: 'hamaker-lifshitz',

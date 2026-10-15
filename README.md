@@ -41,6 +41,11 @@ zoomed view of the contact area. θ_Y is set directly or from γ_SV, γ_SL, γ_L
 fraction f_s, presets (glass, PTFE, lotus leaf), which state is favored, eight "Try this" questions with "Set it up" buttons, and why it matters for clean energy. Equations in
 `src/lib/wetting.ts` (tests: `wetting.test.ts`).
 
+The **Van der Waals Forces** tool (`#/van-der-waals`) splits the attraction between two identical neutral molecules
+into Keesom, Debye and London (all −C/r⁶): pick a molecule (Ar, H₂, CH₄, CO, HCl, NH₃, H₂O or Custom), set T and r,
+and see each term's share of C_vdW, the C values, and φ(r) against kT. Plus key takeaways, the H₂ storage link and
+an eight-question quiz. Constants and formulas in `src/lib/vdw.ts` (tests: `vdw.test.ts`).
+
 **Stack:** [Vite](https://vite.dev) + React + TypeScript, plots with
 [Plotly.js](https://plotly.com/javascript/) via `react-plotly.js`.
 
@@ -71,7 +76,7 @@ index.html                       HTML entry point (meta tags, theme set before f
 vite.config.ts                   Vite config (sets base: "/interface-lab/")
 public/                          favicon and og-image.png (link preview)
 src/main.tsx                     React entry
-src/App.tsx                      Site layout: header, hash routing (#/, #/adsorption, #/capillary, #/surfactants, #/wetting), footer
+src/App.tsx                      Site layout: header, hash routing (#/, #/adsorption, #/capillary, #/surfactants, #/wetting, #/van-der-waals), footer
 src/siteConfig.ts                Course name shown in the footer
 src/design-tokens.css            Colours, type scale and spacing (light and dark)
 src/index.css                    Global and component styles
@@ -89,6 +94,8 @@ src/components/ThemeToggle.tsx   Light/dark switch in the header
 src/components/UpcomingProjects.tsx  Upcoming Projects tab
 src/pages/SurfactantPage.tsx     Surfactants & CMC page; its sections live in src/pages/surfactants/
 src/pages/WettingPage.tsx        Wetting page; its sections (droplet, theory, Try this) live in src/pages/wetting/
+src/pages/VdwPage.tsx            Van der Waals page; its sections (cards, quiz) live in src/pages/vdw/
+src/lib/vdw.ts                   Keesom, Debye, London coefficients, molecule presets, constants (tests: vdw.test.ts)
 src/lib/wetting.ts               Young, Wenzel, Cassie–Baxter, critical angle, presets (tests: wetting.test.ts)
 src/lib/surfactants.ts           CMC, surface tension and property models, all constants (tests: surfactants.test.ts)
 src/lib/adsorption.ts            Isotherm equations, BET fit, surface area, example samples (tests: adsorption.test.ts)

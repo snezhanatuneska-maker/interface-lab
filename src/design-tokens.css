@@ -61,6 +61,7 @@
   --data-2: #b5502a; /* BET */
   --data-1-soft: rgba(47, 106, 168, 0.1);
   --data-2-soft: rgba(181, 80, 42, 0.14);
+  --data-3: #6f4a9e; /* third series (London, vdW tool) */
   --data-grid: #dfe1dc;
   --data-axis: #8f938b;
   --data-plot-bg: #ffffff;
@@ -99,6 +100,7 @@
   --data-2: #e2885f;
   --data-1-soft: rgba(116, 167, 222, 0.14);
   --data-2-soft: rgba(226, 136, 95, 0.12);
+  --data-3: #b693e0;
   --data-grid: #353a3f;
   --data-axis: #646b72;
   --data-plot-bg: #1a1d20;

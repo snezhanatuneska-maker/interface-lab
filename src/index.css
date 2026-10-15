@@ -589,3 +589,36 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
   .wet-controls .slider { flex: 1 1 100%; }
   .wet-presets .button { padding: var(--space-1) var(--space-3); }
 }
+
+/* ================= Van der Waals simulator ================= */
+
+/* Card sketches: two molecules; dipoles as charged ellipses, London as offset electron clouds */
+.vdw-svg { display: block; width: 100%; max-width: 200px; height: auto; margin-bottom: var(--space-2); }
+.vdw-mol { fill: var(--data-1-soft); stroke: var(--data-1); stroke-width: 1.5; }
+.vdw-mol.induced { fill: var(--data-2-soft); stroke: var(--data-2); stroke-dasharray: 4 3; }
+.vdw-sign { font-family: var(--font-sans); font-size: 11px; fill: var(--color-text); text-anchor: middle; }
+.vdw-rot { fill: none; stroke: var(--color-text-muted); stroke-width: 1.5; }
+.vdw-cloud { fill: color-mix(in srgb, var(--data-3) 18%, transparent); stroke: var(--data-3); stroke-width: 1.5; }
+.vdw-flicker { fill: none; stroke: var(--data-3); stroke-width: 1; stroke-dasharray: 2 3; }
+.vdw-nucleus { fill: var(--color-text); }
+.eq-card.vdw-keesom h3 { color: var(--data-1); }
+.eq-card.vdw-debye h3 { color: var(--data-2); }
+.eq-card.vdw-london h3 { color: var(--data-3); }
+.eq-card .vdw-kind { margin: 0; }
+
+.vdw-grid { align-items: start; }
+.vdw-side { min-width: 0; }
+.vdw-side-title { font-family: var(--font-sans); font-size: var(--text-sm); margin: 0 0 var(--space-1); }
+.plot.vdw-bar { height: 64px; margin-bottom: var(--space-3); }
+.vdw-results .result-main dd { color: var(--color-text); }
+.key-line.dashed { border-top-style: dashed; }
+.vdw-controls { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-5); align-items: flex-start; }
+.vdw-controls .slider { flex: 1 1 12rem; }
+.vdw-controls .select { flex: 1 1 12rem; }
+.vdw-hint { flex: 1 1 100%; margin: 0; }
+.slider input[type='range']:disabled { cursor: not-allowed; }
+
+@media (max-width: 600px) {
+  .vdw-controls { gap: var(--space-2); }
+  .vdw-controls .slider, .vdw-controls .select { flex: 1 1 100%; }
+}
