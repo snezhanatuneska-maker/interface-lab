@@ -51,8 +51,8 @@ export const PROJECTS: Project[] = [
       'See how pore size sets capillary pressure, rise and condensation.',
     concepts: ['Young–Laplace', "Jurin's law", 'Capillary pressure ∝ 1/r', 'Hysteresis', 'Kelvin equation'],
     cepLink: 'Liquid transport in porous electrodes and catalyst layers.',
-    status: 'planned',
-    next: true,
+    status: 'live',
+    href: '#/capillary',
   },
   {
     id: 'mercury-porosimetry',

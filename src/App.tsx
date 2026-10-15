@@ -19,12 +19,6 @@ export default function App() {
             Interface Engineering Lab
           </a>
           <span className="site-subtitle">Interactive tools for Clean Energy Processes (CEP)</span>
-          
-          {/* Navigation Links */}
-          <nav className="mt-2 space-x-4">
-            <a href="#/adsorption" className="text-blue-600 hover:underline font-medium">Adsorption Lab</a>
-            <a href="#/capillary" className="text-blue-600 hover:underline font-medium">Capillary Pressure</a>
-          </nav>
 
           <ThemeToggle />
         </div>

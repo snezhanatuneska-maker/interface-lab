@@ -17,6 +17,13 @@ const ICONS: Record<string, ReactNode> = {
       <path className="series-2" d="M6 42 C10 26 16 26 26 24 S36 18 42 6" strokeWidth="3" fill="none" />
     </>,
   ),
+  'capillary-pressure': svg(
+    <>
+      <path d="M4 40 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />
+      <path d="M18 6 V44 M30 6 V44" stroke="currentColor" strokeWidth="2.5" fill="none" />
+      <path className="series-1" d="M18 18 Q24 26 30 18" strokeWidth="3" fill="none" />
+    </>,
+  ),
 }
 
 const TOOLS = PROJECTS.filter((p) => p.status === 'live' && p.href)
