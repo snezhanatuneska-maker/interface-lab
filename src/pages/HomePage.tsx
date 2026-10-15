@@ -32,6 +32,13 @@ const ICONS: Record<string, ReactNode> = {
       <path className="series-2" d="M29 38 A9 9 0 1 1 39 38" strokeWidth="3" fill="none" />
     </>,
   ),
+  'van-der-waals': svg(
+    <>
+      <path d="M6 6 V42 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />
+      <path d="M6 18 H44" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" fill="none" />
+      <path className="series-1" d="M12 42 C14 30 18 24 24 21 S36 18 44 18" strokeWidth="3" fill="none" />
+    </>,
+  ),
   'capillary-pressure': svg(
     <>
       <path d="M4 40 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />
