@@ -223,7 +223,7 @@ export default function Theory() {
         <figure className="figure tensio-figure">
           <TensiometerDiagram />
           <figcaption>
-            <span className="figure-label">Figure 2.</span> <strong>Wilhelmy plate:</strong> a thin plate just touches
+            <span className="figure-label">Figure 3.</span> <strong>Wilhelmy plate:</strong> a thin plate just touches
             the surface; the liquid pulls it down along its perimeter L, and the balance reads F = γL directly, at
             equilibrium. <strong>Du Noüy ring:</strong> a ring is pulled up through the surface and the
             maximum force before the liquid film breaks gives γ, after a correction factor f for the shape of the
