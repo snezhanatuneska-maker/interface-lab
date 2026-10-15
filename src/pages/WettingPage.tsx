@@ -1,9 +1,5 @@
-import { useMemo, useState, type ReactNode } from 'react'
-import type { Annotation, Data, Shape } from 'plotly.js'
-import Plot from '../components/Plot'
+import { useState, type ReactNode } from 'react'
 import { Segmented, Slider } from '../components/Controls'
-import { useThemeColors } from '../lib/themeColors'
-import { axis, baseLayout, staticConfig } from '../lib/plotTheme'
 import {
   cassieAngle,
   criticalAngle,
@@ -30,11 +26,27 @@ import DropView, { type Surface } from './wetting/DropView'
 import Theory from './wetting/Theory'
 import Quiz from './wetting/Quiz'
 
-const PANELS: { surface: Surface; title: string; sub: string }[] = [
-  { surface: 'smooth', title: 'Young', sub: 'smooth' },
-  { surface: 'wenzel', title: 'Wenzel', sub: 'liquid in the grooves' },
-  { surface: 'cassie', title: 'Cassie–Baxter', sub: 'air under the drop' },
+const VIEWS: { value: Surface; label: string; title: string }[] = [
+  { value: 'smooth', label: 'Young', title: 'Young: smooth surface' },
+  { value: 'wenzel', label: 'Wenzel', title: 'Wenzel: liquid in the grooves' },
+  { value: 'cassie', label: 'Cassie–Baxter', title: 'Cassie–Baxter: air under the drop' },
 ]
+
+const LEGEND: Record<Surface, { cls: string; label: string }[]> = {
+  smooth: [
+    { cls: 'liquid', label: 'liquid' },
+    { cls: 'solid', label: 'solid' },
+  ],
+  wenzel: [
+    { cls: 'liquid', label: 'liquid (also in the grooves)' },
+    { cls: 'solid', label: 'rough solid' },
+  ],
+  cassie: [
+    { cls: 'liquid', label: 'liquid' },
+    { cls: 'air', label: 'trapped air' },
+    { cls: 'solid', label: 'textured solid' },
+  ],
+}
 
 const CEP: { title: string; preset: Preset['id']; text: ReactNode }[] = [
   {
@@ -64,8 +76,6 @@ const CEP: { title: string; preset: Preset['id']; text: ReactNode }[] = [
   },
 ]
 
-const N = 181
-
 export default function WettingPage() {
   const [mode, setMode] = useState<InputMode>('angle')
   const [thetaSet, setThetaSet] = useState(THETA_DEFAULT)
@@ -74,7 +84,7 @@ export default function WettingPage() {
   const [gLV, setGLV] = useState(GAMMA_WATER)
   const [r, setR] = useState(R_DEFAULT)
   const [fs, setFs] = useState(FS_DEFAULT)
-  const theme = useThemeColors()
+  const [view, setView] = useState<Surface>('wenzel')
 
   const young = youngFromTensions(gSV, gSL, gLV)
   const thetaY = mode === 'angle' ? thetaSet : young.theta
@@ -90,6 +100,7 @@ export default function WettingPage() {
     setGLV(GAMMA_WATER)
     setR(R_DEFAULT)
     setFs(FS_DEFAULT)
+    setView('wenzel')
   }
 
   const applyPreset = (p: Preset, scroll = false) => {
@@ -97,73 +108,13 @@ export default function WettingPage() {
     setThetaSet(p.thetaY)
     setR(p.r)
     setFs(p.fs)
+    setView(favoredState(p.thetaY, p.r, p.fs)) // show the state this surface actually takes
     if (scroll) document.getElementById('sim-figure')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  // ---------- Chart: apparent angle against θ_Y ----------
-  const curves = useMemo(() => {
-    const xs: number[] = []
-    const w: number[] = []
-    const cb: number[] = []
-    for (let i = 0; i < N; i++) {
-      xs.push(i)
-      w.push(wenzelAngle(i, r))
-      cb.push(cassieAngle(i, fs))
-    }
-    return { xs, w, cb }
-  }, [r, fs])
-
-  const C = { young: theme.muted, wenzel: theme.data1, cassie: theme.data2 }
-  const line = (on: boolean, color: string) => ({ color, width: on ? 3 : 2 })
-
-  const chartData: Data[] = [
-    { x: [0, 180], y: [0, 180], type: 'scatter', mode: 'lines', line: { color: C.young, width: 2, dash: 'dash' } },
-    { x: curves.xs, y: curves.w, type: 'scatter', mode: 'lines', line: line(favored === 'wenzel', C.wenzel) },
-    { x: curves.xs, y: curves.cb, type: 'scatter', mode: 'lines', line: line(favored === 'cassie', C.cassie) },
-    {
-      x: [thetaY, thetaY, thetaY],
-      y: [angles.smooth, angles.wenzel, angles.cassie],
-      type: 'scatter',
-      mode: 'markers',
-      marker: { size: 11, color: [C.young, C.wenzel, C.cassie], line: { color: theme.plotBg, width: 2 } },
-    },
-  ]
-
-  const ref = (y: number): Partial<Shape> => ({
-    type: 'line',
-    xref: 'paper',
-    x0: 0,
-    x1: 1,
-    y0: y,
-    y1: y,
-    layer: 'below',
-    line: { color: theme.axis, width: 1, dash: 'dot' },
-  })
-  const shapes: Partial<Shape>[] = [ref(90), ref(150)]
-  const annotations: Partial<Annotation>[] = [
-    { xref: 'paper', x: 0, y: 150, xanchor: 'left', yanchor: 'bottom', text: '150°', showarrow: false, font: { size: 11, color: theme.muted } },
-  ]
-  if (crit !== null) {
-    shapes.push(
-      { type: 'rect', xref: 'x', yref: 'paper', x0: crit, x1: 180, y0: 0, y1: 1, layer: 'below', fillcolor: theme.data2Soft, line: { width: 0 } },
-      { type: 'line', xref: 'x', yref: 'paper', x0: crit, x1: crit, y0: 0, y1: 1, line: { color: theme.text, width: 1.5, dash: 'dash' } },
-    )
-    annotations.push({
-      x: crit,
-      y: 8,
-      xanchor: crit > 160 ? 'right' : 'left',
-      xshift: crit > 160 ? -4 : 4,
-      yanchor: 'bottom',
-      text: `θ<sub>c</sub> = ${Math.round(crit)}°`,
-      showarrow: false,
-      font: { size: 12, color: theme.text },
-    })
-  }
-
-  const chartLabel =
-    `Apparent angle against Young angle, 0 to 180 degrees. At θ_Y ${Math.round(thetaY)}°: Wenzel ${Math.round(angles.wenzel)}°, ` +
-    `Cassie–Baxter ${Math.round(angles.cassie)}°.` +
-    (crit !== null ? ` Critical angle ${Math.round(crit)}°.` : '')
+  const theta = angles[view]
+  const wet = wettability(theta)
+  const v = VIEWS.find((x) => x.value === view)!
 
   return (
     <article className="page">
@@ -186,33 +137,37 @@ export default function WettingPage() {
         <h2 id="sim-title" className="section-title">
           Simulation
         </h2>
-        <figure id="sim-figure" className="figure" aria-label="Droplets and apparent contact angle">
-          <ul className="drop-grid" aria-live="polite">
-            {PANELS.map((p) => {
-              const th = angles[p.surface]
-              const wet = wettability(th)
-              const isFav = p.surface !== 'smooth' && p.surface === favored && crit !== null
-              return (
-                <li key={p.surface} className={`drop-panel ${p.surface}${isFav ? ' favored' : ''}`}>
-                  <h3>
-                    {p.title} <span className="drop-sub">{p.sub}</span>
-                  </h3>
-                  <div className="surface-wrap">
-                    <DropView
-                      theta={th}
-                      surface={p.surface}
-                      r={r}
-                      fs={fs}
-                      label={`${p.title}: contact angle ${Math.round(th)} degrees, ${wet}`}
-                    />
-                  </div>
-                  <p className="drop-angle">{Math.round(th)}°</p>
-                  <span className={`wet-badge ${wet}`}>{wet}</span>
-                  {isFav && <span className="drop-fav">favored</span>}
+        <figure id="sim-figure" className="figure" aria-label="Droplet on the chosen surface">
+          <div className="wet-view-head">
+            <div className="wet-control-row">
+              <span className="control-label">Show</span>
+              <Segmented label="Wetting model shown" value={view} onChange={setView} options={VIEWS} />
+            </div>
+          </div>
+          <div className={`drop-single ${view}`} aria-live="polite">
+            <h3>{v.title}</h3>
+            <div className="surface-wrap">
+              <DropView
+                theta={theta}
+                surface={view}
+                r={r}
+                fs={fs}
+                label={`${v.title}: contact angle ${Math.round(theta)} degrees, ${wet}`}
+              />
+            </div>
+            <div className="drop-readout">
+              <span className="drop-angle">θ = {Math.round(theta)}°</span>
+              <span className={`wet-badge ${wet}`}>{wet}</span>
+              {view !== 'smooth' && view === favored && crit !== null && <span className="tag">favored state</span>}
+            </div>
+            <ul className="layer-legend drop-legend" aria-label="Legend">
+              {LEGEND[view].map((l) => (
+                <li key={l.cls}>
+                  <span className={`swatch ${l.cls}`} /> {l.label}
                 </li>
-              )
-            })}
-          </ul>
+              ))}
+            </ul>
+          </div>
 
           <div className="insight wet-state" aria-live="polite">
             <p>
@@ -315,6 +270,7 @@ export default function WettingPage() {
               pos={r}
               onChange={setR}
               hint="Wenzel; 1 = smooth"
+              className={view === 'wenzel' ? undefined : 'inactive'}
             />
             <Slider
               id="fs"
@@ -326,6 +282,7 @@ export default function WettingPage() {
               pos={fs}
               onChange={setFs}
               hint="Cassie–Baxter; 1 = no air"
+              className={view === 'cassie' ? undefined : 'inactive'}
             />
             <div className="sim-buttons wet-presets">
               {PRESETS.map((p) => (
@@ -339,46 +296,10 @@ export default function WettingPage() {
             </div>
           </div>
 
-          <div className="wet-chart">
-            <ul className="plot-legend" aria-label="Plot legend">
-              <li>
-                <span className="key-line dashed" style={{ borderColor: C.young }} /> Young (θ* = θ<sub>Y</sub>)
-              </li>
-              <li>
-                <span className="key-line" style={{ borderColor: C.wenzel }} /> Wenzel, r = {r.toFixed(2)}
-              </li>
-              <li>
-                <span className="key-line" style={{ borderColor: C.cassie }} /> Cassie–Baxter, f<sub>s</sub> ={' '}
-                {fs.toFixed(2)}
-              </li>
-              {crit !== null && (
-                <li>
-                  <span className="key-swatch" /> Cassie–Baxter favored (θ<sub>Y</sub> &gt; θ<sub>c</sub>)
-                </li>
-              )}
-            </ul>
-            <div role="img" aria-label={chartLabel}>
-              <Plot
-                data={chartData}
-                layout={{
-                  ...baseLayout(theme),
-                  showlegend: false,
-                  xaxis: { ...axis(theme), title: { text: 'Young angle θ<sub>Y</sub> (°)' }, range: [0, 180], dtick: 30 },
-                  yaxis: { ...axis(theme), title: { text: 'Apparent angle θ* (°)' }, range: [0, 180], dtick: 30 },
-                  shapes,
-                  annotations,
-                }}
-                config={staticConfig}
-                useResizeHandler
-                className="plot"
-              />
-            </div>
-          </div>
           <figcaption>
-            <span className="figure-label">Figure 1.</span> Top: the same drop volume on a smooth, a Wenzel and a
-            Cassie–Baxter surface, with the tangent at the contact point. Bottom: apparent angle against θ
-            <sub>Y</sub>; the dots are the current setting. Right of the dashed line θ<sub>c</sub>, Cassie–Baxter has
-            the lower energy.
+            <span className="figure-label">Figure 1.</span> The same drop volume on the chosen surface, with the
+            tangent at the contact point. The texture is drawn enlarged; deeper grooves mean larger r, thinner pillars
+            mean smaller f<sub>s</sub>.
           </figcaption>
         </figure>
       </section>
