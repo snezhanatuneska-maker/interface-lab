@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { Annotation, Data, Shape } from 'plotly.js'
 import Plot from '../components/Plot'
-import { Slider } from '../components/Controls'
+import { Segmented, Slider } from '../components/Controls'
 import { useThemeColors, type ThemeColors } from '../lib/themeColors'
 import { axis, baseLayout, staticConfig } from '../lib/plotTheme'
 import {
@@ -49,9 +49,6 @@ function fmtC(c: number): string {
   return `${Number((c * 1e6).toPrecision(2))} µM`
 }
 
-/** c/CMC as 0.012, 1.5, 47 or 3200. */
-const fmtRatio = (r: number) => (r >= 100 ? String(Math.round(r)) : String(Number(r.toPrecision(2))))
-
 // ---------- Plots ----------
 
 // The x axis is the same on every plot: c in mM on a log scale, ticks at each decade.
@@ -74,24 +71,23 @@ interface PropertyPlotProps {
   yTitle: string
   color: string
   theme: ThemeColors
-  small?: boolean
   label: string
 }
 
 /** One property against log c, with the CMC line, the micelle region shaded and the current point marked. */
-function PropertyPlot({ sys, c, f, yRange, yTitle, color, theme, small, label }: PropertyPlotProps) {
+function PropertyPlot({ sys, c, f, yRange, yTitle, color, theme, label }: PropertyPlotProps) {
   const xs = concentrationGrid(sys.cmc)
   const y = f(sys, c)
   const off = y > yRange[1]
   const data: Data[] = [
-    { x: xs.map((v) => v * 1e3), y: xs.map((v) => f(sys, v)), type: 'scatter', mode: 'lines', line: { color, width: small ? 2 : 3 } },
+    { x: xs.map((v) => v * 1e3), y: xs.map((v) => f(sys, v)), type: 'scatter', mode: 'lines', line: { color, width: 3 } },
     {
       x: [c * 1e3],
       y: [Math.min(y, yRange[1])],
       type: 'scatter',
       mode: 'markers',
       cliponaxis: false, // keeps the ▲ visible when it is pinned to the top edge
-      marker: { size: small ? 9 : 12, color, symbol: off ? 'triangle-up' : 'circle', line: { color: theme.plotBg, width: 2 } },
+      marker: { size: 12, color, symbol: off ? 'triangle-up' : 'circle', line: { color: theme.plotBg, width: 2 } },
     },
   ]
   const cmcX = sys.cmc * 1e3
@@ -110,30 +106,72 @@ function PropertyPlot({ sys, c, f, yRange, yTitle, color, theme, small, label }:
       xshift: 3,
       text: 'CMC',
       showarrow: false,
-      font: { size: small ? 11 : 12, color: theme.text },
+      font: { size: 12, color: theme.text },
     },
   ]
-  const base = baseLayout(theme)
   return (
     <div role="img" aria-label={label}>
       <Plot
         data={data}
         layout={{
-          ...base,
+          ...baseLayout(theme),
           showlegend: false,
-          margin: small ? { l: 48, r: 8, t: 8, b: 36 } : base.margin,
-          font: small ? { ...base.font, size: 12 } : base.font,
-          xaxis: xAxis(theme, small ? 'c (mM)' : 'Surfactant concentration c (mM, log scale)'),
+          xaxis: xAxis(theme, 'c (mM, log scale)'),
           yaxis: { ...axis(theme), title: { text: yTitle }, range: yRange },
           shapes,
           annotations,
         }}
         config={staticConfig}
         useResizeHandler
-        className={small ? 'plot plot-small' : 'plot'}
+        className="plot"
       />
     </div>
   )
+}
+
+// ---------- Second figure: one property at a time ----------
+
+type PropId = 'conductivity' | 'osmotic' | 'turbidity' | 'diffusion'
+
+const PROPS: Record<Exclude<PropId, 'conductivity'>, { f: (s: System, c: number) => number; yRange: [number, number]; yTitle: string; label: string }> = {
+  osmotic: {
+    f: osmoticRel,
+    yRange: [0, 2],
+    yTitle: 'Π / Π<sub>CMC</sub>',
+    label: 'Osmotic pressure rises with concentration, then nearly levels off above the CMC.',
+  },
+  turbidity: {
+    f: turbidityRel,
+    yRange: [0, 10],
+    yTitle: 'τ (rel.)',
+    label: 'Turbidity is zero below the CMC and rises above it.',
+  },
+  diffusion: {
+    f: diffusionRel,
+    yRange: [0, 1.1],
+    yTitle: 'D / D<sub>monomer</sub>',
+    label: 'The average self-diffusion coefficient is constant below the CMC and falls above it.',
+  },
+}
+
+function captionFor(prop: PropId, beta: number | null) {
+  const label = <span className="figure-label">Figure 2.</span>
+  switch (prop) {
+    case 'conductivity':
+      return (
+        <>
+          {label} Ionic surfactants only. Two straight lines meet at the CMC (they look curved on the log axis); the
+          slope drops because micelles bind part of their counterions
+          {beta !== null && <>, here β = {beta.toFixed(2)}</>}.
+        </>
+      )
+    case 'osmotic':
+      return <>{label} Qualitative. A whole micelle counts as one particle, so Π almost stops rising above the CMC.</>
+    case 'turbidity':
+      return <>{label} Qualitative. Micelles are big enough to scatter light; monomers are not.</>
+    case 'diffusion':
+      return <>{label} Qualitative. More and more molecules sit in slow-moving micelles, so the average D falls.</>
+  }
 }
 
 // ---------- Explanation under the controls ----------
@@ -156,6 +194,7 @@ export default function SurfactantPage() {
   const [saltMM, setSaltMM] = useState(DEFAULT.saltMM)
   const [logC, setLogC] = useState(DEFAULT.logC)
   const [paused, setPaused] = useState(prefersReducedMotion)
+  const [prop, setProp] = useState<PropId>('conductivity')
   const theme = useThemeColors()
 
   const preset = PRESETS.find((p) => p.id === surf)
@@ -172,18 +211,8 @@ export default function SurfactantPage() {
   // What the molecular view draws. Monomer and micelle counts are on a compressed (square-root / log) scale,
   // since the real numbers span many decades.
   const coverage = Gamma / sys.gammaMax
-  const monomers = Math.round(12 * Math.sqrt(freeMonomer(c, sys.cmc) / sys.cmc))
-  const micelles = above ? Math.min(12, Math.ceil(5 * Math.log10(c / sys.cmc))) : 0
-
-  const setC = (v: number) => setLogC(Math.min(LOG_MAX, Math.max(LOG_MIN, Math.round(Math.log10(v) * 100) / 100)))
-
-  const reset = () => {
-    setSurf(DEFAULT.surf)
-    setCustomHead(DEFAULT.head)
-    setCustomTail(DEFAULT.tail)
-    setSaltMM(DEFAULT.saltMM)
-    setLogC(DEFAULT.logC)
-  }
+  const monomers = Math.round(6 * Math.sqrt(freeMonomer(c, sys.cmc) / sys.cmc))
+  const micelles = above ? Math.min(6, Math.ceil(3 * Math.log10(c / sys.cmc))) : 0
 
   const applyPreset = (p: Preset) => {
     setSurf(p.surf)
@@ -192,7 +221,9 @@ export default function SurfactantPage() {
     setSaltMM(p.saltMM ?? 0)
     setLogC(p.logC)
     setPaused(false)
-    requestAnimationFrame(() => document.getElementById('sim-figure')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+    if (p.showConductivity) setProp('conductivity')
+    const target = p.showConductivity ? 'props-figure' : 'sim-figure'
+    requestAnimationFrame(() => document.getElementById(target)?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
   }
 
   // Fixed y ranges per system: wide enough to show the change of slope at the CMC clearly.
@@ -230,49 +261,48 @@ export default function SurfactantPage() {
                 ))}
                 <option value="custom">Custom</option>
               </select>
-              <small className="control-note">{preset ? preset.chem : 'Choose the head type and tail length below.'}</small>
             </div>
 
-            <div className={`select${preset ? ' inactive' : ''}`}>
-              <label className="control-label" htmlFor="head">
-                Head type
-              </label>
-              <select id="head" value={head} disabled={!!preset} onChange={(e) => setCustomHead(e.target.value as HeadType)}>
-                {(Object.keys(HEAD_LABEL) as HeadType[]).map((h) => (
-                  <option key={h} value={h}>
-                    {HEAD_LABEL[h]}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* Head and tail only matter for Custom; salt only for ionic surfactants. */}
+            {!preset && (
+              <>
+                <div className="select">
+                  <label className="control-label" htmlFor="head">
+                    Head type
+                  </label>
+                  <select id="head" value={head} onChange={(e) => setCustomHead(e.target.value as HeadType)}>
+                    {(Object.keys(HEAD_LABEL) as HeadType[]).map((h) => (
+                      <option key={h} value={h}>
+                        {HEAD_LABEL[h]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <Slider
+                  id="tail"
+                  label={<>Tail length <em>n</em></>}
+                  value={`C${tail}`}
+                  min={TAIL_RANGE[0]}
+                  max={TAIL_RANGE[1]}
+                  step={1}
+                  pos={tail}
+                  onChange={setCustomTail}
+                />
+              </>
+            )}
 
-            <Slider
-              id="tail"
-              label={<>Tail length <em>n</em></>}
-              value={`C${tail}`}
-              min={TAIL_RANGE[0]}
-              max={TAIL_RANGE[1]}
-              step={1}
-              pos={tail}
-              onChange={setCustomTail}
-              disabled={!!preset}
-              className={preset ? 'inactive' : undefined}
-              hint={preset ? 'Pick “Custom” to change' : 'carbons in the hydrophobic tail'}
-            />
-
-            <Slider
-              id="salt"
-              label={<>Added NaCl</>}
-              value={ionic ? `${saltMM} mM` : '—'}
-              min={0}
-              max={SALT_MAX * 1e3}
-              step={1}
-              pos={ionic ? saltMM : 0}
-              onChange={setSaltMM}
-              disabled={!ionic}
-              className={ionic ? undefined : 'inactive'}
-              hint={ionic ? 'screens head-group repulsion' : 'only affects ionic surfactants'}
-            />
+            {ionic && (
+              <Slider
+                id="salt"
+                label={<>Added NaCl</>}
+                value={`${saltMM} mM`}
+                min={0}
+                max={SALT_MAX * 1e3}
+                step={1}
+                pos={saltMM}
+                onChange={setSaltMM}
+              />
+            )}
 
             <Slider
               id="conc"
@@ -285,21 +315,10 @@ export default function SurfactantPage() {
               onChange={setLogC}
               hint="log scale"
             />
-            <div className="sim-buttons">
-              <button type="button" className="button" onClick={() => setC(sys.cmc / 10)}>
-                CMC/10
-              </button>
-              <button type="button" className="button" onClick={() => setC(sys.cmc)}>
-                CMC
-              </button>
-              <button type="button" className="button" onClick={() => setC(sys.cmc * 10)}>
-                10×CMC
-              </button>
-            </div>
 
             <dl className="results cmc-results" aria-live="polite">
               <div className="result-main">
-                <dt>CMC ({name})</dt>
+                <dt>CMC</dt>
                 <dd>{fmtC(sys.cmc)}</dd>
               </div>
               <div>
@@ -309,61 +328,29 @@ export default function SurfactantPage() {
                 </dd>
               </div>
               <div>
-                <dt>Free monomer</dt>
-                <dd>{fmtC(freeMonomer(c, sys.cmc))}</dd>
-              </div>
-              <div>
                 <dt>
                   Surface excess <em>Γ</em>
                 </dt>
                 <dd>{(Gamma * 1e6).toFixed(2)} µmol/m²</dd>
               </div>
               <div>
-                <dt>Area per molecule (at Γ)</dt>
+                <dt>Area per molecule</dt>
                 <dd>{Gamma > sys.gammaMax * 1e-3 ? `${areaPerMolecule(Gamma).toFixed(2)} nm²` : '—'}</dd>
               </div>
-              <div>
-                <dt>
-                  Minimum area (at Γ<sub>max</sub>)
-                </dt>
-                <dd>{areaPerMolecule(sys.gammaMax).toFixed(2)} nm²</dd>
-              </div>
-              {beta !== null && (
-                <div>
-                  <dt>Counterion binding β</dt>
-                  <dd>{beta.toFixed(2)}</dd>
-                </div>
-              )}
             </dl>
             <div className="sim-buttons">
               <button type="button" className="button" onClick={() => setPaused((p) => !p)}>
                 {paused ? 'Play' : 'Pause'}
               </button>
-              <button type="button" className="button" onClick={reset}>
-                Reset
-              </button>
             </div>
           </div>
 
           <div className="cmc-main">
-            <div className="hero-head">
-              <div className="coverage">
-                <span className="coverage-label">
-                  Surface tension <em>γ</em>
-                </span>
-                <span className="coverage-value surfactant">{(gamma * 1e3).toFixed(1)} mN/m</span>
-                <span className="coverage-sub">
-                  {fmtC(c)} · {fmtRatio(c / sys.cmc)} × CMC
-                </span>
-              </div>
-              <ul className="layer-legend" aria-label="Legend">
-                <li>
-                  <span className="dot" style={{ background: headColor(head) }} /> head ({HEAD_LABEL[head].toLowerCase()})
-                </li>
-                <li>
-                  <span className="tail-key" /> hydrophobic tail
-                </li>
-              </ul>
+            <div className="coverage">
+              <span className="coverage-label">
+                Surface tension <em>γ</em>
+              </span>
+              <span className="coverage-value surfactant">{(gamma * 1e3).toFixed(1)} mN/m</span>
             </div>
             <MicelleView
               coverage={coverage}
@@ -394,89 +381,66 @@ export default function SurfactantPage() {
           {insight(sys, c)}
         </p>
 
-        <div className="multiples">
-          <div className={`multiple${ionic ? '' : ' disabled'}`}>
-            <h3>
-              Conductivity <em>κ</em> {beta !== null && <span className="multiple-note">β = {beta.toFixed(2)}</span>}
-            </h3>
-            {ionic ? (
-              <PropertyPlot
-                small
-                sys={sys}
-                c={c}
-                f={conductivity}
-                yRange={[0, condMax]}
-                yTitle="κ (mS/cm)"
-                color={theme.data2}
-                theme={theme}
-                label={`Conductivity: two straight lines meeting at the CMC; the slope drops above it. β = ${beta?.toFixed(2)}.`}
-              />
-            ) : (
-              <p className="multiple-empty">
-                {head === 'nonionic' ? 'Non-ionic' : 'Zwitterionic'} surfactants carry no net charge and release no
-                counterions, so they barely change the conductivity: there is no CMC break to see here.
-              </p>
-            )}
-          </div>
-          <div className="multiple">
-            <h3>
-              Osmotic pressure <span className="tag">qualitative</span>
-            </h3>
-            <PropertyPlot
-              small
-              sys={sys}
-              c={c}
-              f={osmoticRel}
-              yRange={[0, 2]}
-              yTitle="Π / Π<sub>CMC</sub>"
-              color={theme.data2}
-              theme={theme}
-              label="Osmotic pressure rises with concentration, then nearly levels off above the CMC."
-            />
-          </div>
-          <div className="multiple">
-            <h3>
-              Turbidity <span className="tag">qualitative</span>
-            </h3>
-            <PropertyPlot
-              small
-              sys={sys}
-              c={c}
-              f={turbidityRel}
-              yRange={[0, 10]}
-              yTitle="τ (rel.)"
-              color={theme.data2}
-              theme={theme}
-              label="Turbidity is zero below the CMC and rises above it."
-            />
-          </div>
-          <div className="multiple">
-            <h3>
-              Self-diffusion <em>D</em> <span className="tag">qualitative</span>
-            </h3>
-            <PropertyPlot
-              small
-              sys={sys}
-              c={c}
-              f={diffusionRel}
-              yRange={[0, 1.1]}
-              yTitle="D / D<sub>monomer</sub>"
-              color={theme.data2}
-              theme={theme}
-              label="The average self-diffusion coefficient is constant below the CMC and falls above it."
-            />
-          </div>
-        </div>
-
         <figcaption>
-          <span className="figure-label">Figure 1.</span> Left: controls and results. Right: the beaker (heads in the
-          water, tails in the air or hidden in micelles) and the surface tension. Below: four more properties. On every
-          plot the dashed line is the CMC, the shaded part is where micelles exist, and the dot is the current
-          concentration (▲ if off the top). The beaker draws monomers and micelles on a compressed scale. Osmotic
-          pressure, turbidity and D are qualitative shapes; conductivity is the surfactant's own contribution (its two
-          straight lines look curved on the log axis; the kink at the CMC is the drop in slope).
+          <span className="figure-label">Figure 1.</span> The beaker shows heads in the water and tails in the air or
+          hidden in micelles. On the plot, the dashed line is the CMC and the dot is the current concentration.
         </figcaption>
       </figure>
+
+      {/* ---------- Other properties, one at a time ---------- */}
+      <section className="section" aria-labelledby="props-plot-title">
+        <h2 id="props-plot-title" className="section-title">
+          Other properties around the CMC
+        </h2>
+        <figure id="props-figure" className="figure">
+          <div className="prop-tabs">
+            <Segmented
+              label="Property"
+              value={prop}
+              onChange={setProp}
+              options={[
+                { value: 'conductivity', label: 'Conductivity' },
+                { value: 'osmotic', label: 'Osmotic pressure' },
+                { value: 'turbidity', label: 'Turbidity' },
+                { value: 'diffusion', label: 'Self-diffusion' },
+              ]}
+            />
+          </div>
+          <div className="prop-plot">
+            {prop === 'conductivity' ? (
+              ionic ? (
+                <PropertyPlot
+                  sys={sys}
+                  c={c}
+                  f={conductivity}
+                  yRange={[0, condMax]}
+                  yTitle="κ (mS/cm)"
+                  color={theme.data2}
+                  theme={theme}
+                  label={`Conductivity: two straight lines meeting at the CMC; the slope drops above it. β = ${beta?.toFixed(2)}.`}
+                />
+              ) : (
+                <p className="multiple-empty">
+                  {head === 'nonionic' ? 'Non-ionic' : 'Zwitterionic'} surfactants carry no net charge, so the
+                  conductivity shows no CMC break.
+                </p>
+              )
+            ) : (
+              <PropertyPlot
+                sys={sys}
+                c={c}
+                f={PROPS[prop].f}
+                yRange={PROPS[prop].yRange}
+                yTitle={PROPS[prop].yTitle}
+                color={theme.data2}
+                theme={theme}
+                label={PROPS[prop].label}
+              />
+            )}
+          </div>
+          <figcaption>{captionFor(prop, beta)}</figcaption>
+        </figure>
+      </section>
 
       <Theory />
 
@@ -486,9 +450,3 @@ export default function SurfactantPage() {
     </article>
   )
 }
-
-const headColor = (h: HeadType) =>
-  h === 'anionic' ? 'var(--data-2)'
-  : h === 'cationic' ? 'var(--data-1)'
-  : h === 'nonionic' ? 'var(--layer-2)'
-  : 'linear-gradient(90deg, var(--data-1) 50%, var(--data-2) 50%)'

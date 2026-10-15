@@ -16,7 +16,7 @@ const WALL = 0.9 // beaker wall inset
 const BOTTOM = H - 0.7
 const N_SLOTS = 26 // interface positions
 const SLOT_W = (W - 2 * WALL - 1) / N_SLOTS
-const MAX_MICELLES = 12
+const MAX_MICELLES = 6
 const FADE = 2.5 // 1/s
 
 /** Visual counts the page derives from the model. */
@@ -148,7 +148,7 @@ export default function MicelleView({ coverage, monomers, micelles, head, tail, 
       const micR = L + headRadius(p.head) * 0.9
       reconcile(monos, p.monomers, () => randomMover(L + 0.4))
       // Bigger micelles (long tails, bulky heads) leave room for fewer, so the cap scales with their size.
-      const fit = Math.floor((0.4 * (W - 2 * WALL) * (BOTTOM - bulkTop)) / (Math.PI * (micR + 0.3) ** 2))
+      const fit = Math.floor((0.3 * (W - 2 * WALL) * (BOTTOM - bulkTop)) / (Math.PI * (micR + 0.3) ** 2))
       reconcile(mics, Math.min(MAX_MICELLES, fit, p.micelles), () => newMicelle(micR))
 
       const moving = !p.paused && !reduceMotion

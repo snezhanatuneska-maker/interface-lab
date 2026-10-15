@@ -8,6 +8,8 @@ export interface Preset {
   saltMM?: number
   /** log10 of the concentration in M. */
   logC: number
+  /** Scroll to the conductivity plot instead of the main simulation. */
+  showConductivity?: boolean
 }
 
 interface Prompt {
@@ -71,14 +73,14 @@ const PROMPTS: Prompt[] = [
       <>
         Na⁺ ions gather around the negative sulfate heads and shield them from each other, removing part of the
         penalty for packing them into a micelle. At 100 mM NaCl the SDS CMC falls from 8.2 mM to about 1.6 mM.
-        Tween's heads are uncharged, so the salt slider has nothing to act on.
+        Tween's heads are uncharged, so there is nothing to screen: the salt slider disappears.
       </>
     ),
     preset: { surf: 'sds', saltMM: 0, logC: -2.3 },
   },
   {
     title: 'Read the conductivity break',
-    task: 'SDS at 3 mM. Move the concentration through the CMC and watch the conductivity plot and β.',
+    task: 'SDS at 3 mM. Move the concentration slider through the CMC while watching the conductivity plot.',
     question: 'Why does the conductivity rise more slowly above the CMC?',
     options: [
       'The surfactant stops dissolving',
@@ -94,7 +96,7 @@ const PROMPTS: Prompt[] = [
         <sub>below</sub>. For Tween 20 there is no break at all: it is not ionic.
       </>
     ),
-    preset: { surf: 'sds', logC: -2.52 },
+    preset: { surf: 'sds', logC: -2.52, showConductivity: true },
   },
 ]
 

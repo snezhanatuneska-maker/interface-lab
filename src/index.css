@@ -72,7 +72,7 @@ main.container { flex: 1; padding-bottom: var(--space-7); }
 .prose { max-width: var(--measure); }
 
 /* "Set it up" scrolls to these; keep a little air above them. */
-#sim-figure, #bet-plot { scroll-margin-top: var(--space-4); }
+#sim-figure, #bet-plot, #props-figure { scroll-margin-top: var(--space-4); }
 
 /* Section heading with a hairline above, like a textbook section break */
 .section { margin-top: var(--space-7); }
@@ -445,11 +445,7 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
 .cmc-controls .sim-buttons { align-self: flex-start; }
 .cmc-controls .sim-buttons .button { padding: var(--space-1) var(--space-3); }
 .cmc-main { min-width: 0; display: grid; gap: var(--space-3); }
-.cmc-main .hero-head { margin-bottom: 0; }
 .cmc-main .plot { height: 260px; }
-.control-note { color: var(--color-text-muted); font-size: var(--text-xs); line-height: var(--leading-snug); margin-top: 2px; }
-.select.inactive { opacity: 0.7; }
-.select select:disabled, .slider input[type='range']:disabled { cursor: not-allowed; }
 .cmc-results { margin-top: var(--space-1); }
 .cmc-results .result-main dd { color: var(--color-text); }
 .state-badge {
@@ -457,17 +453,12 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
   border-radius: var(--radius-sm); color: var(--data-1); background: var(--data-1-soft);
 }
 .state-badge.above { color: var(--data-2); background: var(--data-2-soft); }
-.tail-key { display: inline-block; width: 18px; border-top: 2px solid var(--color-text-muted); vertical-align: 4px; margin-right: 2px; }
 
-/* Small multiples: four more properties */
-.multiples { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3) var(--space-5); margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--color-border); }
-.multiple { min-width: 0; }
-.multiple h3 { font-family: var(--font-sans); font-size: var(--text-sm); margin: 0 0 var(--space-1); display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-2); align-items: baseline; }
-.multiple-note { font-weight: 400; color: var(--color-text-muted); }
-.plot.plot-small { height: 180px; }
-.multiple.disabled h3 { color: var(--color-text-muted); }
+/* Second figure: one property at a time, chosen with a segmented control */
+.prop-plot { margin-top: var(--space-3); }
+.prop-plot .plot { height: 260px; }
 .multiple-empty {
-  height: 180px; margin: 0; display: flex; align-items: center; padding: var(--space-4);
+  height: 260px; margin: 0; display: flex; align-items: center; padding: var(--space-4);
   font-size: var(--text-sm); line-height: var(--leading-snug); color: var(--color-text-muted);
   background: var(--color-surface-sunken); border: 1px dashed var(--color-border-strong); border-radius: var(--radius-sm);
 }
@@ -512,8 +503,9 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
   .cmc-controls { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
   .cmc-controls .slider small { display: block; }
   .cmc-main .plot { height: 230px; }
-  .multiples { grid-template-columns: minmax(0, 1fr); }
-  .plot.plot-small, .multiple-empty { height: 170px; }
+  .prop-plot .plot, .multiple-empty { height: 220px; }
+  .prop-tabs .segmented { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--color-border-strong); }
+  .prop-tabs .segmented button + button { border-left: 0; }
   .data-table th, .data-table td { padding: var(--space-2); }
 }
 .cmc-controls .slider { align-self: stretch; }
