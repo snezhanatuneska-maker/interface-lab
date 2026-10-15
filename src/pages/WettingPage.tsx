@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { Segmented, Slider } from '../components/Controls'
 import {
   cassieAngle,
@@ -24,7 +24,7 @@ import {
 } from '../lib/wetting'
 import DropView, { type Surface } from './wetting/DropView'
 import Theory from './wetting/Theory'
-import Quiz from './wetting/Quiz'
+import TryThis, { type Setup } from './wetting/TryThis'
 
 const VIEWS: { value: Surface; label: string; title: string }[] = [
   { value: 'smooth', label: 'Young', title: 'Young: smooth surface' },
@@ -47,34 +47,6 @@ const LEGEND: Record<Surface, { cls: string; label: string }[]> = {
     { cls: 'solid', label: 'textured solid' },
   ],
 }
-
-const CEP: { title: string; preset: Preset['id']; text: ReactNode }[] = [
-  {
-    title: 'PEM fuel cells',
-    preset: 'ptfe',
-    text: (
-      <>
-        The gas diffusion layer is carbon paper treated with PTFE, which raises θ<sub>Y</sub> above 90°. On the rough
-        fibres Wenzel then makes it even more water-repellent, so product water is pushed out, the pores do not flood
-        and gas still reaches the catalyst layer.
-      </>
-    ),
-  },
-  {
-    title: 'Water electrolysis',
-    preset: 'glass',
-    text:
-      'Electrodes that wet well (hydrophilic, "aerophobic") let H₂ and O₂ bubbles detach small and fast. Roughness ' +
-      'on a hydrophilic surface lowers the angle further (Wenzel), freeing active area and lowering the overpotential.',
-  },
-  {
-    title: 'Self-cleaning solar panels',
-    preset: 'lotus',
-    text:
-      'Lotus-effect coatings hold drops in the Cassie–Baxter state, above 150°. The drops roll off and pick up dust ' +
-      'on the way, so PV output stays high with less cleaning.',
-  },
-]
 
 export default function WettingPage() {
   const [mode, setMode] = useState<InputMode>('angle')
@@ -103,13 +75,21 @@ export default function WettingPage() {
     setView('wenzel')
   }
 
-  const applyPreset = (p: Preset, scroll = false) => {
+  const applyPreset = (p: Preset) => {
     setMode('angle')
     setThetaSet(p.thetaY)
     setR(p.r)
     setFs(p.fs)
     setView(favoredState(p.thetaY, p.r, p.fs)) // show the state this surface actually takes
-    if (scroll) document.getElementById('sim-figure')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  const applySetup = (u: Setup) => {
+    if (u.mode) setMode(u.mode)
+    if (u.thetaY !== undefined) setThetaSet(u.thetaY)
+    if (u.r !== undefined) setR(u.r)
+    if (u.fs !== undefined) setFs(u.fs)
+    if (u.view) setView(u.view)
+    requestAnimationFrame(() => document.getElementById('sim-figure')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
   }
 
   const theta = angles[view]
@@ -304,28 +284,29 @@ export default function WettingPage() {
         </figure>
       </section>
 
-      {/* ---------- Clean energy ---------- */}
-      <section className="section" aria-labelledby="cep-title">
-        <h2 id="cep-title" className="section-title">
-          Why this matters in clean energy processes
+      <TryThis onApply={applySetup} />
+
+      <section className="section" aria-labelledby="why-title">
+        <h2 id="why-title" className="section-title">
+          Why it matters
         </h2>
-        <ul className="wet-cep-grid">
-          {CEP.map((c) => {
-            const p = PRESETS.find((x) => x.id === c.preset)!
-            return (
-              <li key={c.title} className="card wet-cep-card">
-                <h3>{c.title}</h3>
-                <p>{c.text}</p>
-                <button type="button" className="button" onClick={() => applyPreset(p, true)}>
-                  Load preset: {p.label}
-                </button>
-              </li>
-            )
-          })}
+        <ul className="why-list">
+          <li>
+            <strong>PEM fuel cells.</strong> The gas diffusion layer is carbon paper treated with PTFE, which raises θ
+            <sub>Y</sub> above 90°. On the rough fibres Wenzel makes it even more water-repellent, so product water is
+            pushed out, the pores do not flood and gas still reaches the catalyst layer.
+          </li>
+          <li>
+            <strong>Water electrolysis.</strong> Electrodes that wet well (hydrophilic, “aerophobic”) let H<sub>2</sub>{' '}
+            and O<sub>2</sub> bubbles detach small and fast. Roughness on a hydrophilic surface lowers the angle further
+            (Wenzel), freeing active area and lowering the overpotential.
+          </li>
+          <li>
+            <strong>Self-cleaning solar panels.</strong> Lotus-effect coatings hold drops in the Cassie–Baxter state,
+            above 150°. The drops roll off and pick up dust on the way, so PV output stays high with less cleaning.
+          </li>
         </ul>
       </section>
-
-      <Quiz />
     </article>
   )
 }
