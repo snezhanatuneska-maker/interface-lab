@@ -35,10 +35,10 @@ osmotic pressure, turbidity and self-diffusion around the CMC, controls for surf
 betaine, Custom), tail length, head type and NaCl, plus theory, equations and "Try this" questions. All constants
 and equations are in `src/lib/surfactants.ts`; values marked ESTIMATED there should be checked against course notes.
 
-The **Wetting & Contact Angle** tool (`#/wetting`) compares Young, Wenzel and Cassie–Baxter: three droplets drawn
-to scale (smooth, liquid in the grooves, air under the drop), θ_Y set directly or from γ_SV, γ_SL, γ_LV, sliders for
-roughness r and solid fraction f_s, presets (glass, PTFE, lotus leaf), a plot of apparent angle against θ_Y with the
-critical angle for the Cassie–Baxter state, clean-energy examples and an 8-question quiz. Equations in
+The **Wetting & Contact Angle** tool (`#/wetting`) compares Young, Wenzel and Cassie–Baxter: pick one model at a
+time and see a droplet drawn to scale on a smooth surface, with liquid filling the grooves, or on trapped air, with a
+zoomed view of the contact area. θ_Y is set directly or from γ_SV, γ_SL, γ_LV; sliders for roughness r and solid
+fraction f_s, presets (glass, PTFE, lotus leaf), which state is favored, eight "Try this" questions with "Set it up" buttons, and why it matters for clean energy. Equations in
 `src/lib/wetting.ts` (tests: `wetting.test.ts`).
 
 **Stack:** [Vite](https://vite.dev) + React + TypeScript, plots with
@@ -88,7 +88,7 @@ src/components/Tex.tsx           KaTeX equation component
 src/components/ThemeToggle.tsx   Light/dark switch in the header
 src/components/UpcomingProjects.tsx  Upcoming Projects tab
 src/pages/SurfactantPage.tsx     Surfactants & CMC page; its sections live in src/pages/surfactants/
-src/pages/WettingPage.tsx        Wetting page; its sections (droplets, theory, quiz) live in src/pages/wetting/
+src/pages/WettingPage.tsx        Wetting page; its sections (droplet, theory, Try this) live in src/pages/wetting/
 src/lib/wetting.ts               Young, Wenzel, Cassie–Baxter, critical angle, presets (tests: wetting.test.ts)
 src/lib/surfactants.ts           CMC, surface tension and property models, all constants (tests: surfactants.test.ts)
 src/lib/adsorption.ts            Isotherm equations, BET fit, surface area, example samples (tests: adsorption.test.ts)
