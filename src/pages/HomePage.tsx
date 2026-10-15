@@ -25,6 +25,13 @@ const ICONS: Record<string, ReactNode> = {
       <path className="series-2" d="M24 23 V28 M33 32 H28 M24 41 V36 M15 32 H20" strokeWidth="2.5" fill="none" />
     </>,
   ),
+  'wetting-contact-angle': svg(
+    <>
+      <path d="M4 38 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />
+      <path className="series-1" d="M6 38 A10 10 0 0 1 22 38" strokeWidth="3" fill="none" />
+      <path className="series-2" d="M29 38 A9 9 0 1 1 39 38" strokeWidth="3" fill="none" />
+    </>,
+  ),
   'capillary-pressure': svg(
     <>
       <path d="M4 40 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />

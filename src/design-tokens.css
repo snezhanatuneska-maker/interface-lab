@@ -73,6 +73,11 @@
   --gas: #b4bac2;
   --solid: #ecebe6;
   --solid-line: #8f9189;
+
+  /* Wettability labels (wetting tool) */
+  --wet-philic: #0e6b68;
+  --wet-phobic: #8a5a00;
+  --wet-super: #6f4a9e;
 }
 
 :root[data-theme='dark'] {
@@ -105,4 +110,8 @@
   --gas: #5f666d;
   --solid: #24282b;
   --solid-line: #6b7177;
+
+  --wet-philic: #5fbcb4;
+  --wet-phobic: #e0b14f;
+  --wet-super: #b693e0;
 }
