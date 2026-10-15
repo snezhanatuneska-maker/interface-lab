@@ -433,3 +433,87 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
 .pore-cap { fill: color-mix(in srgb, var(--data-1) 20%, var(--data-plot-bg)); }
 .pore-meniscus { fill: none; stroke: var(--data-1); stroke-width: 2; }
 .pore-label { font-family: var(--font-sans); font-size: 13px; fill: var(--color-text); paint-order: stroke; stroke: var(--color-surface); stroke-width: 4px; stroke-linejoin: round; }
+
+/* ================= Surfactant simulator ================= */
+
+.coverage-value.surfactant { color: var(--data-1); }
+
+/* Hero: controls in a side column, beaker and surface tension beside them */
+.cmc-layout { display: grid; grid-template-columns: minmax(15rem, 18rem) minmax(0, 1fr); gap: var(--space-5); align-items: start; }
+.cmc-controls { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+.cmc-controls .select { flex: none; }
+.cmc-controls .sim-buttons { align-self: flex-start; }
+.cmc-controls .sim-buttons .button { padding: var(--space-1) var(--space-3); }
+.cmc-main { min-width: 0; display: grid; gap: var(--space-3); }
+.cmc-main .hero-head { margin-bottom: 0; }
+.cmc-main .plot { height: 260px; }
+.control-note { color: var(--color-text-muted); font-size: var(--text-xs); line-height: var(--leading-snug); margin-top: 2px; }
+.select.inactive { opacity: 0.7; }
+.select select:disabled, .slider input[type='range']:disabled { cursor: not-allowed; }
+.cmc-results { margin-top: var(--space-1); }
+.cmc-results .result-main dd { color: var(--color-text); }
+.state-badge {
+  display: inline-block; font-size: var(--text-xs); font-weight: 600; line-height: 1.6; padding: 0 var(--space-2);
+  border-radius: var(--radius-sm); color: var(--data-1); background: var(--data-1-soft);
+}
+.state-badge.above { color: var(--data-2); background: var(--data-2-soft); }
+.tail-key { display: inline-block; width: 18px; border-top: 2px solid var(--color-text-muted); vertical-align: 4px; margin-right: 2px; }
+
+/* Small multiples: four more properties */
+.multiples { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3) var(--space-5); margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--color-border); }
+.multiple { min-width: 0; }
+.multiple h3 { font-family: var(--font-sans); font-size: var(--text-sm); margin: 0 0 var(--space-1); display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-2); align-items: baseline; }
+.multiple-note { font-weight: 400; color: var(--color-text-muted); }
+.plot.plot-small { height: 180px; }
+.multiple.disabled h3 { color: var(--color-text-muted); }
+.multiple-empty {
+  height: 180px; margin: 0; display: flex; align-items: center; padding: var(--space-4);
+  font-size: var(--text-sm); line-height: var(--leading-snug); color: var(--color-text-muted);
+  background: var(--color-surface-sunken); border: 1px dashed var(--color-border-strong); border-radius: var(--radius-sm);
+}
+
+/* Theory */
+.steps { padding-left: 1.4em; }
+.steps li + li { margin-top: var(--space-2); }
+.class-svg { display: block; width: 100%; max-width: 160px; height: auto; }
+.tail-line { fill: none; stroke: var(--color-text-muted); stroke-width: 2.5; stroke-linejoin: round; }
+.head-fill { stroke: var(--data-plot-bg); stroke-width: 1.5; }
+.head-fill.neg { fill: var(--data-2); }
+.head-fill.pos { fill: var(--data-1); }
+.head-fill.neutral { fill: var(--layer-2); }
+.head-sign { font-family: var(--font-sans); font-size: 16px; font-weight: 700; fill: #fff; text-anchor: middle; dominant-baseline: middle; }
+
+.table-wrap { overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); line-height: var(--leading-snug); }
+.data-table th, .data-table td { text-align: left; vertical-align: top; padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border); }
+.data-table thead th { font-weight: 600; color: var(--color-text-muted); border-bottom-color: var(--color-border-strong); }
+.data-table tbody th { font-weight: 600; white-space: nowrap; }
+.data-table td:last-child { color: var(--color-text-muted); }
+
+.tensio-figure { margin-top: var(--space-4); }
+.tensio-svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 0 auto; }
+.tensio-title { font-family: var(--font-sans); font-size: 15px; font-weight: 600; fill: var(--color-text); text-anchor: middle; }
+.tensio-label { font-family: var(--font-serif); font-size: 13px; font-style: italic; fill: var(--color-text); }
+.tensio-note { font-family: var(--font-sans); font-size: 11px; fill: var(--color-text-muted); }
+.tensio-wire { stroke: var(--data-axis); stroke-width: 2; fill: none; }
+.tensio-metal { fill: var(--solid); stroke: var(--solid-line); stroke-width: 1.5; }
+.tensio-ring { fill: none; stroke: var(--solid-line); stroke-width: 4; }
+.tensio-liquid { fill: color-mix(in srgb, var(--data-1) 22%, var(--data-plot-bg)); }
+.tensio-surface { fill: none; stroke: var(--data-1); stroke-width: 2; }
+.tensio-arrow { stroke: var(--data-2); stroke-width: 2.5; fill: none; }
+.tensio-arrowhead { fill: var(--data-2); }
+
+@media (max-width: 820px) {
+  .cmc-layout { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+  .cmc-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3) var(--space-4); }
+  .cmc-controls .cmc-results { grid-column: 1 / -1; }
+}
+@media (max-width: 600px) {
+  .cmc-controls { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
+  .cmc-controls .slider small { display: block; }
+  .cmc-main .plot { height: 230px; }
+  .multiples { grid-template-columns: minmax(0, 1fr); }
+  .plot.plot-small, .multiple-empty { height: 170px; }
+  .data-table th, .data-table td { padding: var(--space-2); }
+}
+.cmc-controls .slider { align-self: stretch; }

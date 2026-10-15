@@ -29,6 +29,12 @@ The first tool is a **Langmuir vs BET adsorption** simulator for bachelor studen
 - **Beyond BET**: the IUPAC isotherm types I–IV and what each says about the surface.
 - **Why it matters for clean energy**: fuel-cell catalysts, catalyst layers, H₂ storage and CO₂ capture.
 
+The **Surfactants & Micelle Formation** tool (`#/surfactants`) shows how surfactant first adsorbs at the air–water
+interface and then forms micelles above the CMC: an animated beaker, surface tension against log c, conductivity,
+osmotic pressure, turbidity and self-diffusion around the CMC, controls for surfactant (SDS, CTAB, Tween 20, C12
+betaine, Custom), tail length, head type and NaCl, plus theory, equations and "Try this" questions. All constants
+and equations are in `src/lib/surfactants.ts`; values marked ESTIMATED there should be checked against course notes.
+
 **Stack:** [Vite](https://vite.dev) + React + TypeScript, plots with
 [Plotly.js](https://plotly.com/javascript/) via `react-plotly.js`.
 
@@ -59,7 +65,7 @@ index.html                       HTML entry point (meta tags, theme set before f
 vite.config.ts                   Vite config (sets base: "/interface-lab/")
 public/                          favicon and og-image.png (link preview)
 src/main.tsx                     React entry
-src/App.tsx                      Site layout: header, hash routing (#/ and #/adsorption), footer
+src/App.tsx                      Site layout: header, hash routing (#/, #/adsorption, #/capillary, #/surfactants), footer
 src/siteConfig.ts                Course name shown in the footer
 src/design-tokens.css            Colours, type scale and spacing (light and dark)
 src/index.css                    Global and component styles
@@ -75,6 +81,8 @@ src/components/PlotlyPlot.tsx    Plotly component (uses the smaller "basic" Plot
 src/components/Tex.tsx           KaTeX equation component
 src/components/ThemeToggle.tsx   Light/dark switch in the header
 src/components/UpcomingProjects.tsx  Upcoming Projects tab
+src/pages/SurfactantPage.tsx     Surfactants & CMC page; its sections live in src/pages/surfactants/
+src/lib/surfactants.ts           CMC, surface tension and property models, all constants (tests: surfactants.test.ts)
 src/lib/adsorption.ts            Isotherm equations, BET fit, surface area, example samples (tests: adsorption.test.ts)
 src/lib/plotTheme.ts             Shared Plotly layout and axis styling
 src/lib/theme.ts, themeColors.ts Light/dark theme and its colours for canvas and Plotly

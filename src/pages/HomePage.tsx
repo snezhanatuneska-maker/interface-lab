@@ -17,6 +17,14 @@ const ICONS: Record<string, ReactNode> = {
       <path className="series-2" d="M6 42 C10 26 16 26 26 24 S36 18 42 6" strokeWidth="3" fill="none" />
     </>,
   ),
+  'surfactants-cmc': svg(
+    <>
+      <path d="M4 16 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />
+      <path className="series-2" d="M12 16 V8 M20 16 V8 M28 16 V8 M36 16 V8" strokeWidth="2.5" fill="none" />
+      <circle cx="24" cy="32" r="9" className="series-1" strokeWidth="3" fill="none" />
+      <path className="series-2" d="M24 23 V28 M33 32 H28 M24 41 V36 M15 32 H20" strokeWidth="2.5" fill="none" />
+    </>,
+  ),
   'capillary-pressure': svg(
     <>
       <path d="M4 40 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />

@@ -7,6 +7,7 @@ import { COURSE } from './siteConfig';
 // Loaded on demand
 const AdsorptionPage = lazy(() => import('./pages/AdsorptionPage'));
 const CapillaryPage = lazy(() => import('./pages/CapillaryPage'));
+const SurfactantPage = lazy(() => import('./pages/SurfactantPage'));
 
 export default function App() {
   const route = useHashRoute();
@@ -28,6 +29,10 @@ export default function App() {
         {route === '/capillary' ? (
           <Suspense fallback={<p className="loading">Loading simulator...</p>}>
             <CapillaryPage />
+          </Suspense>
+        ) : route === '/surfactants' ? (
+          <Suspense fallback={<p className="loading">Loading simulator...</p>}>
+            <SurfactantPage />
           </Suspense>
         ) : route === '/adsorption' ? (
           <Suspense fallback={<p className="loading">Loading simulator...</p>}>
