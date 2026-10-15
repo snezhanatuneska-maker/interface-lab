@@ -483,26 +483,6 @@ export default function SurfactantPage() {
       <Equations />
 
       <TryThis onApply={applyPreset} />
-
-      <section className="section" aria-labelledby="why-title">
-        <h2 id="why-title" className="section-title">
-          Why it matters
-        </h2>
-        <ul className="why-list">
-          <li>
-            <strong>Catalyst inks.</strong> Surfactants (and ionomers, which behave similarly) wet and disperse Pt/C
-            particles so the ink coats evenly.
-          </li>
-          <li>
-            <strong>Electrolysers.</strong> A lower surface tension helps gas bubbles detach from electrodes, freeing
-            active area.
-          </li>
-          <li>
-            <strong>Foaming.</strong> Above the CMC surfactants stabilise foams, which is usually unwanted in electrolyte
-            and cooling loops.
-          </li>
-        </ul>
-      </section>
     </article>
   )
 }
