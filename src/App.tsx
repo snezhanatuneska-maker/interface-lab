@@ -1,5 +1,4 @@
 import { lazy, Suspense } from 'react';
-import { CapillaryPage } from './pages/capillary/CapillaryPage';
 import HomePage from './pages/HomePage';
 import ThemeToggle from './components/ThemeToggle';
 import { useHashRoute } from './lib/useHashRoute';
@@ -7,6 +6,7 @@ import { COURSE } from './siteConfig';
 
 // Loaded on demand
 const AdsorptionPage = lazy(() => import('./pages/AdsorptionPage'));
+const CapillaryPage = lazy(() => import('./pages/CapillaryPage'));
 
 export default function App() {
   const route = useHashRoute();

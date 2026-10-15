@@ -419,3 +419,23 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
   .try-card { padding: var(--space-3) var(--space-4); }
   .try-head { flex-direction: column; align-items: flex-start; }
 }
+
+/* ================= Capillary simulator ================= */
+
+.coverage-value.wetting { color: var(--data-1); }
+.coverage-value.nonwetting { color: var(--data-2); }
+.key-line.dotted { border-top-style: dotted; }
+#cond-plot { scroll-margin-top: var(--space-4); }
+
+/* Pore cross-section (PoreView) */
+:root { --pore-liquid: color-mix(in srgb, var(--data-1) 35%, var(--data-plot-bg)); }
+.pore-svg { display: block; width: 100%; height: auto; }
+.pore-gas { fill: var(--data-plot-bg); }
+.pore-liquid { fill: var(--pore-liquid); }
+.pore-meniscus { fill: none; stroke: var(--data-1); stroke-width: 2.5; }
+.pore-surface { stroke: var(--data-1); stroke-width: 1.5; }
+.pore-wall { fill: var(--solid); stroke: var(--solid-line); stroke-width: 1; }
+.pore-dim { stroke: var(--color-text-muted); stroke-width: 1.2; }
+.pore-guide { stroke: var(--color-text-muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.pore-arrowhead { fill: var(--color-text-muted); }
+.pore-label { font-family: var(--font-sans); font-size: 12px; fill: var(--color-text-muted); }
