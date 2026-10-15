@@ -6,19 +6,19 @@ const CLASSES = [
     name: 'Anionic',
     head: 'neg',
     example: 'SDS (sodium dodecyl sulfate)',
-    text: 'Negative head, Na⁺ counterion. Detergents, toothpaste, gel electrophoresis.',
+    text: 'Negative head, Na⁺ counterion. Detergents, toothpaste.',
   },
   {
     name: 'Cationic',
     head: 'pos',
     example: 'CTAB (cetyltrimethylammonium bromide)',
-    text: 'Positive head, Br⁻ counterion. Fabric softeners, antiseptics, nanoparticle synthesis.',
+    text: 'Positive head, Br⁻ counterion. Fabric softeners, antiseptics.',
   },
   {
     name: 'Non-ionic',
     head: 'neutral',
     example: 'Tween 20 (polysorbate 20)',
-    text: 'Uncharged, bulky polyoxyethylene head. Food, cosmetics, biochemistry buffers.',
+    text: 'Uncharged, bulky polyoxyethylene head. Food, cosmetics.',
   },
   {
     name: 'Zwitterionic',
@@ -58,12 +58,12 @@ function TensiometerDiagram() {
       <line x1="130" y1="30" x2="130" y2="70" className="tensio-wire" />
       <rect x="95" y="70" width="70" height="80" className="tensio-metal" />
       <rect x="30" y="140" width="200" height="60" className="tensio-liquid" />
-      {/* meniscus climbing the plate: liquid wets platinum, θ ≈ 0 */}
+      {/* liquid climbing the clean platinum plate */}
       <path d="M30 140 H80 Q93 140 95 124 V140 Z" className="tensio-liquid" />
       <path d="M165 140 V124 Q167 140 180 140 H230 V140 Z" className="tensio-liquid" />
       <path d="M30 140 H80 Q93 140 95 124 M165 124 Q167 140 180 140 H230" className="tensio-surface" />
       <path d="M130 158 V196" className="tensio-arrow" markerEnd="url(#arrow)" />
-      <text x="138" y="190" className="tensio-label">F = γ·L·cos θ</text>
+      <text x="138" y="190" className="tensio-label">F = γ·L</text>
       <text x="130" y="214" className="tensio-note" textAnchor="middle">L = 2 × (width + thickness)</text>
 
       {/* ---- Du Noüy ring ---- */}
@@ -217,15 +217,15 @@ export default function Theory() {
         </h2>
         <p className="prose">
           The CMC is usually found by measuring γ at many concentrations and finding where the curve stops falling.
-          Both standard methods hang a clean platinum probe from a sensitive balance. Platinum is used because water
-          wets it completely (θ ≈ 0) and it is easy to clean by flaming.
+          Both standard methods hang a clean platinum probe from a sensitive balance and measure how hard the surface
+          pulls on it. Platinum is used because the liquid clings fully to it and it is easy to clean by flaming.
         </p>
         <figure className="figure tensio-figure">
           <TensiometerDiagram />
           <figcaption>
             <span className="figure-label">Figure 2.</span> <strong>Wilhelmy plate:</strong> a thin plate just touches
-            the surface; the liquid pulls it down along its wetted length L, and the balance reads F = γL cos θ
-            directly, at equilibrium. <strong>Du Noüy ring:</strong> a ring is pulled up through the surface and the
+            the surface; the liquid pulls it down along its perimeter L, and the balance reads F = γL directly, at
+            equilibrium. <strong>Du Noüy ring:</strong> a ring is pulled up through the surface and the
             maximum force before the liquid film breaks gives γ, after a correction factor f for the shape of the
             lifted liquid.
           </figcaption>
