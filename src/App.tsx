@@ -3,6 +3,7 @@ import HomePage from './pages/HomePage';
 import ThemeToggle from './components/ThemeToggle';
 import { useHashRoute } from './lib/useHashRoute';
 import { COURSE } from './siteConfig';
+import { ZetaPage } from './pages/zeta/ZetaPage';
 
 // Loaded on demand
 const AdsorptionPage = lazy(() => import('./pages/AdsorptionPage'));
@@ -22,13 +23,24 @@ export default function App() {
             Interface Engineering Lab
           </a>
           <span className="site-subtitle">Interactive tools for Clean Energy Processes (CEP)</span>
+          
+          {/* Navigation Links */}
+          <nav className="mt-2 space-x-4">
+            <a href="#/adsorption" className="text-blue-600 hover:underline font-medium">Adsorption Lab</a>
+            <a href="#/capillary" className="text-blue-600 hover:underline font-medium">Capillary Pressure</a>
+            <a href="#/zeta" className="text-blue-600 hover:underline font-medium">Zeta Potential</a>
+          </nav>
 
           <ThemeToggle />
         </div>
       </header>
 
       <main className="container">
-        {route === '/capillary' ? (
+        {route === '/zeta' ? (
+          <Suspense fallback={<p className="loading">Loading simulator...</p>}>
+            <ZetaPage />
+          </Suspense>
+        ) : route === '/capillary' ? (
           <Suspense fallback={<p className="loading">Loading simulator...</p>}>
             <CapillaryPage />
           </Suspense>
@@ -48,7 +60,7 @@ export default function App() {
           <Suspense fallback={<p className="loading">Loading simulator...</p>}>
             <AdsorptionPage />
           </Suspense>
-        ) : (
+        ) :  (
           <HomePage />
         )}
       </main>
