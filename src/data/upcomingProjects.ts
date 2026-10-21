@@ -151,8 +151,8 @@ export const PROJECTS: Project[] = [
       'Titrate pH to find the isoelectric point.',
     concepts: ['Slipping plane', 'Electrophoretic mobility', 'IEP = PZC', 'Potential-determining ions'],
     cepLink: 'Controlling dispersion of catalyst and electrode particles.',
-    status: 'planned',
-    next: true,
+    status: 'live',
+    href: '#/zeta',
   },
   {
     id: 'dlvo',
