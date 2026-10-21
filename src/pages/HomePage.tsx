@@ -46,6 +46,13 @@ const ICONS: Record<string, ReactNode> = {
       <path className="series-1" d="M18 18 Q24 26 30 18" strokeWidth="3" fill="none" />
     </>,
   ),
+  'zeta-potential': svg(
+    <>
+      <path d="M6 38 H42" stroke="currentColor" strokeWidth="2.5" fill="none" />
+      <path className="series-1" d="M12 12 H36 L12 30 H36" strokeWidth="3" fill="none" />
+      <circle cx="24" cy="21" r="3" className="series-2" fill="currentColor" />
+    </>
+  ),
 }
 
 const TOOLS = PROJECTS.filter((p) => p.status === 'live' && p.href)
