@@ -16,14 +16,14 @@ export const ZetaTheory: React.FC = () => {
         <div className="space-y-2">
           <h4 className="font-semibold text-gray-900 text-base">The Slipping Plane & Zeta Potential</h4>
           <p>
-            As a charged particle moves through liquid, a thin layer of counter-ions moves with it. The electric potential at this boundary—known as the slipping plane—is defined as the **zeta potential ($\zeta$)**.
+            As a charged particle moves through liquid, a thin layer of counter-ions moves with it. The electric potential at this boundary—known as the slipping plane—is defined as the <strong className="font-semibold text-gray-900">zeta potential (<span className="font-serif italic">ζ</span>)</strong>.
           </p>
         </div>
 
         <div className="space-y-2">
           <h4 className="font-semibold text-gray-900 text-base">IEP = PZC</h4>
           <p>
-            At the **Isoelectric Point (IEP)**, the zeta potential is zero ($ζ = 0$), corresponding to zero net surface charge (Point of Zero Charge, PZC), leading to particle flocculation.
+            At the <strong className="font-semibold text-gray-900">Isoelectric Point (IEP)</strong>, the zeta potential is zero (<span className="font-serif italic">ζ</span> = 0), corresponding to zero net surface charge (Point of Zero Charge, PZC), leading to particle flocculation.
           </p>
         </div>
       </div>
