@@ -4,6 +4,7 @@ import ThemeToggle from './components/ThemeToggle';
 import { useHashRoute } from './lib/useHashRoute';
 import { COURSE } from './siteConfig';
 import { ZetaPage } from './pages/zeta/ZetaPage';
+import { DlvoPage } from './pages/dlvo/DlvoPage';
 
 // Loaded on demand
 const AdsorptionPage = lazy(() => import('./pages/AdsorptionPage'));
@@ -29,6 +30,7 @@ export default function App() {
             <a href="#/adsorption" className="text-blue-600 hover:underline font-medium">Adsorption Lab</a>
             <a href="#/capillary" className="text-blue-600 hover:underline font-medium">Capillary Pressure</a>
             <a href="#/zeta" className="text-blue-600 hover:underline font-medium">Zeta Potential</a>
+            <a href="#/dlvo" className="text-blue-600 hover:underline font-medium">DLVO Theory</a>
           </nav>
 
           <ThemeToggle />
@@ -36,7 +38,11 @@ export default function App() {
       </header>
 
       <main className="container">
-        {route === '/zeta' ? (
+        {route === '/dlvo' ? (
+          <Suspense fallback={<p className="loading">Loading simulator...</p>}>
+            <DlvoPage />
+          </Suspense>
+        ) : route === '/zeta' ? (
           <Suspense fallback={<p className="loading">Loading simulator...</p>}>
             <ZetaPage />
           </Suspense>
