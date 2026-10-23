@@ -5,6 +5,7 @@ import { useHashRoute } from './lib/useHashRoute';
 import { COURSE } from './siteConfig';
 import { ZetaPage } from './pages/zeta/ZetaPage';
 import { DlvoPage } from './pages/dlvo/DlvoPage';
+import { MipsPage } from './pages/mips/MipsPage';
 
 // Loaded on demand
 const AdsorptionPage = lazy(() => import('./pages/AdsorptionPage'));
@@ -31,6 +32,7 @@ export default function App() {
             <a href="#/capillary" className="text-blue-600 hover:underline font-medium">Capillary Pressure</a>
             <a href="#/zeta" className="text-blue-600 hover:underline font-medium">Zeta Potential</a>
             <a href="#/dlvo" className="text-blue-600 hover:underline font-medium">DLVO Theory</a>
+            <a href="#/mips" className="text-blue-600 hover:underline font-medium">Mercury Porosimetry</a>
           </nav>
 
           <ThemeToggle />
@@ -38,7 +40,11 @@ export default function App() {
       </header>
 
       <main className="container">
-        {route === '/dlvo' ? (
+        {route === '/mips' ? (
+          <Suspense fallback={<p className="loading">Loading simulator...</p>}>
+            <MipsPage />
+          </Suspense>
+        ) : route === '/dlvo' ? (
           <Suspense fallback={<p className="loading">Loading simulator...</p>}>
             <DlvoPage />
           </Suspense>
