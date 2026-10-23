@@ -6,8 +6,6 @@ export const DlvoTryThis: React.FC = () => {
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Approximate calculations
-  // Higher salt or higher valency collapses the energy barrier faster (Schulze-Hardy effect ~ z^6)
   const effectiveCoagulationPower = saltConc * Math.pow(valency, 6);
   const barrierHeight = Math.max(0, 25 - (effectiveCoagulationPower / 15)).toFixed(1);
   const isCoagulated = parseFloat(barrierHeight) < 5;
@@ -22,13 +20,11 @@ export const DlvoTryThis: React.FC = () => {
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw interaction energy curve preview (simplified graph on canvas left or background)
     ctx.strokeStyle = '#38bdf8';
     ctx.lineWidth = 2;
     ctx.beginPath();
     for (let x = 20; x < 200; x++) {
       const dist = (x - 20) / 10;
-      // Repulsion term minus attraction term modulated by salt
       const energy = (50 * Math.exp(-dist * (0.5 + saltConc * 0.05 * valency))) - (30 / (dist + 0.5)) + (parseFloat(barrierHeight) * 0.2);
       const y = 130 - energy * 2;
       if (x === 20) ctx.moveTo(x, y);
@@ -36,7 +32,6 @@ export const DlvoTryThis: React.FC = () => {
     }
     ctx.stroke();
 
-    // Draw particle dispersion state on right side
     const centerX = 290;
     const centerY = 130;
     const numParticles = 14;
@@ -63,7 +58,6 @@ export const DlvoTryThis: React.FC = () => {
       ctx.stroke();
     }
 
-    // Labels
     ctx.fillStyle = '#ffffff';
     ctx.font = '12px sans-serif';
     ctx.fillText(`Energy Barrier: ${barrierHeight} kT`, 20, 30);
@@ -107,7 +101,7 @@ export const DlvoTryThis: React.FC = () => {
           <div className="bg-blue-50/60 border border-blue-100 p-4 rounded-lg space-y-1 text-sm">
             <p><strong>Energy Barrier Peak:</strong> {barrierHeight} <span className="font-serif italic">kT</span></p>
             <p><strong>Coagulation Tendency:</strong> <span className={isCoagulated ? "text-rose-700 font-semibold" : "text-emerald-700 font-semibold"}>{isCoagulated ? "High (Barrier Collapsed)" : "Low (Stable Colloid)"}</span></p>
-            <p><strong>Schulze-Hardy Scaling:</strong> <span className="font-mono">CCC &propto; 1/z<sup>6</sup></span></p>
+            <p><strong>Schulze-Hardy Scaling:</strong> <span className="font-mono">CCC &prop; 1/z<sup>6</sup></span></p>
           </div>
         </div>
 
