@@ -16,7 +16,7 @@ export const DlvoTheory: React.FC = () => {
         <div className="space-y-2">
           <h4 className="font-semibold text-gray-900 text-base">Primary & Secondary Minima</h4>
           <p>
-            At large separations, weak attraction creates a shallow **secondary minimum** (reversible flocculation). At contact, the deep **primary minimum** causes irreversible particle aggregation.
+            At large separations, weak attraction creates a shallow <strong className="font-semibold text-gray-900">secondary minimum</strong> (reversible flocculation). At contact, the deep <strong className="font-semibold text-gray-900">primary minimum</strong> causes irreversible particle aggregation.
           </p>
         </div>
 
