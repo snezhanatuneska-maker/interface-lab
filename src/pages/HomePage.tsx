@@ -46,6 +46,13 @@ const ICONS: Record<string, ReactNode> = {
       <path className="series-1" d="M18 18 Q24 26 30 18" strokeWidth="3" fill="none" />
     </>,
   ),
+  'dlvo-theory': svg(
+    <>
+      <path d="M6 42 V6 M6 42 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />
+      <path className="series-1" d="M6 12 C14 38 22 40 28 20 S38 8 44 14" strokeWidth="3" fill="none" />
+      <path className="series-2" d="M6 34 C14 36 22 38 28 32 S38 20 44 26" strokeWidth="2" strokeDasharray="2 2" fill="none" />
+    </>
+  ),
   'zeta-potential': svg(
     <>
       <path d="M6 38 H42" stroke="currentColor" strokeWidth="2.5" fill="none" />
