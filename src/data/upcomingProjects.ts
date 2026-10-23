@@ -63,7 +63,8 @@ export const PROJECTS: Project[] = [
     description: 'Push mercury into pores and get the pore-size distribution.',
     concepts: ['Washburn equation', 'Non-wetting intrusion', 'Pore-size distribution'],
     cepLink: 'Standard method for characterising fuel-cell catalyst layers.',
-    status: 'planned',
+    status: 'live',
+    href: '#/mips',
   },
 
   // ---------- Solid Interfaces ----------
