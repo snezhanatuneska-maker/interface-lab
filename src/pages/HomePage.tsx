@@ -53,6 +53,13 @@ const ICONS: Record<string, ReactNode> = {
       <path className="series-2" d="M6 34 C14 36 22 38 28 32 S38 20 44 26" strokeWidth="2" strokeDasharray="2 2" fill="none" />
     </>
   ),
+  'mercury-porosimetry': svg(
+    <>
+      <path d="M6 42 V6 M6 42 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />
+      <path className="series-1" d="M6 16 C16 16 20 38 28 38 S36 20 44 20" strokeWidth="3" fill="none" />
+      <path className="series-2" d="M6 26 C16 26 22 10 28 10 S36 32 44 32" strokeWidth="2" strokeDasharray="2 2" fill="none" />
+    </>
+  ),
   'zeta-potential': svg(
     <>
       <path d="M6 38 H42" stroke="currentColor" strokeWidth="2.5" fill="none" />
