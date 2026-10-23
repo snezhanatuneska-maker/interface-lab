@@ -162,8 +162,8 @@ export const PROJECTS: Project[] = [
       'Add salt and watch the energy barrier collapse.',
     concepts: ['Energy barrier', 'Primary/secondary minimum', 'Critical coagulation concentration ∝ 1/z⁶', 'Steric stabilisation'],
     cepLink: 'Stable inks and slurries for fuel-cell and battery electrode manufacturing.',
-    status: 'planned',
-    next: true,
+    status: 'live',
+    href: '#/dlvo',
   },
 
   // ---------- Nucleation & Growth ----------
