@@ -23,7 +23,7 @@ export const DlvoTheory: React.FC = () => {
         <div className="space-y-2">
           <h4 className="font-semibold text-gray-900 text-base">The Schulze-Hardy Rule</h4>
           <p>
-            Adding salt compresses the electrical double layer. Counter-ion valency (<span className="font-serif italic">z</span>) drastically impacts stability, with the Critical Coagulation Concentration scaling as <span className="font-mono">CCC &propto; 1/z<sup>6</sup></span>.
+            Adding salt compresses the electrical double layer. Counter-ion valency (<span className="font-serif italic">z</span>) drastically impacts stability, with the Critical Coagulation Concentration scaling as <span className="font-mono">CCC &prop; 1/z<sup>6</sup></span>.
           </p>
         </div>
       </div>
