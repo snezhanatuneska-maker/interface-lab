@@ -13,6 +13,7 @@ const TOKENS = {
   data2: '--data-2',
   data2Soft: '--data-2-soft',
   data3: '--data-3',
+  accent: '--color-accent',
   accentSoft: '--color-accent-soft',
   grid: '--data-grid',
   axis: '--data-axis',

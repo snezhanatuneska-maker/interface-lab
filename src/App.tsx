@@ -3,9 +3,6 @@ import HomePage from './pages/HomePage';
 import ThemeToggle from './components/ThemeToggle';
 import { useHashRoute } from './lib/useHashRoute';
 import { COURSE } from './siteConfig';
-import { ZetaPage } from './pages/zeta/ZetaPage';
-import { DlvoPage } from './pages/dlvo/DlvoPage';
-import { MipsPage } from './pages/mips/MipsPage';
 
 // Loaded on demand
 const AdsorptionPage = lazy(() => import('./pages/AdsorptionPage'));
@@ -13,6 +10,9 @@ const CapillaryPage = lazy(() => import('./pages/CapillaryPage'));
 const SurfactantPage = lazy(() => import('./pages/SurfactantPage'));
 const WettingPage = lazy(() => import('./pages/WettingPage'));
 const VdwPage = lazy(() => import('./pages/VdwPage'));
+const ZetaPage = lazy(() => import('./pages/zeta/ZetaPage').then((m) => ({ default: m.ZetaPage })));
+const DlvoPage = lazy(() => import('./pages/dlvo/DlvoPage').then((m) => ({ default: m.DlvoPage })));
+const MipsPage = lazy(() => import('./pages/mips/MipsPage').then((m) => ({ default: m.MipsPage })));
 
 export default function App() {
   const route = useHashRoute();
@@ -25,15 +25,6 @@ export default function App() {
             Interface Engineering Lab
           </a>
           <span className="site-subtitle">Interactive tools for Clean Energy Processes (CEP)</span>
-          
-          {/* Navigation Links */}
-          <nav className="mt-2 space-x-4">
-            <a href="#/adsorption" className="text-blue-600 hover:underline font-medium">Adsorption Lab</a>
-            <a href="#/capillary" className="text-blue-600 hover:underline font-medium">Capillary Pressure</a>
-            <a href="#/zeta" className="text-blue-600 hover:underline font-medium">Zeta Potential</a>
-            <a href="#/dlvo" className="text-blue-600 hover:underline font-medium">DLVO Theory</a>
-            <a href="#/mips" className="text-blue-600 hover:underline font-medium">Mercury Porosimetry</a>
-          </nav>
 
           <ThemeToggle />
         </div>

@@ -1,25 +1,39 @@
-import React from 'react';
+import Tex from '../../components/Tex'
 
-export const DlvoEquations: React.FC = () => {
+export function DlvoEquations() {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm border-l-4 border-l-blue-600 space-y-4">
-      <h3 className="text-xl font-bold text-gray-900">Core Physical Principles & Equations</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700">
-        <div className="p-4 bg-blue-50/40 rounded-lg space-y-2 border border-blue-100">
-          <h4 className="font-semibold text-blue-900">Total DLVO Interaction Energy</h4>
-          <p>The net interaction potential (<span className="italic font-serif">V<sub>total</sub></span>) is the sum of double-layer repulsion (<span className="italic font-serif">V<sub>R</sub></span>) and van der Waals attraction (<span className="italic font-serif">V<sub>A</sub></span>):</p>
-          <div className="p-3 bg-white rounded border border-blue-200 text-center font-mono font-medium text-blue-700 text-base shadow-sm">
-            V<sub>total</sub> = V<sub>R</sub> + V<sub>A</sub>
+    <section className="section" aria-labelledby="eq-title">
+      <h2 id="eq-title" className="section-title">
+        Core Physical Principles & Equations
+      </h2>
+      <div className="eq-grid">
+        <div className="card eq-card">
+          <h3>Total DLVO Interaction Energy</h3>
+          <p>
+            The net interaction potential (<em>V<sub>total</sub></em>) is the sum of double-layer
+            repulsion (<em>V<sub>R</sub></em>) and van der Waals attraction (<em>V<sub>A</sub></em>):
+          </p>
+          <div className="formula">
+            <div className="formula-body">
+              <Tex display tex={String.raw`V_{total} = V_R + V_A`} />
+            </div>
+            <span className="formula-number">(1)</span>
           </div>
         </div>
-        <div className="p-4 bg-blue-50/40 rounded-lg space-y-2 border border-blue-100">
-          <h4 className="font-semibold text-blue-900">The Schulze-Hardy Rule</h4>
-          <p>The Critical Coagulation Concentration (CCC) decreases exponentially with the valency (<span className="italic font-serif">z</span>) of counter-ions:</p>
-          <div className="p-3 bg-white rounded border border-blue-200 text-center font-mono font-medium text-blue-700 text-sm shadow-sm">
-            CCC &propto; 1 / z<sup>6</sup>
+        <div className="card eq-card">
+          <h3>The Schulze-Hardy Rule</h3>
+          <p>
+            The Critical Coagulation Concentration (CCC) decreases exponentially with the valency (<em>z</em>) of
+            counter-ions:
+          </p>
+          <div className="formula">
+            <div className="formula-body">
+              <Tex display tex={String.raw`\mathrm{CCC} \propto \frac{1}{z^6}`} />
+            </div>
+            <span className="formula-number">(2)</span>
           </div>
         </div>
       </div>
-    </div>
-  );
-};
+    </section>
+  )
+}
