@@ -14,6 +14,7 @@ const ZetaPage = lazy(() => import('./pages/zeta/ZetaPage').then((m) => ({ defau
 const DlvoPage = lazy(() => import('./pages/dlvo/DlvoPage').then((m) => ({ default: m.DlvoPage })));
 const EdlPage = lazy(() => import('./pages/EdlPage'));
 const PhaseSeparationPage = lazy(() => import('./pages/PhaseSeparationPage'))
+const NucleationPage = lazy(() => import('./pages/NucleationPage'));
 const MipsPage = lazy(() => import('./pages/mips/MipsPage').then((m) => ({ default: m.MipsPage })));
 
 export default function App() {
@@ -36,6 +37,10 @@ export default function App() {
         {route === '/phase-separation' ? (
           <Suspense fallback={<p className="loading">Loading simulator...</p>}>
             <PhaseSeparationPage />
+          </Suspense>
+        ) : route === '/nucleation' ? (
+          <Suspense fallback={<p className="loading">Loading simulator...</p>}>
+            <NucleationPage />
           </Suspense>
         ) : route === '/double-layer' ? (
           <Suspense fallback={<p className="loading">Loading simulator...</p>}>
