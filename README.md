@@ -37,8 +37,7 @@ each is reproducible from the number shown above it. The trainers:
   coagulating from a DLVO curve, and the Schulze–Hardy rule CCC ∝ 1/z⁶.
 
 **About** (`#/about`, linked from the header and the footer): what the site is, who made it, the course it supports,
-the FAU Signal Processing Toolkit that inspired its structure, and links to the GitHub repository and Issues for
-feedback. The course details are marked `[TO CONFIRM]` until checked.
+and links to the GitHub repository and Issues for feedback.
 
 The first tool is a **Langmuir vs BET adsorption** simulator for bachelor students:
 

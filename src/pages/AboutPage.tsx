@@ -19,7 +19,7 @@ export default function AboutPage() {
         <div>
           <dt>Course</dt>
           <dd>
-            Interface Engineering (Prof. Klupp) <span className="tag accent">[TO CONFIRM]</span>
+            Interface Engineering (Prof. Klupp)
           </dd>
         </div>
         <div>
@@ -32,16 +32,6 @@ export default function AboutPage() {
             <a href="#/demos">{TOOLS.length} demos</a>: interactive simulators, one per course subtopic, grouped by topic.{' '}
             <a href="#/training">{TRAINERS.length} trainers</a>: randomized practice problems with worked solutions and an
             exam mode.
-          </dd>
-        </div>
-        <div>
-          <dt>Inspiration</dt>
-          <dd>
-            The structure follows FAU’s{' '}
-            <a href="https://lms-spt.e-technik.uni-erlangen.de/" target="_blank" rel="noopener noreferrer">
-              Signal Processing Toolkit
-            </a>
-            .
           </dd>
         </div>
         <div>

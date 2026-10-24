@@ -239,7 +239,6 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
 .about-list > div { display: grid; grid-template-columns: 10rem minmax(0, 1fr); gap: var(--space-1) var(--space-4); }
 .about-list dt { font-weight: 600; }
 .about-list dd { margin: 0; }
-.about-list .tag { vertical-align: 1px; margin-left: var(--space-1); }
 @media (max-width: 600px) {
   .about-list > div { grid-template-columns: minmax(0, 1fr); }
 }
