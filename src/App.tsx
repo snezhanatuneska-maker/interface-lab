@@ -20,6 +20,7 @@ const EdlPage = lazy(() => import('./pages/EdlPage'));
 const CrystalPage = lazy(() => import('./pages/CrystalPage'));
 const PhaseSeparationPage = lazy(() => import('./pages/PhaseSeparationPage'))
 const NucleationPage = lazy(() => import('./pages/NucleationPage'));
+const DemosPage = lazy(() => import('./pages/DemosPage'));
 const MipsPage = lazy(() => import('./pages/mips/MipsPage').then((m) => ({ default: m.MipsPage })));
 
 export default function App() {
@@ -86,7 +87,11 @@ export default function App() {
       <div className="layout">
         <SideMenu route={route} open={menuOpen} onClose={closeMenu} />
         <main className="layout-main" inert={menuOpen}>
-          {route === '/zisman' ? (
+          {route === '/demos' ? (
+            <Suspense fallback={<p className="loading">Loading demos...</p>}>
+              <DemosPage />
+            </Suspense>
+          ) : route === '/zisman' ? (
             <Suspense fallback={<p className="loading">Loading simulator...</p>}>
               <ZismanPage />
             </Suspense>
