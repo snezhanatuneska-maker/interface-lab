@@ -1,7 +1,7 @@
 import { barrier, HAMAKER_DEFAULT, RADIUS_DEFAULT, STABLE_BARRIER, total, type DlvoParams } from './dlvo'
 import { debyeLength } from './edl'
 import type { Rng } from './random'
-import { fmt, fmtTex, labelled, numericOptions, round, type Difficulty, type Generator, type Step } from './training'
+import { fmt, fmtTex, labelled, numericOptions, round, type Difficulty, type Generator, type Problem, type Step } from './training'
 
 // Colloid stability training: Debye length κ⁻¹ from salt and valency (src/lib/edl.ts), stable or coagulating from a
 // DLVO curve (src/lib/dlvo.ts), and the Schulze–Hardy rule CCC ∝ 1/z⁶.
@@ -26,37 +26,41 @@ const CONCS = [1, 2, 5, 10, 20, 50, 100, 200] // mM
 
 export const DLVO_GAPS = Array.from({ length: 120 }, (_, i) => 0.3 + (i * 29.7) / 119) // nm
 
+/** Debye length κ⁻¹ from salt concentration and valency (also used by the double-layer trainer). */
+export function debyeProblem(rng: Rng, difficulty: Difficulty): Problem<ColloidData> {
+  const ask = 'debye' as const
+  const c0 = rng.pick(CONCS)
+  const z = difficulty === 'easy' ? 1 : rng.int(1, 3)
+  const L = debyeLength(c0, z)
+  const I = c0 * z * z
+  const { options, answer } = numericOptions(
+    rng,
+    L,
+    // ignored z (I = c₀); mM taken as M; I in M taken as mM; I written as ½c₀z² for a z:z salt
+    [debyeLength(c0, 1), L / Math.sqrt(1000), L * Math.sqrt(1000), L * Math.SQRT2],
+    { format: (v) => `${fmt(v)} nm` },
+  )
+  const steps: Step[] = [
+    { text: 'Ionic strength of a z:z electrolyte:', tex: `I = \\tfrac12\\sum_i c_i z_i^2 = c_0 z^2 = ${c0}\\ \\mathrm{mM} \\times ${z}^2 = ${fmtTex(I / 1000)}\\ \\mathrm{M}` },
+    {
+      text: 'Debye length in water at 25 °C (ε_r = 78.5):',
+      tex: `\\kappa^{-1} = \\sqrt{\\frac{\\varepsilon_0 \\varepsilon_r k T}{2 N_A e^2 I}} \\approx \\frac{0.304\\ \\mathrm{nm}}{\\sqrt{I/\\mathrm{M}}} = \\frac{0.304}{\\sqrt{${fmtTex(I / 1000)}}}\\ \\mathrm{nm} = ${fmtTex(L)}\\ \\mathrm{nm}`,
+    },
+    { text: 'More salt or a higher valency compresses the double layer: κ⁻¹ ∝ 1/(z√c₀).' },
+  ]
+  return {
+    question: `What is the Debye length $\\kappa^{-1}$ in ${c0} mM ${salt(z)} in water at 25 °C?`,
+    options,
+    answer,
+    steps,
+    data: { ask, c0, z, debye: L },
+  }
+}
+
 export const generateColloid: Generator<ColloidData> = (rng: Rng, difficulty: Difficulty) => {
   const ask = rng.pick(ASKS[difficulty])
 
-  if (ask === 'debye') {
-    const c0 = rng.pick(CONCS)
-    const z = difficulty === 'easy' ? 1 : rng.int(1, 3)
-    const L = debyeLength(c0, z)
-    const I = c0 * z * z
-    const { options, answer } = numericOptions(
-      rng,
-      L,
-      // ignored z (I = c₀); mM taken as M; I in M taken as mM; I written as ½c₀z² for a z:z salt
-      [debyeLength(c0, 1), L / Math.sqrt(1000), L * Math.sqrt(1000), L * Math.SQRT2],
-      { format: (v) => `${fmt(v)} nm` },
-    )
-    const steps: Step[] = [
-      { text: 'Ionic strength of a z:z electrolyte:', tex: `I = \\tfrac12\\sum_i c_i z_i^2 = c_0 z^2 = ${c0}\\ \\mathrm{mM} \\times ${z}^2 = ${fmtTex(I / 1000)}\\ \\mathrm{M}` },
-      {
-        text: 'Debye length in water at 25 °C (ε_r = 78.5):',
-        tex: `\\kappa^{-1} = \\sqrt{\\frac{\\varepsilon_0 \\varepsilon_r k T}{2 N_A e^2 I}} \\approx \\frac{0.304\\ \\mathrm{nm}}{\\sqrt{I/\\mathrm{M}}} = \\frac{0.304}{\\sqrt{${fmtTex(I / 1000)}}}\\ \\mathrm{nm} = ${fmtTex(L)}\\ \\mathrm{nm}`,
-      },
-      { text: 'More salt or a higher valency compresses the double layer: κ⁻¹ ∝ 1/(z√c₀).' },
-    ]
-    return {
-      question: `What is the Debye length $\\kappa^{-1}$ in ${c0} mM ${salt(z)} in water at 25 °C?`,
-      options,
-      answer,
-      steps,
-      data: { ask, c0, z, debye: L },
-    }
-  }
+  if (ask === 'debye') return debyeProblem(rng, difficulty)
 
   if (ask === 'ccc') {
     const z1 = difficulty === 'hard' ? rng.int(1, 2) : 1

@@ -25,8 +25,6 @@ import Schematic from './edl/Schematic'
 import { insight } from './edl/insight'
 import { Seeing, Stern, WhyItMatters } from './edl/Theory'
 import Equations from './edl/Equations'
-import TryThis, { type Preset } from './edl/TryThis'
-import Quiz from './edl/Quiz'
 
 const N_POINTS = 300
 const N_CAP = 101
@@ -53,15 +51,6 @@ export default function EdlPage() {
     setZ(Z_DEFAULT)
     setPsi0(PSI0_DEFAULT)
     setDelta(DELTA_DEFAULT)
-  }
-
-  const applyPreset = (p: Preset) => {
-    if (p.model) setModel(p.model)
-    if (p.c0 !== undefined) setC0(p.c0)
-    if (p.z !== undefined) setZ(p.z)
-    if (p.psi0 !== undefined) setPsi0(p.psi0)
-    if (p.delta !== undefined) setDelta(p.delta)
-    requestAnimationFrame(() => document.getElementById('sim-figure')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
   }
 
   // ---------- Profiles ----------
@@ -394,9 +383,7 @@ export default function EdlPage() {
       <Seeing />
       <Stern />
       <Equations model={model} />
-      <TryThis onApply={applyPreset} />
       <WhyItMatters />
-      <Quiz />
     </article>
   )
 }

@@ -1,7 +1,6 @@
 import { MipsTryThis } from './MipsTryThis'
 import { MipsTheory } from './MipsTheory'
 import { MipsEquations } from './MipsEquations'
-import { MipsQuiz } from './MipsQuiz'
 import { MipsInsight } from './MipsInsight'
 
 export function MipsPage() {
@@ -21,7 +20,6 @@ export function MipsPage() {
       <MipsTryThis />
       <MipsTheory />
       <MipsEquations />
-      <MipsQuiz />
       <MipsInsight />
     </article>
   )

@@ -1,7 +1,6 @@
 import { ZetaTryThis } from './ZetaTryThis'
 import { ZetaTheory } from './ZetaTheory'
 import { ZetaEquations } from './ZetaEquations'
-import { ZetaQuiz } from './ZetaQuiz'
 import { ZetaInsight } from './ZetaInsight'
 
 export function ZetaPage() {
@@ -21,7 +20,6 @@ export function ZetaPage() {
       <ZetaTryThis />
       <ZetaTheory />
       <ZetaEquations />
-      <ZetaQuiz />
       <ZetaInsight />
     </article>
   )

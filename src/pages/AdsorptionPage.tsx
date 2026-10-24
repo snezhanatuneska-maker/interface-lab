@@ -18,7 +18,6 @@ import {
   type Model,
 } from '../lib/adsorption'
 import { insight } from './adsorption/insight'
-import TryThis, { type Preset } from './adsorption/TryThis'
 import Equations from './adsorption/Equations'
 import SurfaceArea from './adsorption/SurfaceArea'
 import BeyondBet from './adsorption/BeyondBet'
@@ -107,17 +106,6 @@ export default function AdsorptionPage() {
     if (m === mode) return
     setMode(m)
     restart() // pressure, K and C are kept so the models can be compared at the same setting
-  }
-
-  const applyPreset = (p: Preset) => {
-    if (p.mode) setMode(p.mode)
-    if (p.x !== undefined) setX(p.x)
-    if (p.K !== undefined) setK(p.K)
-    if (p.c !== undefined) setC(p.c)
-    setPaused(false)
-    restart()
-    // Scroll on the next frame, once the new setting has rendered: it can change the height of what is above the target.
-    requestAnimationFrame(() => document.getElementById(p.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
   }
 
   // ---------- Isotherm ----------
@@ -415,8 +403,6 @@ export default function AdsorptionPage() {
       </section>
 
       <Equations mode={mode} />
-
-      <TryThis onApply={applyPreset} />
 
       <SurfaceArea c={c} setC={setC} sampleId={sampleId} setSampleId={setSampleId} theme={theme} />
 

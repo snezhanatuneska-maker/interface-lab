@@ -4,7 +4,6 @@ import { useThemeColors } from '../lib/themeColors'
 import PhaseDiagram from './phase/PhaseDiagram'
 import ProfileAnimation from './phase/ProfileAnimation'
 import NucleationBarrier from './phase/NucleationBarrier'
-import PhaseQuiz from './phase/PhaseQuiz'
 
 const NARROW = '(max-width: 600px)'
 function useNarrow(): boolean {
@@ -125,7 +124,6 @@ export default function PhaseSeparationPage() {
         </ul>
       </section>
 
-      <PhaseQuiz />
     </article>
   )
 }

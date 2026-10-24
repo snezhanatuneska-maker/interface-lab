@@ -32,14 +32,18 @@ interface SideMenuProps {
   open: boolean
   /** `restoreFocus`: send focus back to the menu button (not when the drawer closes because a link was followed). */
   onClose: (restoreFocus: boolean) => void
+  /** Desktop: fold the sidebar away to the side. */
+  onHide: () => void
+  /** Desktop: the sidebar is folded away (its links are then out of the tab order too). */
+  hidden: boolean
 }
 
 /**
- * The site menu: every finished page grouped by topic, then the trainers. On desktop it is a sticky sidebar;
- * on narrow screens a drawer. While the drawer is open the rest of the page is inert (App.tsx),
+ * The site menu: every finished page grouped by topic, then the trainers. On desktop it is a sticky sidebar that
+ * folds away to the side (header menu button or "Hide menu"); on narrow screens a drawer. While the drawer is open the rest of the page is inert (App.tsx),
  * so Tab stays inside it; Esc, the close button, the backdrop and following a link all close it.
  */
-export default function SideMenu({ route, open, onClose }: SideMenuProps) {
+export default function SideMenu({ route, open, onClose, onHide, hidden }: SideMenuProps) {
   const closeRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
@@ -62,6 +66,7 @@ export default function SideMenu({ route, open, onClose }: SideMenuProps) {
         id="site-menu"
         className={open ? 'side-menu open' : 'side-menu'}
         aria-label="Site menu"
+        inert={hidden}
         onClick={(e) => {
           // Following a link closes the drawer (the route change does too, but not when the link is the current page).
           if ((e.target as HTMLElement).closest('a')) onClose(false)
@@ -73,6 +78,9 @@ export default function SideMenu({ route, open, onClose }: SideMenuProps) {
             ×
           </button>
         </div>
+        <button type="button" className="menu-hide" onClick={onHide}>
+          <span aria-hidden="true">«</span> Hide menu
+        </button>
         <div className="menu-section menu-site-links">
           <Links links={SITE_LINKS} route={route} />
         </div>

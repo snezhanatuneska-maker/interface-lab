@@ -2,7 +2,6 @@ import React from 'react';
 import { ZismanTryThis } from './ZismanTryThis';
 import { ZismanTheory } from './ZismanTheory';
 import { ZismanEquations } from './ZismanEquations';
-import { ZismanQuiz } from './ZismanQuiz';
 import { ZismanInsight } from './ZismanInsight';
 
 export const ZismanPage: React.FC = () => {
@@ -27,10 +26,6 @@ export const ZismanPage: React.FC = () => {
 
       <section>
         <ZismanEquations />
-      </section>
-
-      <section>
-        <ZismanQuiz />
       </section>
 
       <section>

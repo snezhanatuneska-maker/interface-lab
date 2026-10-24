@@ -24,7 +24,6 @@ import {
 } from '../lib/wetting'
 import DropView, { type Surface } from './wetting/DropView'
 import Theory from './wetting/Theory'
-import TryThis, { type Setup } from './wetting/TryThis'
 
 const VIEWS: { value: Surface; label: string; title: string }[] = [
   { value: 'smooth', label: 'Young', title: 'Young: smooth surface' },
@@ -81,15 +80,6 @@ export default function WettingPage() {
     setR(p.r)
     setFs(p.fs)
     setView(favoredState(p.thetaY, p.r, p.fs)) // show the state this surface actually takes
-  }
-
-  const applySetup = (u: Setup) => {
-    if (u.mode) setMode(u.mode)
-    if (u.thetaY !== undefined) setThetaSet(u.thetaY)
-    if (u.r !== undefined) setR(u.r)
-    if (u.fs !== undefined) setFs(u.fs)
-    if (u.view) setView(u.view)
-    requestAnimationFrame(() => document.getElementById('sim-figure')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
   }
 
   const theta = angles[view]
@@ -283,8 +273,6 @@ export default function WettingPage() {
           </figcaption>
         </figure>
       </section>
-
-      <TryThis onApply={applySetup} />
 
       <section className="section" aria-labelledby="why-title">
         <h2 id="why-title" className="section-title">

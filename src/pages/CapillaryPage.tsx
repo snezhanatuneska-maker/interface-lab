@@ -13,7 +13,6 @@ import {
 } from '../lib/capillary'
 import PoreView from './capillary/PoreView'
 import Equations from './capillary/Equations'
-import TryThis from './capillary/TryThis'
 
 const LEGEND = [
   { color: 'var(--pore-liquid)', label: 'liquid' },
@@ -35,8 +34,6 @@ export default function CapillaryPage() {
     setTheta(THETA_DEFAULT)
     setMode(MODE_DEFAULT)
   }
-
-  const scrollToSim = () => document.getElementById('sim-figure')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
   return (
     <article className="page">
@@ -168,8 +165,6 @@ export default function CapillaryPage() {
       </section>
 
       <Equations />
-
-      <TryThis onSetUp={scrollToSim} />
 
       <section className="section" aria-labelledby="why-title">
         <h2 id="why-title" className="section-title">

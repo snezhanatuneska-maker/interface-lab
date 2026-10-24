@@ -37,3 +37,22 @@ export function inSection(href: string, route: string): boolean {
   const path = href.replace(/^#/, '')
   return isCurrent(href, route) || (path !== '/' && route.startsWith(path + '/'))
 }
+
+// Whether the desktop sidebar is hidden, remembered per browser. Storage may be blocked: then it lasts for the visit.
+const HIDDEN_KEY = 'side-menu-hidden'
+
+export function loadMenuHidden(): boolean {
+  try {
+    return localStorage.getItem(HIDDEN_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+export function saveMenuHidden(hidden: boolean): void {
+  try {
+    localStorage.setItem(HIDDEN_KEY, hidden ? '1' : '0')
+  } catch {
+    // storage unavailable
+  }
+}

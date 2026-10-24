@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { SUBTOPICS, TOOLS, TOPICS } from '../data/subtopics'
 import { TRAINERS } from '../data/trainers'
-import { buildMenu, inSection, isCurrent } from './menu'
+import { buildMenu, inSection, isCurrent, loadMenuHidden, saveMenuHidden } from './menu'
 
 describe('side menu', () => {
   const menu = buildMenu(SUBTOPICS, TRAINERS)
@@ -38,5 +38,26 @@ describe('side menu', () => {
     expect(inSection('#/training', '/training')).toBe(true)
     expect(inSection('#/training', '/trainingx')).toBe(false)
     expect(inSection('#/', '/wetting')).toBe(false)
+  })
+})
+
+describe('hidden sidebar setting', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('is remembered, and defaults to shown when storage is missing or blocked', () => {
+    expect(loadMenuHidden()).toBe(false) // no localStorage in this test environment
+    expect(() => saveMenuHidden(true)).not.toThrow()
+    const store = new Map<string, string>()
+    vi.stubGlobal('localStorage', { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => store.set(k, v) })
+    saveMenuHidden(true)
+    expect(loadMenuHidden()).toBe(true)
+    saveMenuHidden(false)
+    expect(loadMenuHidden()).toBe(false)
+    vi.stubGlobal('localStorage', {
+      getItem: () => {
+        throw new Error('blocked')
+      },
+    })
+    expect(loadMenuHidden()).toBe(false)
   })
 })

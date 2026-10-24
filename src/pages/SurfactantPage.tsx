@@ -28,7 +28,6 @@ import {
 import MicelleView from './surfactants/MicelleView'
 import Theory from './surfactants/Theory'
 import Equations from './surfactants/Equations'
-import TryThis, { type Preset } from './surfactants/TryThis'
 
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -213,18 +212,6 @@ export default function SurfactantPage() {
   const coverage = Gamma / sys.gammaMax
   const monomers = Math.round(6 * Math.sqrt(freeMonomer(c, sys.cmc) / sys.cmc))
   const micelles = above ? Math.min(6, Math.ceil(3 * Math.log10(c / sys.cmc))) : 0
-
-  const applyPreset = (p: Preset) => {
-    setSurf(p.surf)
-    if (p.head) setCustomHead(p.head)
-    if (p.tail !== undefined) setCustomTail(p.tail)
-    setSaltMM(p.saltMM ?? 0)
-    setLogC(p.logC)
-    setPaused(false)
-    if (p.showConductivity) setProp('conductivity')
-    const target = p.showConductivity ? 'props-figure' : 'sim-figure'
-    requestAnimationFrame(() => document.getElementById(target)?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
-  }
 
   // Fixed y ranges per system: wide enough to show the change of slope at the CMC clearly.
   const condMax = Math.max(conductivity(sys, sys.cmc * 10), 1e-6) * 1.1
@@ -446,7 +433,6 @@ export default function SurfactantPage() {
 
       <Equations />
 
-      <TryThis onApply={applyPreset} />
     </article>
   )
 }

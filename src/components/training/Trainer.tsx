@@ -28,9 +28,16 @@ interface TrainerProps<D> {
 const LABELS: Record<Difficulty, string> = { easy: 'Easy', medium: 'Medium', hard: 'Hard' }
 type Mode = 'practice' | 'exam'
 
-const make = <D,>(generate: Generator<D>, difficulty: Difficulty): Seeded<D> => {
-  const seed = newSeed()
-  return { seed, problem: generate(makeRng(seed), difficulty) }
+/** A new problem, avoiding the questions in `avoid` when possible (concept questions come from small banks). */
+const make = <D,>(generate: Generator<D>, difficulty: Difficulty, avoid: Seeded<D>[] = []): Seeded<D> => {
+  const seen = new Set(avoid.map((s) => s.problem.question))
+  let next: Seeded<D>
+  let tries = 0
+  do {
+    const seed = newSeed()
+    next = { seed, problem: generate(makeRng(seed), difficulty) }
+  } while (seen.has(next.problem.question) && ++tries < 30)
+  return next
 }
 
 /** True while the reader is typing in a field, so the shortcut keys leave the keystroke alone. */
@@ -107,12 +114,14 @@ export default function Trainer<D>({ id, generate, renderData }: TrainerProps<D>
   const summaryRef = useRef<HTMLHeadingElement>(null)
 
   const newProblem = (d = difficulty) => {
-    setCurrent(make(generate, d))
+    setCurrent(make(generate, d, [current]))
     setPicked(null)
   }
 
   const startExam = (d = difficulty) => {
-    setExam(Array.from({ length: EXAM_LENGTH }, () => make(generate, d)))
+    const list: Seeded<D>[] = []
+    for (let i = 0; i < EXAM_LENGTH; i++) list.push(make(generate, d, list))
+    setExam(list)
     setAnswers([])
   }
 

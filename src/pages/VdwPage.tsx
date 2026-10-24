@@ -27,7 +27,6 @@ import {
   type Term,
 } from '../lib/vdw'
 import Theory from './vdw/Theory'
-import Quiz from './vdw/Quiz'
 
 const TERMS: Term[] = ['keesom', 'debye', 'london']
 const N_POINTS = 200
@@ -419,7 +418,6 @@ export default function VdwPage() {
         </p>
       </section>
 
-      <Quiz />
     </article>
   )
 }

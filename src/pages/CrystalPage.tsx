@@ -18,7 +18,6 @@ import FacetView, { type FacetStats } from './crystal/FacetView'
 import DlaView, { type DlaStats } from './crystal/DlaView'
 import RegimePlot from './crystal/RegimePlot'
 import Equations from './crystal/Equations'
-import Quiz from './crystal/Quiz'
 
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -453,7 +452,6 @@ export default function CrystalPage() {
         </ul>
       </section>
 
-      <Quiz />
     </article>
   )
 }

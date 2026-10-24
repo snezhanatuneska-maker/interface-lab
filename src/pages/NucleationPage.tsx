@@ -24,7 +24,6 @@ import {
 import CapSketch from './nucleation/CapSketch'
 import Equations from './nucleation/Equations'
 import { CepRelation, Concept, WhatToNotice } from './nucleation/Theory'
-import Quiz from './nucleation/Quiz'
 
 const N_POINTS = 300
 const LOG_S: [number, number] = [Math.log(S_RANGE[0]), Math.log(S_RANGE[1])]
@@ -417,7 +416,6 @@ export default function NucleationPage() {
 
       <WhatToNotice />
       <CepRelation />
-      <Quiz />
     </article>
   )
 }

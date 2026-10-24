@@ -3,7 +3,9 @@ import HomePage from './pages/HomePage';
 import ThemeToggle from './components/ThemeToggle';
 import SideMenu, { DRAWER_QUERY } from './components/SideMenu';
 import { SITE_LINKS } from './data/nav';
-import { inSection } from './lib/menu';
+import { inSection, loadMenuHidden, saveMenuHidden } from './lib/menu';
+import { trainerAt } from './data/trainers';
+import PracticeLinks from './components/PracticeLinks';
 import { useHashRoute } from './lib/useHashRoute';
 import { COURSE } from './siteConfig';
 import { ZismanPage } from './pages/zisman/ZismanPage';
@@ -23,15 +25,15 @@ const NucleationPage = lazy(() => import('./pages/NucleationPage'));
 const DemosPage = lazy(() => import('./pages/DemosPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const TrainingPage = lazy(() => import('./pages/TrainingPage'));
-const BetTrainerPage = lazy(() => import('./pages/training/BetTrainerPage'));
-const IsothermTrainerPage = lazy(() => import('./pages/training/IsothermTrainerPage'));
-const WettingTrainerPage = lazy(() => import('./pages/training/WettingTrainerPage'));
-const ColloidTrainerPage = lazy(() => import('./pages/training/ColloidTrainerPage'));
+const TrainerPage = lazy(() => import('./pages/training/TrainerPage'));
 const MipsPage = lazy(() => import('./pages/mips/MipsPage').then((m) => ({ default: m.MipsPage })));
 
 export default function App() {
   const route = useHashRoute();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const trainer = trainerAt(route);
+  const [menuOpen, setMenuOpen] = useState(false); // drawer, below 1024 px
+  const [menuHidden, setMenuHidden] = useState(loadMenuHidden); // sidebar folded away, desktop
+  const [isDrawer, setIsDrawer] = useState(() => window.matchMedia(DRAWER_QUERY).matches);
   const menuButton = useRef<HTMLButtonElement>(null);
   const restoreFocus = useRef(false);
 
@@ -51,11 +53,23 @@ export default function App() {
   useEffect(() => {
     const mq = window.matchMedia(DRAWER_QUERY);
     const onChange = () => {
+      setIsDrawer(mq.matches);
       if (!mq.matches) setMenuOpen(false);
     };
     mq.addEventListener('change', onChange);
     return () => mq.removeEventListener('change', onChange);
   }, []);
+
+  const setHidden = (hidden: boolean) => {
+    setMenuHidden(hidden);
+    saveMenuHidden(hidden);
+  };
+  // On narrow screens the menu button opens the drawer; on desktop it folds the sidebar away and back.
+  const onMenuButton = () => (isDrawer ? setMenuOpen(true) : setHidden(!menuHidden));
+  const hideSidebar = () => {
+    setHidden(true);
+    menuButton.current?.focus();
+  };
 
   return (
     <div className="app">
@@ -65,14 +79,15 @@ export default function App() {
             ref={menuButton}
             type="button"
             className="menu-button"
-            aria-expanded={menuOpen}
+            aria-expanded={isDrawer ? menuOpen : !menuHidden}
             aria-controls="site-menu"
-            onClick={() => setMenuOpen(true)}
+            title={isDrawer ? 'Menu' : menuHidden ? 'Show menu' : 'Hide menu'}
+            onClick={onMenuButton}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" className="theme-icon">
               <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
             </svg>
-            <span className="visually-hidden">Menu</span>
+            <span className="visually-hidden">{isDrawer ? 'Menu' : menuHidden ? 'Show menu' : 'Hide menu'}</span>
           </button>
           <a className="site-title" href="#/">
             Interface Engineering Lab
@@ -90,8 +105,8 @@ export default function App() {
         </div>
       </header>
 
-      <div className="layout">
-        <SideMenu route={route} open={menuOpen} onClose={closeMenu} />
+      <div className={menuHidden ? 'layout menu-hidden' : 'layout'}>
+        <SideMenu route={route} open={menuOpen} onClose={closeMenu} onHide={hideSidebar} hidden={menuHidden && !isDrawer} />
         <main className="layout-main" inert={menuOpen}>
           {route === '/demos' ? (
             <Suspense fallback={<p className="loading">Loading demos...</p>}>
@@ -105,21 +120,9 @@ export default function App() {
             <Suspense fallback={<p className="loading">Loading training...</p>}>
               <TrainingPage />
             </Suspense>
-          ) : route === '/training/bet' ? (
+          ) : trainer ? (
             <Suspense fallback={<p className="loading">Loading trainer...</p>}>
-              <BetTrainerPage />
-            </Suspense>
-          ) : route === '/training/isotherms' ? (
-            <Suspense fallback={<p className="loading">Loading trainer...</p>}>
-              <IsothermTrainerPage />
-            </Suspense>
-          ) : route === '/training/wetting' ? (
-            <Suspense fallback={<p className="loading">Loading trainer...</p>}>
-              <WettingTrainerPage />
-            </Suspense>
-          ) : route === '/training/colloids' ? (
-            <Suspense fallback={<p className="loading">Loading trainer...</p>}>
-              <ColloidTrainerPage />
+              <TrainerPage id={trainer.id} />
             </Suspense>
           ) : route === '/zisman' ? (
             <Suspense fallback={<p className="loading">Loading simulator...</p>}>
@@ -176,6 +179,7 @@ export default function App() {
           ) :  (
             <HomePage />
           )}
+          <PracticeLinks route={route} />
         </main>
       </div>
 

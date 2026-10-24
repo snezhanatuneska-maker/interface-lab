@@ -1,7 +1,6 @@
 import { DlvoTryThis } from './DlvoTryThis'
 import { DlvoTheory } from './DlvoTheory'
 import { DlvoEquations } from './DlvoEquations'
-import { DlvoQuiz } from './DlvoQuiz'
 import { DlvoInsight } from './DlvoInsight'
 
 export function DlvoPage() {
@@ -21,7 +20,6 @@ export function DlvoPage() {
       <DlvoTryThis />
       <DlvoTheory />
       <DlvoEquations />
-      <DlvoQuiz />
       <DlvoInsight />
     </article>
   )
