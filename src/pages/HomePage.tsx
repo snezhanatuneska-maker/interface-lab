@@ -60,6 +60,13 @@ const ICONS: Record<string, ReactNode> = {
       <path className="series-2" d="M6 26 C16 26 22 10 28 10 S36 32 44 32" strokeWidth="2" strokeDasharray="2 2" fill="none" />
     </>
   ),
+  'double-layer': svg(
+    <>
+      <path d="M6 6 V42 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />
+      <path className="series-2" d="M6 10 L12 22" strokeWidth="3" fill="none" />
+      <path className="series-1" d="M12 22 C18 34 26 39 44 41" strokeWidth="3" fill="none" />
+    </>
+  ),
   'zeta-potential': svg(
     <>
       <path d="M6 38 H42" stroke="currentColor" strokeWidth="2.5" fill="none" />

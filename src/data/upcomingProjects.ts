@@ -140,9 +140,10 @@ export const PROJECTS: Project[] = [
     category: 'Colloidal Systems',
     description:
       'Change salt and see the potential decay away from a surface.',
-    concepts: ['Stern layer', 'Diffuse layer', 'Debye length κ⁻¹', 'Ionic strength', 'Specific adsorption (IHP/OHP)'],
+    concepts: ['Stern layer', 'Diffuse layer', 'Debye length κ⁻¹', 'Ionic strength', 'Double-layer capacitance'],
     cepLink: 'The double layer behind supercapacitors and every electrode–electrolyte interface.',
-    status: 'planned',
+    status: 'live',
+    href: '#/double-layer',
   },
   {
     id: 'zeta-potential',

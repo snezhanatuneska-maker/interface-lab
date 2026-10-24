@@ -12,6 +12,7 @@ const WettingPage = lazy(() => import('./pages/WettingPage'));
 const VdwPage = lazy(() => import('./pages/VdwPage'));
 const ZetaPage = lazy(() => import('./pages/zeta/ZetaPage').then((m) => ({ default: m.ZetaPage })));
 const DlvoPage = lazy(() => import('./pages/dlvo/DlvoPage').then((m) => ({ default: m.DlvoPage })));
+const EdlPage = lazy(() => import('./pages/EdlPage'));
 const MipsPage = lazy(() => import('./pages/mips/MipsPage').then((m) => ({ default: m.MipsPage })));
 
 export default function App() {
@@ -31,7 +32,11 @@ export default function App() {
       </header>
 
       <main className="container">
-        {route === '/mips' ? (
+        {route === '/double-layer' ? (
+          <Suspense fallback={<p className="loading">Loading simulator...</p>}>
+            <EdlPage />
+          </Suspense>
+        ) : route === '/mips' ? (
           <Suspense fallback={<p className="loading">Loading simulator...</p>}>
             <MipsPage />
           </Suspense>
