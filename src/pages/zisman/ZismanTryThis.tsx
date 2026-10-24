@@ -6,10 +6,7 @@ export const ZismanTryThis: React.FC = () => {
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Critical surface tension values (gamma_c)
   const gammaC = substrate === 'teflon' ? 18 : substrate === 'pe' ? 31 : 72;
-  
-  // Zisman relation: cos(theta) = 1 - b(gamma_lv - gamma_c)
   const b = 0.03;
   const cosTheta = Math.min(1.0, Math.max(-1.0, 1 - b * (liquidGamma - gammaC)));
   const contactAngleDeg = Math.acos(Math.max(-1, Math.min(1, cosTheta))) * (180 / Math.PI);
@@ -24,7 +21,6 @@ export const ZismanTryThis: React.FC = () => {
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw Zisman plot axes on canvas left
     ctx.strokeStyle = '#64748b';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
@@ -33,18 +29,15 @@ export const ZismanTryThis: React.FC = () => {
     ctx.lineTo(220, 200);
     ctx.stroke();
 
-    // Axis labels
     ctx.fillStyle = '#94a3b8';
     ctx.font = '10px sans-serif';
     ctx.fillText('cos(θ) = 1.0', 10, 25);
     ctx.fillText('0', 30, 205);
     ctx.fillText('γ_lv (mN/m)', 120, 218);
 
-    // Draw Zisman trendline
     ctx.strokeStyle = '#38bdf8';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    // maps gamma_c to cos=1, and higher gamma to lower cos
     const startX = 40 + (gammaC - 10) * 2;
     const startY = 20;
     const endX = 40 + (80 - 10) * 2;
@@ -53,7 +46,6 @@ export const ZismanTryThis: React.FC = () => {
     ctx.lineTo(endX, endY);
     ctx.stroke();
 
-    // Plot current active point
     const currentX = 40 + (liquidGamma - 10) * 2;
     const currentY = 200 - ((1 - b * (liquidGamma - gammaC))) * 180;
     ctx.fillStyle = '#f43f5e';
@@ -61,11 +53,10 @@ export const ZismanTryThis: React.FC = () => {
     ctx.arc(currentX, Math.max(20, Math.min(200, currentY)), 5, 0, Math.PI * 2);
     ctx.fill();
 
-    // Draw Droplet schematic on right side
     const dropX = 300;
     const dropY = 140;
     ctx.fillStyle = '#334155';
-    ctx.fillRect(240, 140, 120, 10); // Solid surface
+    ctx.fillRect(240, 140, 120, 10);
 
     ctx.fillStyle = '#38bdf8';
     ctx.beginPath();
