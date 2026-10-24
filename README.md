@@ -19,7 +19,7 @@ title, description, concept tags, the lecture chapter (when `chapter` is set in 
 A search box filters by title, description and concept tags (press `/` to jump to it, Esc to clear it), and chips
 filter by topic, each with its number of matches. The search logic is in `src/lib/demos.ts`.
 
-**Training** (`#/training`). Randomized practice problems, modelled on FAU SPT's Convolution Training. Every trainer
+**Training** (`#/training`). Randomized practice problems. Every trainer
 has Easy / Medium / Hard, a Generate problem button, four answers (click or keys 1–4; Space loads the next problem),
 the current and best streak per trainer (saved in localStorage when available), a Reset button, and after each
 answer the worked solution step by step. **Exam mode** asks 10 questions without feedback, then shows the score and
