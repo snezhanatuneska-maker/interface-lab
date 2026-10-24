@@ -31,3 +31,9 @@ export function isCurrent(href: string, route: string): boolean {
   if (path === '/') return route === '/' || route === 'upcoming'
   return route === path
 }
+
+/** Whether the route is inside a header section: "#/training" covers "/training" and "/training/bet". */
+export function inSection(href: string, route: string): boolean {
+  const path = href.replace(/^#/, '')
+  return isCurrent(href, route) || (path !== '/' && route.startsWith(path + '/'))
+}

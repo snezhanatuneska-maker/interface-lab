@@ -3,7 +3,7 @@ import HomePage from './pages/HomePage';
 import ThemeToggle from './components/ThemeToggle';
 import SideMenu, { DRAWER_QUERY } from './components/SideMenu';
 import { SITE_LINKS } from './data/nav';
-import { isCurrent } from './lib/menu';
+import { inSection } from './lib/menu';
 import { useHashRoute } from './lib/useHashRoute';
 import { COURSE } from './siteConfig';
 import { ZismanPage } from './pages/zisman/ZismanPage';
@@ -21,6 +21,11 @@ const CrystalPage = lazy(() => import('./pages/CrystalPage'));
 const PhaseSeparationPage = lazy(() => import('./pages/PhaseSeparationPage'))
 const NucleationPage = lazy(() => import('./pages/NucleationPage'));
 const DemosPage = lazy(() => import('./pages/DemosPage'));
+const TrainingPage = lazy(() => import('./pages/TrainingPage'));
+const BetTrainerPage = lazy(() => import('./pages/training/BetTrainerPage'));
+const IsothermTrainerPage = lazy(() => import('./pages/training/IsothermTrainerPage'));
+const WettingTrainerPage = lazy(() => import('./pages/training/WettingTrainerPage'));
+const ColloidTrainerPage = lazy(() => import('./pages/training/ColloidTrainerPage'));
 const MipsPage = lazy(() => import('./pages/mips/MipsPage').then((m) => ({ default: m.MipsPage })));
 
 export default function App() {
@@ -75,7 +80,7 @@ export default function App() {
 
           <nav className="header-nav" aria-label="Main">
             {SITE_LINKS.map((l) => (
-              <a key={l.href} href={l.href} aria-current={isCurrent(l.href, route) ? 'page' : undefined}>
+              <a key={l.href} href={l.href} aria-current={inSection(l.href, route) ? 'page' : undefined}>
                 {l.title}
               </a>
             ))}
@@ -90,6 +95,26 @@ export default function App() {
           {route === '/demos' ? (
             <Suspense fallback={<p className="loading">Loading demos...</p>}>
               <DemosPage />
+            </Suspense>
+          ) : route === '/training' ? (
+            <Suspense fallback={<p className="loading">Loading training...</p>}>
+              <TrainingPage />
+            </Suspense>
+          ) : route === '/training/bet' ? (
+            <Suspense fallback={<p className="loading">Loading trainer...</p>}>
+              <BetTrainerPage />
+            </Suspense>
+          ) : route === '/training/isotherms' ? (
+            <Suspense fallback={<p className="loading">Loading trainer...</p>}>
+              <IsothermTrainerPage />
+            </Suspense>
+          ) : route === '/training/wetting' ? (
+            <Suspense fallback={<p className="loading">Loading trainer...</p>}>
+              <WettingTrainerPage />
+            </Suspense>
+          ) : route === '/training/colloids' ? (
+            <Suspense fallback={<p className="loading">Loading trainer...</p>}>
+              <ColloidTrainerPage />
             </Suspense>
           ) : route === '/zisman' ? (
             <Suspense fallback={<p className="loading">Loading simulator...</p>}>

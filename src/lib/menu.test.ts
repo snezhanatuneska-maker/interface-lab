@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { SUBTOPICS, TOOLS, TOPICS } from '../data/subtopics'
 import { TRAINERS } from '../data/trainers'
-import { buildMenu, isCurrent } from './menu'
+import { buildMenu, inSection, isCurrent } from './menu'
 
 describe('side menu', () => {
   const menu = buildMenu(SUBTOPICS, TRAINERS)
@@ -27,5 +27,16 @@ describe('side menu', () => {
     expect(isCurrent('#/', 'upcoming')).toBe(true)
     expect(isCurrent('#/', '/wetting')).toBe(false)
     expect(isCurrent('#/training', '/training/bet')).toBe(false)
+  })
+
+  it('lists the trainers in the Training section', () => {
+    expect(menu.at(-1)!.links.map((l) => l.href)).toEqual(TRAINERS.map((t) => t.href))
+  })
+
+  it('highlights a header section on its sub-pages', () => {
+    expect(inSection('#/training', '/training/bet')).toBe(true)
+    expect(inSection('#/training', '/training')).toBe(true)
+    expect(inSection('#/training', '/trainingx')).toBe(false)
+    expect(inSection('#/', '/wetting')).toBe(false)
   })
 })

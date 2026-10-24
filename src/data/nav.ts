@@ -4,4 +4,5 @@ import type { MenuLink } from '../lib/menu'
 export const SITE_LINKS: MenuLink[] = [
   { title: 'Home', href: '#/' },
   { title: 'Demos', href: '#/demos' },
+  { title: 'Training', href: '#/training' },
 ]
