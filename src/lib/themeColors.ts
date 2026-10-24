@@ -10,6 +10,7 @@ const TOKENS = {
   surface: '--color-surface',
   border: '--color-border',
   data1: '--data-1',
+  data1Soft: '--data-1-soft',
   data2: '--data-2',
   data2Soft: '--data-2-soft',
   data3: '--data-3',
