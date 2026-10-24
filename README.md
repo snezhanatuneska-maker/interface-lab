@@ -76,7 +76,7 @@ index.html                       HTML entry point (meta tags, theme set before f
 vite.config.ts                   Vite config (sets base: "/interface-lab/")
 public/                          favicon and og-image.png (link preview)
 src/main.tsx                     React entry
-src/App.tsx                      Site layout: header, hash routing (#/, #/adsorption, #/capillary, #/surfactants, #/wetting, #/van-der-waals), footer
+src/App.tsx                      Site layout: header, hash routing (#/, #/adsorption, #/capillary, #/surfactants, #/wetting, #/van-der-waals, #/nucleation, …), footer
 src/siteConfig.ts                Course name shown in the footer
 src/design-tokens.css            Colours, type scale and spacing (light and dark)
 src/index.css                    Global and component styles
@@ -95,6 +95,8 @@ src/components/UpcomingProjects.tsx  Upcoming Projects tab
 src/pages/SurfactantPage.tsx     Surfactants & CMC page; its sections live in src/pages/surfactants/
 src/pages/WettingPage.tsx        Wetting page; its sections (droplet, theory, Try this) live in src/pages/wetting/
 src/pages/VdwPage.tsx            Van der Waals page; its sections (cards, quiz) live in src/pages/vdw/
+src/pages/NucleationPage.tsx     Classical nucleation page; its sections (equations, cap sketch, theory, quiz) live in src/pages/nucleation/
+src/lib/nucleation.ts            ΔG(d), d*, ΔG*, shape factor f(θ), log rate (tests: nucleation.test.ts)
 src/lib/vdw.ts                   Keesom, Debye, London coefficients, molecule presets, constants (tests: vdw.test.ts)
 src/lib/wetting.ts               Young, Wenzel, Cassie–Baxter, critical angle, presets (tests: wetting.test.ts)
 src/lib/surfactants.ts           CMC, surface tension and property models, all constants (tests: surfactants.test.ts)
