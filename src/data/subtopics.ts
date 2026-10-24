@@ -33,8 +33,12 @@ export interface Subtopic {
   cepLink: string
   /** Route of the finished page, e.g. '#/wetting'. Leave out while the page is not built yet. */
   href?: string
+  /** Lecture chapter this page belongs to, e.g. 'Chapter 3'; shown on the demo cards (#/demos) when set. */
+  chapter?: string
 }
 
+// TODO: fill in `chapter` for each subtopic with the lecture chapter numbers from Prof. Klupp's
+// Interface Engineering course (left empty until they are checked against the course material).
 export const SUBTOPICS: Subtopic[] = [
   // ---------- Liquid Interfaces ----------
   {

@@ -14,6 +14,11 @@ is inert while it is open). It lists the finished pages grouped under the five c
 page, and ends with a Training section. It is built from `src/data/subtopics.ts` and `src/data/trainers.ts`, so a new
 page appears there by itself. The header links to the main site sections (`src/data/nav.ts`) and has the theme toggle.
 
+**Demo library** (`#/demos`). Cards for every finished page, grouped by topic with a count per group; each shows the
+title, description, concept tags, the lecture chapter (when `chapter` is set in `subtopics.ts`) and a Launch link.
+A search box filters by title, description and concept tags (press `/` to jump to it, Esc to clear it), and chips
+filter by topic, each with its number of matches. The search logic is in `src/lib/demos.ts`.
+
 The first tool is a **Langmuir vs BET adsorption** simulator for bachelor students:
 
 - An animated **molecular view**: a kinetic simulation where gas molecules fly with Maxwell–Boltzmann speeds and
@@ -90,16 +95,18 @@ index.html                       HTML entry point (meta tags, theme set before f
 vite.config.ts                   Vite config (sets base: "/interface-lab/")
 public/                          favicon and og-image.png (link preview)
 src/main.tsx                     React entry
-src/App.tsx                      Site layout: header, side menu, hash routing (#/, #/adsorption, #/capillary, #/surfactants, #/wetting, #/van-der-waals, #/nucleation, …), footer
+src/App.tsx                      Site layout: header, side menu, hash routing (#/, #/demos, #/adsorption, #/capillary, #/surfactants, #/wetting, #/van-der-waals, #/nucleation, …), footer
 src/siteConfig.ts                Course name shown in the footer
 src/design-tokens.css            Colours, type scale and spacing (light and dark)
 src/index.css                    Global and component styles
-src/data/subtopics.ts            Course topics and every subtopic on the homepage (with href = finished page)
+src/data/subtopics.ts            Course topics and every subtopic on the homepage (href = finished page, chapter = lecture chapter)
 src/data/trainers.ts             Training-mode trainers (listed in the side menu's Training section)
 src/data/nav.ts                  Main site sections linked from the header
 src/components/SideMenu.tsx      Side menu: sticky sidebar on desktop, drawer on narrow screens
 src/lib/menu.ts                  Builds the side menu from subtopics and trainers; current-route check (tests: menu.test.ts)
 src/pages/HomePage.tsx           Homepage: Tools and Upcoming Projects tabs
+src/pages/DemosPage.tsx          Demo library (#/demos): searchable, filterable cards of every finished page
+src/lib/demos.ts                 Demo search and topic filter, chip counts (tests: demos.test.ts)
 src/pages/AdsorptionPage.tsx     Langmuir vs BET page: simulation, isotherm and controls
 src/pages/adsorption/            Sections of that page: Try this, equations, BET plot and surface area,
                                  isotherm types, and the contextual explanations (insight.tsx)
