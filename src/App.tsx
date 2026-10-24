@@ -3,6 +3,7 @@ import HomePage from './pages/HomePage';
 import ThemeToggle from './components/ThemeToggle';
 import { useHashRoute } from './lib/useHashRoute';
 import { COURSE } from './siteConfig';
+import { ZismanPage } from './pages/zisman/ZismanPage';
 
 // Loaded on demand
 const AdsorptionPage = lazy(() => import('./pages/AdsorptionPage'));
@@ -26,6 +27,7 @@ export default function App() {
       <header className="site-header">
         <div className="container">
           <a className="site-title" href="#/">
+            <a href="#/zisman" className="text-blue-600 hover:underline font-medium">Zisman Plot</a>
             Interface Engineering Lab
           </a>
           <span className="site-subtitle">Interactive tools for Clean Energy Processes (CEP)</span>
@@ -35,7 +37,11 @@ export default function App() {
       </header>
 
       <main className="container">
-        {route === '/crystal-growth' ? (
+        {route === '/zisman' ? (
+          <Suspense fallback={<p className="loading">Loading simulator...</p>}>
+            <ZismanPage />
+          </Suspense>
+        ) : route === '/crystal-growth' ? (
           <Suspense fallback={<p className="loading">Loading simulator...</p>}>
             <CrystalPage />
           </Suspense>
