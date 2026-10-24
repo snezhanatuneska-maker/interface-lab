@@ -670,6 +670,41 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
   .edl-svg { height: 130px; }
 }
 
+/* ================= Crystal growth & shape ================= */
+.crystal-note { margin: var(--space-3) 0 0; font-size: var(--text-sm); color: var(--color-text-muted); }
+.crystal-tabs { flex-wrap: wrap; gap: 0 var(--space-5); margin-bottom: var(--space-3); }
+.crystal-intro { font-size: var(--text-sm); line-height: var(--leading-snug); }
+.crystal-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-5); align-items: start; }
+.crystal-wrap { width: 100%; min-width: 0; display: flex; justify-content: center; }
+.crystal-canvas { display: block; border: 1px solid var(--color-border); border-radius: var(--radius-sm); }
+.crystal-side { min-width: 0; display: grid; gap: var(--space-4); }
+.crystal-legend { font-size: var(--text-xs); }
+.crystal-legend .dot + .dot { margin-left: -2px; }
+.crystal-toggle { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); }
+.crystal-toggle small { color: var(--color-text-muted); font-size: var(--text-xs); }
+.crystal-toggle-row { display: flex; align-items: center; gap: var(--space-3); }
+.crystal-toggle-row .control-label { margin: 0; }
+.regime { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--color-border); }
+.regime-title { font-family: var(--font-sans); font-size: var(--text-base); margin-bottom: var(--space-2); }
+.regime .plot-legend { padding-left: 0; }
+.plot.regime-plot { height: 240px; }
+.choice:disabled { cursor: default; }
+.choice:disabled:not(.correct):not(.wrong):hover { border-color: var(--color-border-strong); }
+.crystal-score { margin-top: var(--space-4); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.crystal-score p { margin: 0; }
+
+@media (max-width: 820px) {
+  .crystal-grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+}
+@media (max-width: 600px) {
+  /* Too many controls for the sticky bar used by the other tools: they stay in the flow here. */
+  .hero-controls.crystal-controls { position: static; box-shadow: none; padding: var(--space-3) 0 0; gap: var(--space-3); }
+  .hero-controls.crystal-controls .slider small { display: block; }
+  .hero-controls.crystal-controls .slider.inactive { display: flex; }
+  .crystal-tabs .tab { font-size: var(--text-sm); }
+  .plot.regime-plot { height: 210px; }
+}
+
 /* ================= Phase separation ================= */
 .coverage-value.phase-stable, .phase-status .phase-stable { color: var(--color-accent); }
 .coverage-value.phase-metastable, .phase-status .phase-metastable, .nuc-ink, .phase-anim-title.nuc { color: var(--data-1); }

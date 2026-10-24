@@ -196,9 +196,10 @@ export const PROJECTS: Project[] = [
     title: 'Crystal Growth & Shape',
     category: 'Nucleation & Growth',
     description:
-      'Grow a crystal and see what sets its shape.',
+      'Grow a crystal: slow faces win, and high supersaturation makes dendrites.',
     concepts: ['BCF model', 'Diffusion-limited growth', 'Wulff construction', 'DLA', 'Kinetic Monte Carlo'],
-    cepLink: 'Tailoring nanoparticle catalysts by size and shape.',
-    status: 'planned',
+    cepLink: 'Facet-controlled fuel-cell catalysts and lithium dendrites in batteries.',
+    status: 'live',
+    href: '#/crystal-growth',
   },
 ]

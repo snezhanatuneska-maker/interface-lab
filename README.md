@@ -100,6 +100,9 @@ src/components/UpcomingProjects.tsx  Upcoming Projects tab
 src/pages/SurfactantPage.tsx     Surfactants & CMC page; its sections live in src/pages/surfactants/
 src/pages/WettingPage.tsx        Wetting page; its sections (droplet, theory, Try this) live in src/pages/wetting/
 src/pages/VdwPage.tsx            Van der Waals page; its sections (cards, quiz) live in src/pages/vdw/
+src/pages/CrystalPage.tsx        Crystal Growth & Shape page (#/crystal-growth); its sections (facet and DLA canvases,
+                                 G vs S plot, equations, quiz) live in src/pages/crystal/
+src/lib/crystal.ts               Facet geometry, Wulff shape, BCF/diffusion rate sketches (tests: crystal.test.ts)
 src/pages/PhaseSeparationPage.tsx  Nucleation vs spinodal page (#/phase-separation); sections in src/pages/phase/
 src/lib/phase.ts                 Regular solution, binodal/spinodal, Cahn–Hilliard, nucleation barrier (tests: phase.test.ts)
 src/pages/NucleationPage.tsx     Classical nucleation page; its sections (equations, cap sketch, theory, quiz) live in src/pages/nucleation/
