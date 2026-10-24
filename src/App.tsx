@@ -13,6 +13,7 @@ const VdwPage = lazy(() => import('./pages/VdwPage'));
 const ZetaPage = lazy(() => import('./pages/zeta/ZetaPage').then((m) => ({ default: m.ZetaPage })));
 const DlvoPage = lazy(() => import('./pages/dlvo/DlvoPage').then((m) => ({ default: m.DlvoPage })));
 const EdlPage = lazy(() => import('./pages/EdlPage'));
+const NucleationPage = lazy(() => import('./pages/NucleationPage'));
 const MipsPage = lazy(() => import('./pages/mips/MipsPage').then((m) => ({ default: m.MipsPage })));
 
 export default function App() {
@@ -32,7 +33,11 @@ export default function App() {
       </header>
 
       <main className="container">
-        {route === '/double-layer' ? (
+        {route === '/nucleation' ? (
+          <Suspense fallback={<p className="loading">Loading simulator...</p>}>
+            <NucleationPage />
+          </Suspense>
+        ) : route === '/double-layer' ? (
           <Suspense fallback={<p className="loading">Loading simulator...</p>}>
             <EdlPage />
           </Suspense>
