@@ -133,16 +133,7 @@ main.container { flex: 1; padding-bottom: var(--space-7); }
 
 /* ================= Homepage ================= */
 
-.tool-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-4); }
-.tool-card {
-  display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: var(--space-2) var(--space-5); align-items: start;
-  background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius);
-  padding: var(--space-5); color: inherit; text-decoration: none; transition: border-color 0.15s;
-}
-a.tool-card:hover { border-color: var(--color-accent); color: inherit; }
-.tool-card h3 { margin: 0 0 var(--space-1); }
-.tool-card p { margin: 0; color: var(--color-text-muted); max-width: var(--measure); }
-.tool-icon { width: 72px; height: 72px; color: var(--color-text-muted); }
+.tool-icon { width: 40px; height: 40px; flex: none; color: var(--color-text-muted); }
 .tool-icon .series-1 { stroke: var(--data-1); }
 .tool-icon .series-2 { stroke: var(--data-2); }
 .tool-cta { display: inline-block; margin-top: var(--space-3); font-weight: 600; color: var(--color-accent); }
@@ -156,23 +147,12 @@ a.tool-card:hover { border-color: var(--color-accent); color: inherit; }
 }
 .tab:hover { color: var(--color-text); }
 .tab[aria-selected='true'] { color: var(--color-accent); border-bottom-color: var(--color-accent); }
-.tab-panel > section:first-child > .section-title { border-top: 0; padding-top: 0; }
 
-/* Upcoming projects */
-.upcoming-intro { margin-bottom: var(--space-4); }
-.filter-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-2); }
-.chip {
-  font: inherit; font-size: var(--text-sm); font-weight: 600; cursor: pointer; color: var(--color-text-muted);
-  background: var(--color-surface); border: 1px solid var(--color-border-strong); border-radius: 999px; padding: 2px var(--space-3);
-}
-.chip:hover { color: var(--color-text); border-color: var(--color-accent); }
-.chip[aria-pressed='true'] { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-on-accent); }
-
+/* Topic groups on both tabs (Tools and Upcoming Projects), built from src/data/subtopics.ts */
 .project-group { margin-top: var(--space-6); }
-.roadmap { margin-top: var(--space-6); border-top: 1px solid var(--color-border); padding-top: var(--space-4); }
-.roadmap > summary { cursor: pointer; font-weight: 600; color: var(--color-accent); margin-bottom: var(--space-4); }
-.roadmap .project-group:first-of-type { margin-top: var(--space-4); }
-.category-title { font-family: var(--font-sans); font-size: var(--text-sm); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-muted); margin-bottom: var(--space-3); }
+.tab-panel > .project-group:first-child { margin-top: 0; }
+.category-title { font-family: var(--font-sans); font-size: var(--text-sm); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-muted); margin-bottom: var(--space-1); }
+.topic-desc { font-size: var(--text-sm); color: var(--color-text-muted); margin: 0 0 var(--space-3); max-width: var(--measure); }
 .project-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: var(--space-4); }
 .project-grid > li { display: flex; min-width: 0; }
 .project-card {
@@ -182,7 +162,7 @@ a.tool-card:hover { border-color: var(--color-accent); color: inherit; }
 }
 a.project-card:hover { border-color: var(--color-accent); color: inherit; }
 .project-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-2); }
-.project-head h3 { font-size: var(--text-base); line-height: var(--leading-snug); margin: 0; }
+.project-head h3 { flex: 1; min-width: 0; font-size: var(--text-base); line-height: var(--leading-snug); margin: 0; }
 .project-head .tag { flex: none; margin-top: 2px; }
 .project-card p { font-size: var(--text-sm); line-height: var(--leading-snug); color: var(--color-text-muted); }
 .project-concepts { list-style: none; margin: 0 0 var(--space-3); padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-1); }
@@ -203,8 +183,6 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
   .section { margin-top: var(--space-6); }
   .card, .figure { padding: var(--space-4); }
   .formula { padding: var(--space-3) var(--space-4); }
-  .tool-card { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); padding: var(--space-4); }
-  .tool-card .tool-icon { width: 48px; height: 48px; }
   .project-card { padding: var(--space-4); }
 }
 
