@@ -19,6 +19,23 @@ title, description, concept tags, the lecture chapter (when `chapter` is set in 
 A search box filters by title, description and concept tags (press `/` to jump to it, Esc to clear it), and chips
 filter by topic, each with its number of matches. The search logic is in `src/lib/demos.ts`.
 
+**Training** (`#/training`). Randomized practice problems, modelled on FAU SPT's Convolution Training. Every trainer
+has Easy / Medium / Hard, a Generate problem button, four answers (click or keys 1–4; Space loads the next problem),
+the current and best streak per trainer (saved in localStorage when available), a Reset button, and after each
+answer the worked solution step by step. **Exam mode** asks 10 questions without feedback, then shows the score and
+a review of every question with its solution. Problems come from a seeded random generator (`src/lib/random.ts`), so
+each is reproducible from the number shown above it. The trainers:
+
+- **BET Training** (`#/training/bet`): a slightly noisy N₂ dataset as a table and as the straight-line BET plot; find
+  Vₘ, C or the surface area in m²/g. The wrong answers are typical mistakes (slope alone, slope and intercept mixed up,
+  σ in the wrong units). On Hard the slope and intercept are read off the plot.
+- **Isotherm Recognition** (`#/training/isotherms`): name the plotted isotherm (Langmuir, BET, IUPAC type I–IV); harder
+  levels pick curves that look more alike.
+- **Wetting Training** (`#/training/wetting`): the Young angle from γ_SV, γ_SL, γ_LV; the Wenzel angle from r; the
+  Cassie–Baxter angle from f_s; and which state is favoured (from the critical angle).
+- **Colloid Stability Training** (`#/training/colloids`): the Debye length κ⁻¹ from salt and valency, stable or
+  coagulating from a DLVO curve, and the Schulze–Hardy rule CCC ∝ 1/z⁶.
+
 The first tool is a **Langmuir vs BET adsorption** simulator for bachelor students:
 
 - An animated **molecular view**: a kinetic simulation where gas molecules fly with Maxwell–Boltzmann speeds and
@@ -95,18 +112,29 @@ index.html                       HTML entry point (meta tags, theme set before f
 vite.config.ts                   Vite config (sets base: "/interface-lab/")
 public/                          favicon and og-image.png (link preview)
 src/main.tsx                     React entry
-src/App.tsx                      Site layout: header, side menu, hash routing (#/, #/demos, #/adsorption, #/capillary, #/surfactants, #/wetting, #/van-der-waals, #/nucleation, …), footer
+src/App.tsx                      Site layout: header, side menu, hash routing (#/, #/demos, #/training, #/training/bet, #/adsorption, #/capillary, #/surfactants, #/wetting, #/van-der-waals, #/nucleation, …), footer
 src/siteConfig.ts                Course name shown in the footer
 src/design-tokens.css            Colours, type scale and spacing (light and dark)
 src/index.css                    Global and component styles
 src/data/subtopics.ts            Course topics and every subtopic on the homepage (href = finished page, chapter = lecture chapter)
-src/data/trainers.ts             Training-mode trainers (listed in the side menu's Training section)
+src/data/trainers.ts             Trainers, listed on #/training and in the side menu (tests: trainers.test.ts)
 src/data/nav.ts                  Main site sections linked from the header
 src/components/SideMenu.tsx      Side menu: sticky sidebar on desktop, drawer on narrow screens
 src/lib/menu.ts                  Builds the side menu from subtopics and trainers; current-route check (tests: menu.test.ts)
 src/pages/HomePage.tsx           Homepage: Tools and Upcoming Projects tabs
 src/pages/DemosPage.tsx          Demo library (#/demos): searchable, filterable cards of every finished page
 src/lib/demos.ts                 Demo search and topic filter, chip counts (tests: demos.test.ts)
+src/pages/TrainingPage.tsx       Training index (#/training): one card per trainer
+src/pages/training/              The trainer pages (BET, isotherms, wetting, colloids) and their figures
+src/components/training/         Training framework: Trainer (difficulty, streaks, keys, exam mode), Options,
+                                 Solution (worked steps in KaTeX), RichText (text with inline $…$ TeX)
+src/lib/random.ts                Seeded random generator (tests: random.test.ts)
+src/lib/training.ts              Problem type, answer options from typical mistakes, number formatting (tests: training.test.ts)
+src/lib/streak.ts                Current and best streak per trainer in localStorage (tests: streak.test.ts)
+src/lib/trainBet.ts, trainIsotherm.ts, trainWetting.ts, trainColloid.ts
+                                 Problem generators, each with a test checking the answer is among four distinct
+                                 options and the numbers stay physical
+src/lib/dlvo.ts                  DLVO energy of two spheres, barrier height, CCC (tests: dlvo.test.ts)
 src/pages/AdsorptionPage.tsx     Langmuir vs BET page: simulation, isotherm and controls
 src/pages/adsorption/            Sections of that page: Try this, equations, BET plot and surface area,
                                  isotherm types, and the contextual explanations (insight.tsx)
