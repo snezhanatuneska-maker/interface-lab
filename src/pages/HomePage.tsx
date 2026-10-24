@@ -86,6 +86,16 @@ const ICONS: Record<string, ReactNode> = {
       <path className="series-2" d="M6 26 C12 26 14 20 20 20 S28 30 34 40" strokeWidth="3" fill="none" />
     </>
   ),
+  'zisman-plot': svg(
+    <>
+      <path d="M6 42 V6 M6 42 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />
+      <path d="M6 12 H44" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" fill="none" />
+      <path className="series-1" d="M14 12 L40 36" strokeWidth="3" fill="none" />
+      <circle cx="22" cy="19" r="2.5" className="series-2" strokeWidth="2" fill="none" />
+      <circle cx="30" cy="27" r="2.5" className="series-2" strokeWidth="2" fill="none" />
+      <circle cx="37" cy="33" r="2.5" className="series-2" strokeWidth="2" fill="none" />
+    </>
+  ),
   'zeta-potential': svg(
     <>
       <path d="M6 38 H42" stroke="currentColor" strokeWidth="2.5" fill="none" />

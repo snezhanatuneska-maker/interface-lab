@@ -96,6 +96,7 @@ export const SUBTOPICS: Subtopic[] = [
       'Find a solid’s critical surface tension from contact angles.',
     concepts: ['Zisman plot', 'Complete wetting', 'Polar vs non-polar surfaces', 'Teflon low surface energy'],
     cepLink: 'Choosing coatings and membranes with the right wettability.',
+    href: '#/zisman',
   },
   {
     id: 'surface-characterisation',
