@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
-import UpcomingProjects from '../components/UpcomingProjects'
-import { PROJECTS } from '../data/upcomingProjects'
+import { groupByTopic, TOOLS, UPCOMING, type Subtopic } from '../data/subtopics'
 
 const svg = (children: ReactNode) => (
   <svg viewBox="0 0 48 48" aria-hidden="true" className="tool-icon">
@@ -8,7 +7,7 @@ const svg = (children: ReactNode) => (
   </svg>
 )
 
-// Card icons of the live tools, keyed by project id (the tools themselves come from data/upcomingProjects.ts).
+// Card icons of the finished tools, keyed by subtopic id (the subtopics themselves come from data/subtopics.ts).
 const ICONS: Record<string, ReactNode> = {
   'langmuir-bet': svg(
     <>
@@ -96,16 +95,72 @@ const ICONS: Record<string, ReactNode> = {
   ),
 }
 
-const TOOLS = PROJECTS.filter((p) => p.status === 'live' && p.href)
+const FALLBACK_ICON = svg(<path d="M6 42 V6 M6 42 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />)
+
+function SubtopicCard({ s }: { s: Subtopic }) {
+  const body = (
+    <>
+      <div className="project-head">
+        {s.href && (ICONS[s.id] ?? FALLBACK_ICON)}
+        <h3>{s.title}</h3>
+        {!s.href && <span className="tag">Coming soon</span>}
+      </div>
+      <p>{s.description}</p>
+      <ul className="project-concepts" aria-label="Key concepts">
+        {s.concepts.map((c) => (
+          <li key={c} className="tag">
+            {c}
+          </li>
+        ))}
+      </ul>
+      <p className="project-cep">
+        <span className="figure-label">Clean energy link:</span> {s.cepLink}
+      </p>
+      {s.href && <span className="tool-cta">Open simulator →</span>}
+    </>
+  )
+  // Upcoming cards are plain, non-interactive surfaces; only finished tools link out.
+  return s.href ? (
+    <a href={s.href} className="project-card linked">
+      {body}
+    </a>
+  ) : (
+    <div className="project-card">{body}</div>
+  )
+}
+
+function TopicGroups({ list }: { list: Subtopic[] }) {
+  return groupByTopic(list).map(({ topic, subtopics }) => (
+    <section key={topic.name} className="project-group" aria-label={topic.name}>
+      <h2 className="category-title">{topic.name}</h2>
+      <p className="topic-desc">{topic.description}</p>
+      <ul className="project-grid">
+        {subtopics.map((s) => (
+          <li key={s.id}>
+            <SubtopicCard s={s} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))
+}
 
 type TabId = 'tools' | 'upcoming'
-const TABS: { id: TabId; label: string }[] = [
-  { id: 'tools', label: 'Tools' },
-  { id: 'upcoming', label: 'Upcoming Projects' },
+interface Tab {
+  id: TabId
+  label: string
+  list: Subtopic[]
+}
+// The Upcoming Projects tab disappears once every subtopic has a page.
+const ALL_TABS: Tab[] = [
+  { id: 'tools', label: 'Tools', list: TOOLS },
+  { id: 'upcoming', label: 'Upcoming Projects', list: UPCOMING },
 ]
+const TABS = ALL_TABS.filter((t) => t.list.length > 0)
 
 // The active tab lives in the URL hash so "#upcoming" can be linked directly; anything else is "tools".
-const tabFromHash = (): TabId => (window.location.hash === '#upcoming' ? 'upcoming' : 'tools')
+const tabFromHash = (): TabId =>
+  window.location.hash === '#upcoming' && TABS.some((t) => t.id === 'upcoming') ? 'upcoming' : 'tools'
 
 export default function HomePage() {
   const [tab, setTab] = useState<TabId>(tabFromHash)
@@ -148,59 +203,49 @@ export default function HomePage() {
         </p>
       </header>
 
-      <div className="tab-bar" role="tablist" aria-label="Homepage sections">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            ref={(el) => {
-              tabRefs.current[t.id] = el
-            }}
-            type="button"
-            role="tab"
-            id={`tab-${t.id}`}
-            aria-selected={tab === t.id}
-            aria-controls={`panel-${t.id}`}
-            tabIndex={tab === t.id ? 0 : -1}
-            className="tab"
-            onClick={() => select(t.id)}
-            onKeyDown={onTabKey}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      <div role="tabpanel" id="panel-tools" aria-labelledby="tab-tools" hidden={tab !== 'tools'} className="tab-panel">
-        <section aria-labelledby="tools-title">
-          <h2 id="tools-title" className="section-title">
-            Simulators
-          </h2>
-          <ul className="tool-list">
-            {TOOLS.map((t) => (
-              <li key={t.id}>
-                <a href={t.href} className="tool-card">
-                  {ICONS[t.id] ?? svg(<path d="M6 42 V6 M6 42 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />)}
-                  <div>
-                    <h3>{t.title}</h3>
-                    <p>{t.description}</p>
-                    <span className="tool-cta">Open simulator →</span>
-                  </div>
-                </a>
-              </li>
+      {TABS.length > 1 ? (
+        <>
+          <div className="tab-bar" role="tablist" aria-label="Homepage sections">
+            {TABS.map((t) => (
+              <button
+                key={t.id}
+                ref={(el) => {
+                  tabRefs.current[t.id] = el
+                }}
+                type="button"
+                role="tab"
+                id={`tab-${t.id}`}
+                aria-selected={tab === t.id}
+                aria-controls={`panel-${t.id}`}
+                tabIndex={tab === t.id ? 0 : -1}
+                className="tab"
+                onClick={() => select(t.id)}
+                onKeyDown={onTabKey}
+              >
+                {t.label}
+              </button>
             ))}
-          </ul>
-        </section>
-      </div>
+          </div>
 
-      <div
-        role="tabpanel"
-        id="panel-upcoming"
-        aria-labelledby="tab-upcoming"
-        hidden={tab !== 'upcoming'}
-        className="tab-panel"
-      >
-        <UpcomingProjects />
-      </div>
+          {TABS.map((t) => (
+            <div
+              key={t.id}
+              role="tabpanel"
+              id={`panel-${t.id}`}
+              aria-labelledby={`tab-${t.id}`}
+              hidden={tab !== t.id}
+              className="tab-panel"
+            >
+              <TopicGroups list={t.list} />
+            </div>
+          ))}
+        </>
+      ) : (
+        // Every subtopic has a page: show the tools on their own, without a tab bar.
+        <div className="tab-panel">
+          <TopicGroups list={TOOLS} />
+        </div>
+      )}
     </article>
   )
 }

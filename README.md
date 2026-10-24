@@ -4,7 +4,9 @@ Interactive educational tools for **Interface Engineering in Clean Energy Proces
 
 Live site: <https://snezhanatuneska-maker.github.io/interface-lab/>
 
-The homepage lists the live tools; the Upcoming Projects tab shows the tools being built next and the full roadmap.
+The homepage groups the tools by course topic. The Tools tab lists the finished pages; the Upcoming Projects tab lists
+the subtopics that do not have a page yet (and disappears once every subtopic has one). Both are built from
+`src/data/subtopics.ts`: to publish a new page, add its route as `href` there and it moves to Tools by itself.
 The first tool is a **Langmuir vs BET adsorption** simulator for bachelor students:
 
 - An animated **molecular view**: a kinetic simulation where gas molecules fly with Maxwell–Boltzmann speeds and
@@ -85,7 +87,7 @@ src/App.tsx                      Site layout: header, hash routing (#/, #/adsorp
 src/siteConfig.ts                Course name shown in the footer
 src/design-tokens.css            Colours, type scale and spacing (light and dark)
 src/index.css                    Global and component styles
-src/data/upcomingProjects.ts     Every tool on the homepage (live and planned) in one list
+src/data/subtopics.ts            Course topics and every subtopic on the homepage (with href = finished page)
 src/pages/HomePage.tsx           Homepage: Tools and Upcoming Projects tabs
 src/pages/AdsorptionPage.tsx     Langmuir vs BET page: simulation, isotherm and controls
 src/pages/adsorption/            Sections of that page: Try this, equations, BET plot and surface area,
@@ -96,7 +98,6 @@ src/components/Plot.tsx          Loads Plotly on demand, with a same-size "Loadi
 src/components/PlotlyPlot.tsx    Plotly component (uses the smaller "basic" Plotly bundle)
 src/components/Tex.tsx           KaTeX equation component
 src/components/ThemeToggle.tsx   Light/dark switch in the header
-src/components/UpcomingProjects.tsx  Upcoming Projects tab
 src/pages/SurfactantPage.tsx     Surfactants & CMC page; its sections live in src/pages/surfactants/
 src/pages/WettingPage.tsx        Wetting page; its sections (droplet, theory, Try this) live in src/pages/wetting/
 src/pages/VdwPage.tsx            Van der Waals page; its sections (cards, quiz) live in src/pages/vdw/
