@@ -23,7 +23,7 @@ export const ZismanTheory: React.FC = () => {
         <div className="space-y-2">
           <h4 className="font-semibold text-gray-900 text-base">Teflon & Low Energy Surfaces</h4>
           <p>
-            Fluoropolymers like PTFE (Teflon) feature dense <span className="font-mono">-CF<sub>2</sub>-</span> groups, creating exceptionally low surface energy ($\gamma_c \approx 18\text{ mN/m}$) that repels water completely.
+            Fluoropolymers like PTFE (Teflon) feature dense <span className="font-mono">-CF<sub>2</sub>-</span> groups, creating exceptionally low surface energy (<span className="font-serif italic">&gamma;<sub>c</sub></span> &approx; 18 mN/m) that repels water completely.
           </p>
         </div>
       </div>
