@@ -185,10 +185,11 @@ export const PROJECTS: Project[] = [
     title: 'Phase Separation: Nucleation vs Spinodal Decomposition',
     category: 'Nucleation & Growth',
     description:
-      'Nucleation vs spinodal decomposition across the phase diagram.',
+      'Drag a mixture across the phase diagram: nucleation or spinodal decomposition?',
     concepts: ['Binodal', 'Spinodal', 'Metastable region', 'Supersaturation'],
-    cepLink: 'Microstructure formation in membranes and precipitated materials.',
-    status: 'planned',
+    cepLink: 'Microstructure formation in membranes, battery electrodes and precipitated materials.',
+    status: 'live',
+    href: '#/phase-separation',
   },
   {
     id: 'crystal-growth',
