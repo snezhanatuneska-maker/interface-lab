@@ -7,6 +7,13 @@ Live site: <https://snezhanatuneska-maker.github.io/interface-lab/>
 The homepage groups the tools by course topic. The Tools tab lists the finished pages; the Upcoming Projects tab lists
 the subtopics that do not have a page yet (and disappears once every subtopic has one). Both are built from
 `src/data/subtopics.ts`: to publish a new page, add its route as `href` there and it moves to Tools by itself.
+
+**Site navigation.** Every page has a side menu: a sticky sidebar on desktop, and on narrower screens a drawer opened
+from the ☰ button in the header (closed by Esc, the × button, the backdrop or following a link; the rest of the page
+is inert while it is open). It lists the finished pages grouped under the five course topics, highlights the current
+page, and ends with a Training section. It is built from `src/data/subtopics.ts` and `src/data/trainers.ts`, so a new
+page appears there by itself. The header links to the main site sections (`src/data/nav.ts`) and has the theme toggle.
+
 The first tool is a **Langmuir vs BET adsorption** simulator for bachelor students:
 
 - An animated **molecular view**: a kinetic simulation where gas molecules fly with Maxwell–Boltzmann speeds and
@@ -83,11 +90,15 @@ index.html                       HTML entry point (meta tags, theme set before f
 vite.config.ts                   Vite config (sets base: "/interface-lab/")
 public/                          favicon and og-image.png (link preview)
 src/main.tsx                     React entry
-src/App.tsx                      Site layout: header, hash routing (#/, #/adsorption, #/capillary, #/surfactants, #/wetting, #/van-der-waals, #/nucleation, …), footer
+src/App.tsx                      Site layout: header, side menu, hash routing (#/, #/adsorption, #/capillary, #/surfactants, #/wetting, #/van-der-waals, #/nucleation, …), footer
 src/siteConfig.ts                Course name shown in the footer
 src/design-tokens.css            Colours, type scale and spacing (light and dark)
 src/index.css                    Global and component styles
 src/data/subtopics.ts            Course topics and every subtopic on the homepage (with href = finished page)
+src/data/trainers.ts             Training-mode trainers (listed in the side menu's Training section)
+src/data/nav.ts                  Main site sections linked from the header
+src/components/SideMenu.tsx      Side menu: sticky sidebar on desktop, drawer on narrow screens
+src/lib/menu.ts                  Builds the side menu from subtopics and trainers; current-route check (tests: menu.test.ts)
 src/pages/HomePage.tsx           Homepage: Tools and Upcoming Projects tabs
 src/pages/AdsorptionPage.tsx     Langmuir vs BET page: simulation, isotherm and controls
 src/pages/adsorption/            Sections of that page: Try this, equations, BET plot and surface area,
