@@ -95,6 +95,9 @@ src/components/UpcomingProjects.tsx  Upcoming Projects tab
 src/pages/SurfactantPage.tsx     Surfactants & CMC page; its sections live in src/pages/surfactants/
 src/pages/WettingPage.tsx        Wetting page; its sections (droplet, theory, Try this) live in src/pages/wetting/
 src/pages/VdwPage.tsx            Van der Waals page; its sections (cards, quiz) live in src/pages/vdw/
+src/pages/CrystalPage.tsx        Crystal Growth & Shape page (#/crystal-growth); its sections (facet and DLA canvases,
+                                 G vs S plot, equations, quiz) live in src/pages/crystal/
+src/lib/crystal.ts               Facet geometry, Wulff shape, BCF/diffusion rate sketches (tests: crystal.test.ts)
 src/lib/vdw.ts                   Keesom, Debye, London coefficients, molecule presets, constants (tests: vdw.test.ts)
 src/lib/wetting.ts               Young, Wenzel, Cassie–Baxter, critical angle, presets (tests: wetting.test.ts)
 src/lib/surfactants.ts           CMC, surface tension and property models, all constants (tests: surfactants.test.ts)

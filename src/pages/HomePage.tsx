@@ -67,6 +67,12 @@ const ICONS: Record<string, ReactNode> = {
       <path className="series-1" d="M12 22 C18 34 26 39 44 41" strokeWidth="3" fill="none" />
     </>
   ),
+  'crystal-growth': svg(
+    <>
+      <path className="series-1" d="M14 8 H34 L40 14 V34 L34 40 H14 L8 34 V14 Z" strokeWidth="3" fill="none" />
+      <path className="series-2" d="M24 14 L34 24 L24 34 L14 24 Z" strokeWidth="2.5" fill="none" />
+    </>
+  ),
   'zeta-potential': svg(
     <>
       <path d="M6 38 H42" stroke="currentColor" strokeWidth="2.5" fill="none" />
