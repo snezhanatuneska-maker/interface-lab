@@ -39,6 +39,7 @@
 
   --gutter: var(--space-4);
   --content-width: 60rem; /* 960px */
+  --menu-width: 15rem; /* side menu on desktop */
   --radius-sm: 4px;
   --radius: 6px;
 
