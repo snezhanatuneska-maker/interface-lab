@@ -36,6 +36,10 @@ each is reproducible from the number shown above it. The trainers:
 - **Colloid Stability Training** (`#/training/colloids`): the Debye length κ⁻¹ from salt and valency, stable or
   coagulating from a DLVO curve, and the Schulze–Hardy rule CCC ∝ 1/z⁶.
 
+**About** (`#/about`, linked from the header and the footer): what the site is, who made it, the course it supports,
+the FAU Signal Processing Toolkit that inspired its structure, and links to the GitHub repository and Issues for
+feedback. The course details are marked `[TO CONFIRM]` until checked.
+
 The first tool is a **Langmuir vs BET adsorption** simulator for bachelor students:
 
 - An animated **molecular view**: a kinetic simulation where gas molecules fly with Maxwell–Boltzmann speeds and
@@ -112,18 +116,19 @@ index.html                       HTML entry point (meta tags, theme set before f
 vite.config.ts                   Vite config (sets base: "/interface-lab/")
 public/                          favicon and og-image.png (link preview)
 src/main.tsx                     React entry
-src/App.tsx                      Site layout: header, side menu, hash routing (#/, #/demos, #/training, #/training/bet, #/adsorption, #/capillary, #/surfactants, #/wetting, #/van-der-waals, #/nucleation, …), footer
-src/siteConfig.ts                Course name shown in the footer
+src/App.tsx                      Site layout: header, side menu, hash routing (#/, #/demos, #/training, #/about, #/training/bet, #/adsorption, #/capillary, #/surfactants, #/wetting, #/van-der-waals, #/nucleation, …), footer (with an About link)
+src/siteConfig.ts                Course name shown in the footer; GitHub repository URL (About page)
 src/design-tokens.css            Colours, type scale and spacing (light and dark)
 src/index.css                    Global and component styles
 src/data/subtopics.ts            Course topics and every subtopic on the homepage (href = finished page, chapter = lecture chapter)
 src/data/trainers.ts             Trainers, listed on #/training and in the side menu (tests: trainers.test.ts)
-src/data/nav.ts                  Main site sections linked from the header
+src/data/nav.ts                  Header links: Home, Demos, Training, About (tests: nav.test.ts)
 src/components/SideMenu.tsx      Side menu: sticky sidebar on desktop, drawer on narrow screens
 src/lib/menu.ts                  Builds the side menu from subtopics and trainers; current-route check (tests: menu.test.ts)
 src/pages/HomePage.tsx           Homepage: Tools and Upcoming Projects tabs
 src/pages/DemosPage.tsx          Demo library (#/demos): searchable, filterable cards of every finished page
 src/lib/demos.ts                 Demo search and topic filter, chip counts (tests: demos.test.ts)
+src/pages/AboutPage.tsx          About page (#/about)
 src/pages/TrainingPage.tsx       Training index (#/training): one card per trainer
 src/pages/training/              The trainer pages (BET, isotherms, wetting, colloids) and their figures
 src/components/training/         Training framework: Trainer (difficulty, streaks, keys, exam mode), Options,

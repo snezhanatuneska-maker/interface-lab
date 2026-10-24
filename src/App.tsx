@@ -21,6 +21,7 @@ const CrystalPage = lazy(() => import('./pages/CrystalPage'));
 const PhaseSeparationPage = lazy(() => import('./pages/PhaseSeparationPage'))
 const NucleationPage = lazy(() => import('./pages/NucleationPage'));
 const DemosPage = lazy(() => import('./pages/DemosPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
 const TrainingPage = lazy(() => import('./pages/TrainingPage'));
 const BetTrainerPage = lazy(() => import('./pages/training/BetTrainerPage'));
 const IsothermTrainerPage = lazy(() => import('./pages/training/IsothermTrainerPage'));
@@ -95,6 +96,10 @@ export default function App() {
           {route === '/demos' ? (
             <Suspense fallback={<p className="loading">Loading demos...</p>}>
               <DemosPage />
+            </Suspense>
+          ) : route === '/about' ? (
+            <Suspense fallback={<p className="loading">Loading...</p>}>
+              <AboutPage />
             </Suspense>
           ) : route === '/training' ? (
             <Suspense fallback={<p className="loading">Loading training...</p>}>
@@ -177,6 +182,7 @@ export default function App() {
       <footer className="site-footer" inert={menuOpen}>
         <div className="container wide">
           <span>{COURSE}</span>
+          <a href="#/about">About</a>
         </div>
       </footer>
     </div>
