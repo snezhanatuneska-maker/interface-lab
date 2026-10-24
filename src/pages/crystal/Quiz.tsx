@@ -156,7 +156,7 @@ export default function Quiz() {
           <Card key={q.title} q={q} picked={picks[i]} onPick={(p) => setPicks((ps) => ps.map((x, j) => (j === i ? p : x)))} />
         ))}
       </ol>
-      <div className="card quiz-score" aria-live="polite">
+      <div className="card crystal-score" aria-live="polite">
         {done ? (
           <>
             <p>

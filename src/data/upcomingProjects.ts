@@ -175,19 +175,21 @@ export const PROJECTS: Project[] = [
     category: 'Nucleation & Growth',
     description:
       'See how supersaturation and a surface set the nucleation barrier.',
-    concepts: ['ΔG = −(πd³/6V_m)·kT·ln S + πd²γ', 'Critical nucleus d*', 'Nucleation rate J', 'Shape factor f(θ)', 'Seeding'],
-    cepLink: 'Controlling nucleation sets the size and number of catalyst nanoparticles.',
-    status: 'planned',
+    concepts: ['ΔG = −(πd³/6V_m)·kT·ln S + πd²γ', 'Critical nucleus d*', 'Nucleation rate J', 'Shape factor f(θ)'],
+    cepLink: 'Where gas bubbles nucleate on electrolyser electrodes.',
+    status: 'live',
+    href: '#/nucleation',
   },
   {
     id: 'phase-separation',
     title: 'Phase Separation: Nucleation vs Spinodal Decomposition',
     category: 'Nucleation & Growth',
     description:
-      'Nucleation vs spinodal decomposition across the phase diagram.',
+      'Drag a mixture across the phase diagram: nucleation or spinodal decomposition?',
     concepts: ['Binodal', 'Spinodal', 'Metastable region', 'Supersaturation'],
-    cepLink: 'Microstructure formation in membranes and precipitated materials.',
-    status: 'planned',
+    cepLink: 'Microstructure formation in membranes, battery electrodes and precipitated materials.',
+    status: 'live',
+    href: '#/phase-separation',
   },
   {
     id: 'crystal-growth',

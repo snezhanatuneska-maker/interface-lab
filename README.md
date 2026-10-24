@@ -35,6 +35,11 @@ osmotic pressure, turbidity and self-diffusion around the CMC, controls for surf
 betaine, Custom), tail length, head type and NaCl, plus theory, equations and "Try this" questions. All constants
 and equations are in `src/lib/surfactants.ts`; values marked ESTIMATED there should be checked against course notes.
 
+The **Phase Separation** tool (`#/phase-separation`) contrasts nucleation and spinodal decomposition: drag a point
+on a regular-solution phase diagram (binodal, spinodal, three shaded regions) linked to G(x) with its common tangent
+and inflection points; side-by-side 1D concentration profiles (scripted nuclei vs a Cahn–Hilliard simulation); the
+nucleation barrier ΔG(d) with sliders for S and γ; CEP examples and an eight-question quiz with a score.
+
 The **Wetting & Contact Angle** tool (`#/wetting`) compares Young, Wenzel and Cassie–Baxter: pick one model at a
 time and see a droplet drawn to scale on a smooth surface, with liquid filling the grooves, or on trapped air, with a
 zoomed view of the contact area. θ_Y is set directly or from γ_SV, γ_SL, γ_LV; sliders for roughness r and solid
@@ -76,7 +81,7 @@ index.html                       HTML entry point (meta tags, theme set before f
 vite.config.ts                   Vite config (sets base: "/interface-lab/")
 public/                          favicon and og-image.png (link preview)
 src/main.tsx                     React entry
-src/App.tsx                      Site layout: header, hash routing (#/, #/adsorption, #/capillary, #/surfactants, #/wetting, #/van-der-waals), footer
+src/App.tsx                      Site layout: header, hash routing (#/, #/adsorption, #/capillary, #/surfactants, #/wetting, #/van-der-waals, #/nucleation, …), footer
 src/siteConfig.ts                Course name shown in the footer
 src/design-tokens.css            Colours, type scale and spacing (light and dark)
 src/index.css                    Global and component styles
@@ -98,6 +103,10 @@ src/pages/VdwPage.tsx            Van der Waals page; its sections (cards, quiz) 
 src/pages/CrystalPage.tsx        Crystal Growth & Shape page (#/crystal-growth); its sections (facet and DLA canvases,
                                  G vs S plot, equations, quiz) live in src/pages/crystal/
 src/lib/crystal.ts               Facet geometry, Wulff shape, BCF/diffusion rate sketches (tests: crystal.test.ts)
+src/pages/PhaseSeparationPage.tsx  Nucleation vs spinodal page (#/phase-separation); sections in src/pages/phase/
+src/lib/phase.ts                 Regular solution, binodal/spinodal, Cahn–Hilliard, nucleation barrier (tests: phase.test.ts)
+src/pages/NucleationPage.tsx     Classical nucleation page; its sections (equations, cap sketch, theory, quiz) live in src/pages/nucleation/
+src/lib/nucleation.ts            ΔG(d), d*, ΔG*, shape factor f(θ), log rate (tests: nucleation.test.ts)
 src/lib/vdw.ts                   Keesom, Debye, London coefficients, molecule presets, constants (tests: vdw.test.ts)
 src/lib/wetting.ts               Young, Wenzel, Cassie–Baxter, critical angle, presets (tests: wetting.test.ts)
 src/lib/surfactants.ts           CMC, surface tension and property models, all constants (tests: surfactants.test.ts)

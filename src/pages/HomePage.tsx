@@ -73,6 +73,20 @@ const ICONS: Record<string, ReactNode> = {
       <path className="series-2" d="M24 14 L34 24 L24 34 L14 24 Z" strokeWidth="2.5" fill="none" />
     </>
   ),
+  'phase-separation': svg(
+    <>
+      <path d="M6 42 V6 M6 42 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />
+      <path className="series-1" d="M9 42 C11 20 18 10 25 10 S39 20 41 42" strokeWidth="3" fill="none" />
+      <path className="series-2" d="M16 42 C18 26 21 14 25 10 C29 14 32 26 34 42" strokeWidth="2" strokeDasharray="3 2" fill="none" />
+    </>
+  ),
+  'nucleation-cnt': svg(
+    <>
+      <path d="M6 6 V42 M6 26 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />
+      <path className="series-1" d="M6 26 C12 26 14 8 20 8 S28 30 34 40" strokeWidth="3" fill="none" />
+      <path className="series-2" d="M6 26 C12 26 14 20 20 20 S28 30 34 40" strokeWidth="3" fill="none" />
+    </>
+  ),
   'zeta-potential': svg(
     <>
       <path d="M6 38 H42" stroke="currentColor" strokeWidth="2.5" fill="none" />
