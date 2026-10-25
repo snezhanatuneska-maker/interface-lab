@@ -13,6 +13,7 @@ import { WETTING_BANK } from '../../data/practice/wetting'
 import { ZETA_BANK } from '../../data/practice/zeta'
 import { ZISMAN_BANK } from '../../data/practice/zisman'
 import { SURFACE_BANK } from '../../data/practice/surface'
+import { generateLennardJones, type LennardJonesData } from '../../lib/trainLennardJones'
 import { bankGenerator, isBank, mix, type BankData } from '../../lib/bank'
 import type { Generator, Problem } from '../../lib/training'
 import { generateBet, type BetData } from '../../lib/trainBet'
@@ -118,5 +119,9 @@ export const CONFIGS: Record<string, TrainerConfig> = {
   'surface-characterisation': {
     intro: 'SEM, AFM, and XPS resolution, cantilevers, and the photoelectric effect.',
     generate: withBank<SurfaceData>(generateSurface, SURFACE_BANK, 1),
+  },
+  'lennard-jones': {
+    intro: 'Tune ε and σ to explore the 12-6 potential well, equilibrium distance, and well depth.',
+    generate: generateLennardJones as Generator<unknown>,
   },
 }
