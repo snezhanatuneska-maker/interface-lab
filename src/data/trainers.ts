@@ -99,6 +99,14 @@ export const TRAINERS: Trainer[] = [
     description: 'Tune ε and σ to explore the 12-6 potential well, equilibrium distance, and well depth.',
     href: '#/training/lennard-jones',
   },
+  {
+    id: 'hamaker',
+    title: 'Hamaker Constant Training',
+    topic: 'Molecular & Macroscopic Interactions',
+    subtopic: 'hamaker-lifshitz',
+    description: 'A₁₃₂ from the combining relation, attraction or repulsion, and vdW energy for plane–plane and sphere–plane geometry.',
+    href: '#/training/hamaker',
+  },
   // ---------- Colloidal Systems ----------
   {
     id: 'edl',
