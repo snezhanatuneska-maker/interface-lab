@@ -103,6 +103,13 @@ const ICONS: Record<string, ReactNode> = {
       <circle cx="24" cy="21" r="3" className="series-2" fill="currentColor" />
     </>
   ),
+  'surface-explorer': svg(
+    <>
+      <path d="M6 42 V6 M6 42 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />
+      <path className="series-1" d="M6 20 C14 10 20 30 28 15 S38 25 44 12" strokeWidth="3" fill="none" />
+      <path className="series-2" d="M6 32 L44 32" strokeWidth="1.5" strokeDasharray="3 3" fill="none" />
+    </>
+  ),
 }
 
 const FALLBACK_ICON = svg(<path d="M6 42 V6 M6 42 H44" stroke="currentColor" strokeWidth="2.5" fill="none" />)
