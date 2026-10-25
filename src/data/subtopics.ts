@@ -122,6 +122,7 @@ export const SUBTOPICS: Subtopic[] = [
       'Tune ε and σ and see the potential well and force.',
     concepts: ['12-6 potential', 'Equilibrium distance', 'Well depth', 'Hard-sphere limit'],
     cepLink: 'The molecular basis of adhesion, adsorption and cohesion.',
+    href: '#/lennard-jones',
   },
   {
     id: 'van-der-waals',
