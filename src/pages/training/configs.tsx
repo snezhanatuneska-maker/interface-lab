@@ -115,4 +115,8 @@ export const CONFIGS: Record<string, TrainerConfig> = {
     intro: 'Which faces survive as a crystal grows, capping agents, BCF spirals and diffusion-limited growth.',
     generate: withBank<CrystalData>(generateCrystal, CRYSTAL_BANK, 1),
   },
+  surface-characterisation: {
+    intro: 'SEM, AFM, and XPS resolution, cantilevers, and the photoelectric effect.',
+    generate: withBank<SurfaceExplorerData>(generateSurfaceExplorer, SURFACE_BANK),
+  },    
 }
