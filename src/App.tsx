@@ -28,6 +28,7 @@ const TrainingPage = lazy(() => import('./pages/TrainingPage'));
 const TrainerPage = lazy(() => import('./pages/training/TrainerPage'));
 const MipsPage = lazy(() => import('./pages/mips/MipsPage').then((m) => ({ default: m.MipsPage })));
 const SurfaceExplorerPage = lazy(() => import('./pages/surface-explorer/SurfaceExplorerPage').then((m) => ({ default: m.SurfaceExplorerPage })));
+const LennardJonesPage = lazy(() => import('./pages/lennard-jones/LennardJonesPage').then((m) => ({ default: m.LennardJonesPage })));
 
 export default function App() {
   const route = useHashRoute();
@@ -124,6 +125,10 @@ export default function App() {
           ) : trainer ? (
             <Suspense fallback={<p className="loading">Loading trainer...</p>}>
               <TrainerPage id={trainer.id} />
+            </Suspense>
+          ) : route === '/lennard-jones' ? (
+            <Suspense fallback={<p className="loading">Loading simulator...</p>}>
+              <LennardJonesPage />
             </Suspense>
           ) : route === '/surface-characterisation' ? (
             <Suspense fallback={<p className="loading">Loading simulator...</p>}>
