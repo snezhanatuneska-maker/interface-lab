@@ -135,7 +135,7 @@ export default function App() {
             <Suspense fallback={<p className="loading">Loading simulator...</p>}>
               <SurfaceExplorerPage />
             </Suspense>
-          ) : route === '/hamaker' ? (
+          ) : route === '/hamaker-lifshitz' ? (
             <Suspense fallback={<p className="loading">Loading simulator...</p>}>
               <HamakerPage />
             </Suspense>
