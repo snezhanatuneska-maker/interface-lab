@@ -29,6 +29,7 @@ const TrainerPage = lazy(() => import('./pages/training/TrainerPage'));
 const MipsPage = lazy(() => import('./pages/mips/MipsPage').then((m) => ({ default: m.MipsPage })));
 const SurfaceExplorerPage = lazy(() => import('./pages/surface-explorer/SurfaceExplorerPage').then((m) => ({ default: m.SurfaceExplorerPage })));
 const LennardJonesPage = lazy(() => import('./pages/lennard-jones/LennardJonesPage').then((m) => ({ default: m.LennardJonesPage })));
+const HamakerPage = lazy(() => import('./pages/hamaker/HamakerPage').then((m) => ({ default: m.HamakerPage })));
 
 export default function App() {
   const route = useHashRoute();
@@ -133,6 +134,10 @@ export default function App() {
           ) : route === '/surface-characterisation' ? (
             <Suspense fallback={<p className="loading">Loading simulator...</p>}>
               <SurfaceExplorerPage />
+            </Suspense>
+          ) : route === '/hamaker' ? (
+            <Suspense fallback={<p className="loading">Loading simulator...</p>}>
+              <HamakerPage />
             </Suspense>
           ) : route === '/zisman' ? (
             <Suspense fallback={<p className="loading">Loading simulator...</p>}>
