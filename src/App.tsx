@@ -125,7 +125,7 @@ export default function App() {
             <Suspense fallback={<p className="loading">Loading trainer...</p>}>
               <TrainerPage id={trainer.id} />
             </Suspense>
-          ) : route === 'surface-characterisation' ? (
+          ) : route === '/surface-characterisation' ? (
             <Suspense fallback={<p className="loading">Loading simulator...</p>}>
               <SurfaceExplorerPage />
             </Suspense>
