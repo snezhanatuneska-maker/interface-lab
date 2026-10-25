@@ -142,6 +142,7 @@ export const SUBTOPICS: Subtopic[] = [
       'Pick two materials and a medium: attraction or repulsion?',
     concepts: ['Hamaker constant', 'A₁₃₂', 'Refractive index', 'Sphere–plane vs plane–plane geometry'],
     cepLink: 'Particle adhesion in electrode slurries and coatings.',
+    href: '#/hamaker-lifshitz',
   },
 
   // ---------- Colloidal Systems ----------
