@@ -31,6 +31,7 @@ import { generateZeta, type ZetaData } from '../../lib/trainZeta'
 import { generateZisman, type ZismanData } from '../../lib/trainZisman'
 import { generateSurface, type SurfaceData } from '../../lib/trainSurface'
 import { generateLennardJones } from '../../lib/trainLennardJones'
+import { generateHamaker } from '../../lib/trainHamaker'
 import { BetFigure, DlvoFigure, IsothermFigure, ZismanFigure } from './figures'
 
 // What each trainer (src/data/trainers.ts) asks: a generator, a line under its title, and the figure drawn above
@@ -123,5 +124,9 @@ export const CONFIGS: Record<string, TrainerConfig> = {
   'lennard-jones': {
     intro: 'Tune ε and σ to explore the 12-6 potential well, equilibrium distance, and well depth.',
     generate: generateLennardJones as Generator<unknown>,
+  },
+  'hamaker': {
+    intro: 'The Hamaker constant A₁₃₂ from the combining relation, whether two surfaces attract or repel across a medium, and the vdW energy for plane–plane and sphere–plane geometry.',
+    generate: generateHamaker as Generator<unknown>,
   },
 }
