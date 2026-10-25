@@ -11,13 +11,6 @@ export const generateSurface: Generator<SurfaceData> = (rng: Rng, difficulty: Di
   if (topic === 'sem') {
     const acceleratingVoltage = rng.pick([5, 10, 15, 20, 30]) // kV
     const workingDistance = rng.pick([4, 6, 8, 10]) // mm
-    
-    const { options, answer } = numericOptions(
-      rng,
-      0, // index of correct option
-      [1, 2, 3],
-      { format: (v) => ['Secondary electrons (SE)', 'Backscattered electrons (BSE)', 'Characteristic X-rays', 'Transmitted electrons'][v] }
-    )
 
     return {
       question: `In an SEM operating at an accelerating voltage of ${acceleratingVoltage} kV and a working distance of ${workingDistance} mm, what is the primary signal utilized for high-resolution surface topography imaging?`,
