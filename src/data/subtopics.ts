@@ -110,6 +110,7 @@ export const SUBTOPICS: Subtopic[] = [
       'Compare what SEM, AFM and XPS each see of one surface.',
     concepts: ['Lateral/vertical resolution', 'Cantilever and tip', 'Photoelectric effect', 'Information depth ~1–10 nm'],
     cepLink: 'How catalyst and electrode surfaces are characterised in practice.',
+    href: '#/surface-explorer',
   },
 
   // ---------- Molecular & Macroscopic Interactions ----------
