@@ -117,6 +117,6 @@ export const CONFIGS: Record<string, TrainerConfig> = {
   },
   surface-characterisation: {
     intro: 'SEM, AFM, and XPS resolution, cantilevers, and the photoelectric effect.',
-    generate: withBank<SurfaceExplorerData>(generateSurfaceExplorer, SURFACE_BANK),
-  },    
+    generate: withBank<SurfaceData>(generateSurface, SURFACE_BANK, 1),
+  },
 }
