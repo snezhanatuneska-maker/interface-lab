@@ -75,10 +75,10 @@ export const TRAINERS: Trainer[] = [
     href: '#/training/zisman',
   },
   {
-    id: 'surface-characterisation-training',
+    id: 'surface-characterisation',
     title: 'Surface Characterisation Training',
-    topic: 'Solid Interfaces', // Make sure this matches the topic you set in subtopics.ts
-    subtopic: 'surface-characterisation',
+    topic: 'Solid Interfaces',
+    subtopic: 'surface-characterisation', // <-- This MUST match s.id in subtopics.ts exactly!
     description: 'SEM, AFM, and XPS resolution, cantilevers, and the photoelectric effect.',
     href: '#/training/surface-characterisation',
   },
