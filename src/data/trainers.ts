@@ -74,6 +74,14 @@ export const TRAINERS: Trainer[] = [
     description: 'Find the critical surface tension γ_c from contact angles of test liquids.',
     href: '#/training/zisman',
   },
+  {
+    id: 'surface-characterisation-training',
+    title: 'Surface Characterisation Training',
+    topic: 'Solid Interfaces', // Make sure this matches the topic you set in subtopics.ts
+    subtopic: 'surface-characterisation',
+    description: 'SEM, AFM, and XPS resolution, cantilevers, and the photoelectric effect.',
+    href: '#/training/surface-characterisation',
+  },
   // ---------- Molecular & Macroscopic Interactions ----------
   {
     id: 'vdw',
