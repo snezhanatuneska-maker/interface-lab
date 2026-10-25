@@ -27,6 +27,7 @@ const AboutPage = lazy(() => import('./pages/AboutPage'));
 const TrainingPage = lazy(() => import('./pages/TrainingPage'));
 const TrainerPage = lazy(() => import('./pages/training/TrainerPage'));
 const MipsPage = lazy(() => import('./pages/mips/MipsPage').then((m) => ({ default: m.MipsPage })));
+const SurfaceExplorerPage = lazy(() => import('./pages/surface-explorer/SurfaceExplorerPage').then((m) => ({ default: m.SurfaceExplorerPage })));
 
 export default function App() {
   const route = useHashRoute();
@@ -123,6 +124,10 @@ export default function App() {
           ) : trainer ? (
             <Suspense fallback={<p className="loading">Loading trainer...</p>}>
               <TrainerPage id={trainer.id} />
+            </Suspense>
+          ) : route === 'surface-explorer' ? (
+            <Suspense fallback={<p className="loading">Loading simulator...</p>}>
+              <SurfaceExplorerPage />
             </Suspense>
           ) : route === '/zisman' ? (
             <Suspense fallback={<p className="loading">Loading simulator...</p>}>
