@@ -94,7 +94,7 @@ export const TRAINERS: Trainer[] = [
   {
     id: 'lennard-jones',
     title: 'Lennard-Jones Potential Training',
-    topic: 'Solid Interfaces',
+    topic: 'Molecular & Macroscopic Interactions',
     subtopic: 'lennard-jones',
     description: 'Tune ε and σ to explore the 12-6 potential well, equilibrium distance, and well depth.',
     href: '#/training/lennard-jones',
