@@ -1,6 +1,6 @@
 import type { Rng } from './random'
 import { labelled, numericOptions, round, type Difficulty, type Generator, type Step } from './training'
-import { cassieAngle, criticalAngle, FS_RANGE, R_RANGE, wenzelAngle, youngFromTensions } from './wetting'
+import { cassieAngle, criticalAngle, FS_RANGE, R_RANGE, THETA_RANGE, wenzelAngle, youngFromTensions } from './wetting'
 
 // Wetting training: contact angles from Young, Wenzel and Cassie–Baxter, and which rough-surface state is favoured.
 // Reuses src/lib/wetting.ts. Angles in degrees, tensions in mN/m.
@@ -26,6 +26,8 @@ const ASKS: Record<Difficulty, WettingAsk[]> = {
 }
 
 const RAD = Math.PI / 180
+/** Young angles on a smooth surface stop at about 120° (–CF₃ monolayers), as the wetting page says; in steps of 5°. */
+const MAX_STEP = THETA_RANGE[1] / 5
 const acosDeg = (c: number) => Math.acos(Math.min(1, Math.max(-1, c))) / RAD
 const deg = (v: number) => `${Math.round(v)}°`
 const angleOptions = {
@@ -62,7 +64,7 @@ export const generateWetting: Generator<WettingData> = (rng: Rng, difficulty: Di
       angleOptions,
     )
     const steps: Step[] = [
-      { text: 'Young’s equation balances the three tensions at the contact line:', tex: '\\gamma_{SV} = \\gamma_{SL} + \\gamma_{LV}\\cos\\theta_Y \;\\Rightarrow\; \\cos\\theta_Y = \\frac{\\gamma_{SV} - \\gamma_{SL}}{\\gamma_{LV}}' },
+      { text: 'Young’s equation balances the three tensions at the contact line:', tex: '\\gamma_{SV} = \\gamma_{SL} + \\gamma_{LV}\\cos\\theta_Y \\;\\Rightarrow\\;\\cos\\theta_Y = \\frac{\\gamma_{SV} - \\gamma_{SL}}{\\gamma_{LV}}' },
       { text: 'Insert the values:', tex: `\\cos\\theta_Y = \\frac{${gSV} - ${gSL}}{${gLV}} = ${cos.toFixed(3)}` },
       { text: `So θ_Y = arccos(${cos.toFixed(3)}) ≈ ${deg(theta)}: ${theta < 90 ? 'below 90°, the liquid wets the solid' : 'above 90°, the solid repels the liquid'}.` },
     ]
@@ -78,7 +80,7 @@ export const generateWetting: Generator<WettingData> = (rng: Rng, difficulty: Di
   if (ask === 'wenzel') {
     const r = round(rng.uniform(1.2, 2.5), 2)
     // Keep |r cos θ_Y| below 1, so the drop has an angle rather than spreading or balling up completely.
-    const allowed = Array.from({ length: 29 }, (_, i) => 20 + 5 * i).filter((t) => Math.abs(r * Math.cos(t * RAD)) < 0.95)
+    const allowed = Array.from({ length: MAX_STEP - 3 }, (_, i) => 20 + 5 * i).filter((t) => Math.abs(r * Math.cos(t * RAD)) < 0.95)
     const thetaY = rng.pick(allowed)
     const theta = wenzelAngle(thetaY, r)
     const { options, answer } = numericOptions(
@@ -102,7 +104,7 @@ export const generateWetting: Generator<WettingData> = (rng: Rng, difficulty: Di
   }
 
   if (ask === 'cassie') {
-    const thetaY = rng.int(19, 32) * 5
+    const thetaY = rng.int(19, MAX_STEP) * 5
     const fs = round(rng.uniform(FS_RANGE[0] + 0.05, 0.7), 2)
     const theta = cassieAngle(thetaY, fs)
     const c = Math.cos(thetaY * RAD)
@@ -128,7 +130,7 @@ export const generateWetting: Generator<WettingData> = (rng: Rng, difficulty: Di
   // Which state is favoured: compare θ_Y with the critical angle cos θ_c = (f_s − 1)/(r − f_s).
   let thetaY: number, r: number, fs: number, crit: number
   do {
-    thetaY = rng.int(19, 34) * 5
+    thetaY = rng.int(19, MAX_STEP) * 5
     r = round(rng.uniform(1.3, R_RANGE[1]), 2)
     fs = round(rng.uniform(0.1, 0.8), 2)
     crit = criticalAngle(r, fs)!
@@ -148,7 +150,7 @@ export const generateWetting: Generator<WettingData> = (rng: Rng, difficulty: Di
     answer,
     steps: [
       { text: 'The two states have equal energy when θ_Y equals the critical angle:', tex: '\\cos\\theta_c = \\frac{f_s - 1}{r - f_s}' },
-      { text: 'Insert the values:', tex: `\\cos\\theta_c = \\frac{${fs} - 1}{${r} - ${fs}} = ${cosc.toFixed(3)} \;\\Rightarrow\; \\theta_c \\approx ${Math.round(crit)}^\\circ` },
+      { text: 'Insert the values:', tex: `\\cos\\theta_c = \\frac{${fs} - 1}{${r} - ${fs}} = ${cosc.toFixed(3)} \\;\\Rightarrow\\;\\theta_c \\approx ${Math.round(crit)}^\\circ` },
       {
         text:
           state === 'cassie'

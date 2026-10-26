@@ -41,7 +41,7 @@ export const generateSurfactant: Generator<SurfactantData> = (rng: Rng, difficul
       options,
       answer,
       steps: [
-        { text: 'Klevens rule:', tex: `\\log_{10}\\mathrm{CMC} = A - B\\,n \;\\Rightarrow\; \\mathrm{CMC}_2 = \\mathrm{CMC}_1 \\times 10^{-B(n_2 - n_1)}` },
+        { text: 'Klevens rule:', tex: `\\log_{10}\\mathrm{CMC} = A - B\\,n \\;\\Rightarrow\\;\\mathrm{CMC}_2 = \\mathrm{CMC}_1 \\times 10^{-B(n_2 - n_1)}` },
         { text: 'Insert the values:', tex: `\\mathrm{CMC}_2 = ${fmtTex(cmc1, 2)}\\ \\mathrm{mM} \\times 10^{-${B} \\times (${dn})} = ${fmtTex(cmc2, 2)}\\ \\mathrm{mM}` },
         { text: `Each extra CH₂ makes leaving the water more favourable, so a longer tail lowers the CMC (×${fmt(10 ** -B, 2)} per CH₂ here).` },
       ],

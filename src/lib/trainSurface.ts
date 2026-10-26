@@ -1,5 +1,5 @@
 import type { Rng } from './random'
-import { fmt, fmtTex, numericOptions, round, type Difficulty, type Generator, type Problem } from './training'
+import { labelled, numericOptions, type Difficulty, type Generator, type Problem } from './training'
 
 export interface SurfaceData {
   topic: 'sem' | 'afm' | 'xps'
@@ -14,13 +14,12 @@ export const generateSurface: Generator<SurfaceData> = (rng: Rng, difficulty: Di
 
     return {
       question: `In an SEM operating at an accelerating voltage of ${acceleratingVoltage} kV and a working distance of ${workingDistance} mm, what is the primary signal utilized for high-resolution surface topography imaging?`,
-      options: [
+      ...labelled(rng, [
         'Secondary electrons (SE)',
         'Backscattered electrons (BSE)',
         'Characteristic X-rays',
         'Transmitted electrons'
-      ],
-      answer: 0,
+      ], 0),
       steps: [
         { text: 'Interaction volume and escape depth:' },
         { text: 'Secondary electrons originate from the top few nanometers of the sample surface, providing maximum topographic contrast.' }
@@ -32,13 +31,12 @@ export const generateSurface: Generator<SurfaceData> = (rng: Rng, difficulty: Di
 
     return {
       question: `An AFM cantilever features a nominal spring constant of ${springConstant} N/m. Which operational mode is best suited for soft biological or polymer samples to eliminate destructive lateral shear forces?`,
-      options: [
+      ...labelled(rng, [
         'TappingMode (Intermittent contact)',
         'Contact mode (Constant force)',
         'STM (Scanning Tunneling Mode)',
         'Direct scratching mode'
-      ],
-      answer: 0,
+      ], 0),
       steps: [
         { text: 'Force minimization principle:' },
         { text: 'TappingMode oscillates the tip vertically near resonance, reducing destructive lateral friction forces on soft or loosely bound substrates.' }
@@ -51,15 +49,18 @@ export const generateSurface: Generator<SurfaceData> = (rng: Rng, difficulty: Di
       { name: 'Al', hv: 1486.6 },
     ]) // eV, Kα lines
     const photonEnergy = source.hv
-    const bindingEnergy = round(rng.uniform(280, 650), 1)
-    const kineticEnergy = round(photonEnergy - bindingEnergy - 4.2, 1)
+    // Energies to 0.1 eV, as a spectrum would give them
+    const tenth = (v: number) => Math.round(v * 10) / 10
+    const bindingEnergy = tenth(rng.uniform(280, 650))
+    const kineticEnergy = tenth(photonEnergy - bindingEnergy - 4.2)
+    const eV = (v: number) => v.toFixed(1)
 
     const { options, answer } = numericOptions(
       rng,
       bindingEnergy,
       // took E_k as E_b; added Φ instead of subtracting it; took hν as E_b
       [kineticEnergy, photonEnergy - kineticEnergy + 4.2, photonEnergy],
-      { format: (v) => `${fmt(v, 1)} eV` }
+      { format: (v) => `${eV(v)} eV`, apart: (a, b) => Math.abs(a - b) >= 5 }
     )
 
     return {
@@ -68,7 +69,7 @@ export const generateSurface: Generator<SurfaceData> = (rng: Rng, difficulty: Di
       answer,
       steps: [
         { text: 'Photoelectric relation:', tex: `E_k = h\\nu - E_b - \\Phi \\;\\Rightarrow\\; E_b = h\\nu - E_k - \\Phi` },
-        { text: 'Substitute the given values:', tex: `E_b = ${fmtTex(photonEnergy)} - ${fmtTex(kineticEnergy)} - 4.2 = ${fmtTex(bindingEnergy)}\\ \\mathrm{eV}` }
+        { text: 'Substitute the given values:', tex: `E_b = ${eV(photonEnergy)} - ${eV(kineticEnergy)} - 4.2 = ${eV(bindingEnergy)}\\ \\mathrm{eV}` }
       ],
       data: { topic: 'xps' }
     }

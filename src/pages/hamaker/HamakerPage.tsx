@@ -14,7 +14,8 @@ interface Material {
 
 // Approximate textbook values (Israelachvili, Intermolecular and Surface Forces). All share one absorption
 // frequency ν_e, which suits dielectrics with n ≈ 1.3–1.8; high-index oxides such as TiO₂ absorb much lower in the UV,
-// so the single-ν_e formula would overestimate them several times and they are left out.
+// so the single-ν_e formula would overestimate them several times and they are left out. Polystyrene is left out
+// for the same reason: its aromatic rings absorb lower (ν_e ≈ 2.3 × 10¹⁵ Hz), and 3 × 10¹⁵ Hz gives about 30 % too much.
 const MATERIALS: Material[] = [
   { name: 'Vacuum / air', eps: 1.0, n: 1.0 },
   { name: 'Water', eps: 80, n: 1.333 },
@@ -22,7 +23,6 @@ const MATERIALS: Material[] = [
   { name: 'NMP (slurry solvent)', eps: 32, n: 1.47 },
   { name: 'Hexane', eps: 1.9, n: 1.375 },
   { name: 'PTFE (Teflon)', eps: 2.1, n: 1.35 },
-  { name: 'Polystyrene', eps: 2.55, n: 1.557 },
   { name: 'Silica (SiO₂)', eps: 3.8, n: 1.46 },
   { name: 'Mica', eps: 7.0, n: 1.58 },
   { name: 'Alumina (Al₂O₃)', eps: 10.0, n: 1.75 },

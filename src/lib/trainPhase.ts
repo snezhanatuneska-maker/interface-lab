@@ -38,7 +38,7 @@ export const generatePhase: Generator<PhaseData> = (rng: Rng, difficulty: Diffic
       options,
       answer,
       steps: [
-        { text: 'The spinodal is where the curvature of G vanishes:', tex: '\\frac{d^2G}{dx^2} = \\frac{1}{x(1-x)} - 2\\chi = 0 \;\\Rightarrow\; x(1-x) = \\frac{1}{2\\chi}' },
+        { text: 'The spinodal is where the curvature of G vanishes:', tex: '\\frac{d^2G}{dx^2} = \\frac{1}{x(1-x)} - 2\\chi = 0 \\;\\Rightarrow\\; x(1-x) = \\frac{1}{2\\chi}' },
         { text: 'Solve the quadratic:', tex: `x = \\tfrac12 - \\tfrac12\\sqrt{1 - 2/\\chi} = \\tfrac12 - \\tfrac12\\sqrt{1 - 2/${c}} = ${fmtTex(xs)}` },
         { text: `The binodal (common tangent) lies further out, at x ≈ ${xb.toFixed(3)}; between the two the mixture is metastable.` },
       ],

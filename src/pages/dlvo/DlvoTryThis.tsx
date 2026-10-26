@@ -41,9 +41,16 @@ export function DlvoTryThis() {
     const hs = Array.from({ length: N_POINTS + 1 }, (_, i) => 0.2 + ((hMax - 0.2) * i) / N_POINTS)
     return { hs, V: hs.map((h) => total(h, p)) }
   }, [saltConc, valency, psi0, hMax])
-  // Secondary minimum: the lowest point beyond the barrier (or beyond the first few nm when there is none).
+  // Secondary minimum: a true local minimum (V falls, then rises again) beyond the barrier. Without a barrier the
+  // curve rises monotonically towards 0, and its value at the plot edge is not a minimum.
   const peakIndex = curve.V.reduce((best, v, i) => (v > curve.V[best] ? i : best), 0)
-  const secondary = Math.min(0, ...curve.V.slice(Math.max(peakIndex, 10)))
+  let secondary = 0
+  if (b > 0)
+    for (let i = Math.max(peakIndex, 1); i < curve.V.length - 1; i++)
+      if (curve.V[i] < curve.V[i - 1] && curve.V[i] <= curve.V[i + 1]) {
+        secondary = Math.min(0, curve.V[i])
+        break
+      }
   const yTop = Math.max(25, 1.2 * b)
   const yBottom = -Math.max(15, 1.5 * Math.abs(secondary))
 
