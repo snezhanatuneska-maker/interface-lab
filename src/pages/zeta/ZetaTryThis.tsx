@@ -2,9 +2,18 @@ import { useEffect, useRef, useState } from 'react'
 import { Slider } from '../../components/Controls'
 import { useThemeColors } from '../../lib/themeColors'
 import { CANVAS_FONT, setupCanvas } from '../../lib/canvas'
+import { E0, EPS_BULK } from '../../lib/edl'
+import { ETA_WATER } from '../../lib/trainZeta'
 
 const W = 380
 const H = 260
+
+const ZETA_MAX = 60 // mV, plateau far from the IEP
+const ZETA_WIDTH = 3 // pH units over which ζ turns from one plateau to the other
+/** Rule of thumb for electrostatic stability. */
+const STABLE_ZETA = 30 // mV
+/** Smoluchowski: u = ε₀ε_r ζ / η, in µm·cm/(V·s) per mV (1 µm·cm/(V·s) = 10⁻⁸ m²/(V·s)): about 0.078. */
+const MOBILITY_PER_MV = (E0 * EPS_BULK * 1e-3) / ETA_WATER / 1e-8
 
 export function ZetaTryThis() {
   const [ph, setPh] = useState(7) // pH 2 to 12
@@ -12,11 +21,11 @@ export function ZetaTryThis() {
   const theme = useThemeColors()
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  // Zeta potential drops linearly away from IEP: zeta = -12 * (pH - iep)
-  const zetaPotential = (-12 * (ph - iep)).toFixed(1)
+  // Model oxide: ζ changes sign at the IEP and levels off at both ends (sigmoidal, as measured titration curves do).
+  const zetaPotential = (-ZETA_MAX * Math.tanh((ph - iep) / ZETA_WIDTH)).toFixed(1)
   const zetaNum = parseFloat(zetaPotential)
-  const mobility = (0.8 * zetaNum).toFixed(1) // scaled electrophoretic mobility
-  const isStable = Math.abs(zetaNum) > 25
+  const mobility = (MOBILITY_PER_MV * zetaNum).toFixed(2) // Smoluchowski, water at 25 °C
+  const isStable = Math.abs(zetaNum) > STABLE_ZETA
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -85,7 +94,7 @@ export function ZetaTryThis() {
             <dt>
               Electrophoretic Mobility (<em>u<sub>e</sub></em>)
             </dt>
-            <dd>{mobility} (µm/s)/(V/cm)</dd>
+            <dd>{mobility} µm·cm/(V·s)</dd>
           </div>
           <div>
             <dt>Dispersion State</dt>
@@ -120,7 +129,9 @@ export function ZetaTryThis() {
         />
       </div>
       <figcaption>
-        <span className="figure-label">Figure 1.</span> Interactive pH Titration Simulator
+        <span className="figure-label">Figure 1.</span> A model oxide with its IEP at pH 7 in an indifferent salt. The
+        mobility follows Smoluchowski (thin double layer, water at 25 °C): 1 µm·cm/(V·s) ≈ 12.8 mV. Stable here
+        means |ζ| &gt; {STABLE_ZETA} mV, a rule of thumb that depends on salt and particle size.
       </figcaption>
     </figure>
   )

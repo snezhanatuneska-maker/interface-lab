@@ -20,14 +20,21 @@ const LEGEND = [
   { color: 'var(--data-plot-bg)', label: 'vapor' },
 ]
 
+/** Height with a readable unit (µm to km); negative = capillary depression. */
+function fmtHeight(m: number): string {
+  const a = Math.abs(m)
+  const [v, unit] = a >= 1000 ? [m / 1000, 'km'] : a >= 1 ? [m, 'm'] : a >= 1e-3 ? [m * 1e3, 'mm'] : [m * 1e6, 'µm']
+  return `${Number(v.toPrecision(3)).toLocaleString('en')} ${unit}`
+}
+
 export default function CapillaryPage() {
   const [r, setR] = useState(R_DEFAULT)
   const [theta, setTheta] = useState(THETA_DEFAULT)
   const [mode, setMode] = useState<Mode>(MODE_DEFAULT)
 
   const pc = capillaryPressure(r, theta).toFixed(1)
-  const h = jurinHeight(r).toFixed(1)
-  const kelvin = kelvinRatio(r).toFixed(2)
+  const h = fmtHeight(jurinHeight(r, theta))
+  const kelvin = kelvinRatio(r, theta).toFixed(3)
 
   const reset = () => {
     setR(R_DEFAULT)
@@ -75,6 +82,7 @@ export default function CapillaryPage() {
             mode={mode}
             label={`Pore of radius ${r} nm, contact angle ${theta}°, ${mode}.`}
           />
+          <div>
           <dl className="results" aria-live="polite">
             <div>
               <dt>
@@ -86,7 +94,7 @@ export default function CapillaryPage() {
               <dt>
                 Jurin rise height (<em>h</em>)
               </dt>
-              <dd>{h} µm</dd>
+              <dd>{h}</dd>
             </div>
             <div>
               <dt>
@@ -95,6 +103,12 @@ export default function CapillaryPage() {
               <dd>{kelvin}</dd>
             </div>
           </dl>
+          <p className="note">
+            Water at 25 °C. The Jurin height is the formal value 2γ cos θ/(ρgr): in nanopores it is far beyond any real
+            column, because water cavitates long before such suction is reached.
+            {theta > 90 && ' With θ > 90° the pressure is negative: the liquid has to be pushed in, and no capillary condensation occurs below saturation.'}
+          </p>
+          </div>
         </div>
 
         <div className="figure-controls hero-controls">
@@ -129,6 +143,7 @@ export default function CapillaryPage() {
             step={1}
             pos={theta}
             onChange={setTheta}
+            hint={mode === 'imbibition' ? 'filling: use the advancing angle θ_A' : 'emptying: use the receding angle θ_R (< θ_A)'}
           />
           <div className="sim-buttons">
             <button type="button" className="button" onClick={reset}>
@@ -148,19 +163,27 @@ export default function CapillaryPage() {
         </h2>
         <h3>Jurin’s law &amp; height</h3>
         <p className="prose">
-          When a wetting liquid comes into contact with a narrow capillary, surface tension pulls the fluid upward. The
-          height (<em>h</em>) is inversely proportional to pore radius (<em>r</em>), meaning sub-micron pores generate
-          enormous suction heights.
+          When a wetting liquid (θ &lt; 90°) touches a narrow capillary, the curved meniscus pulls the liquid upward until
+          the hydrostatic pressure ρgh balances the capillary pressure. The height (<em>h</em>) is inversely proportional
+          to the radius (<em>r</em>): about 1.5 cm in a 1 mm tube, 15 m in a 1 µm pore. A non-wetting liquid (θ &gt;
+          90°) is pushed down instead.
         </p>
         <h3>Capillary condensation</h3>
         <p className="prose">
-          In mesopores, vapor condenses into liquid at relative pressures (P/P<sub>0</sub> &lt; 1) well below
-          saturation due to the negative curvature of the menisci, as described by the Kelvin equation.
+          In mesopores, vapor condenses into liquid at relative pressures below saturation (P/P<sub>0</sub> &lt; 1),
+          because the vapor pressure over a concave meniscus is lower than over a flat surface (Kelvin equation). The
+          smaller the pore, the lower the pressure at which it fills.
         </p>
-        <h3>Adsorption hysteresis</h3>
+        <h3>Two kinds of hysteresis</h3>
         <p className="prose">
-          The filling (imbibition) and emptying (drainage) pathways often follow different curves. This hysteresis loop
-          arises from contact angle advancing/receding differences and pore network geometry effects.
+          <strong>Imbibition and drainage.</strong> A liquid advancing into a pore meets the wall at the advancing
+          angle θ<sub>A</sub>; when it recedes, at the smaller receding angle θ<sub>R</sub>. Filling and emptying
+          therefore need different capillary pressures. Use the mode switch and set θ to θ<sub>A</sub> or θ<sub>R</sub>.
+        </p>
+        <p className="prose">
+          <strong>Sorption hysteresis.</strong> In capillary condensation the loop has other causes: a pore fills
+          through a cylindrical meniscus but empties through a hemispherical one (so at a lower p/p₀), condensation is
+          delayed by metastable films, and wide cavities behind narrow necks (ink bottles) only empty when the neck does.
         </p>
       </section>
 
@@ -171,11 +194,13 @@ export default function CapillaryPage() {
           Clean energy link: porous electrodes &amp; catalyst layers
         </h2>
         <p className="prose">
-          In hydrogen fuel cells and water electrolyzers, catalyst layers and gas diffusion layers (GDLs) consist of
-          complex nanoscale porous carbon networks. Managing capillary pressure (P<sub>c</sub>) is vital: if capillary
-          forces are too high, product water completely floods the pore network, starving the active sites of reactant
-          gases (O<sub>2</sub> or H<sub>2</sub>). Balancing pore size distribution optimizes liquid water removal while
-          preserving ionic conductivity.
+          In a PEM fuel cell the catalyst layer has pores of about 10–100 nm, while the gas diffusion layer (GDL)
+          below it is carbon paper with pores of about 10–100 µm, often with a microporous layer of about 0.1–1 µm in
+          between. Product water must leave without filling the pores that bring O<sub>2</sub> to the catalyst. GDLs
+          are therefore treated with PTFE so that θ &gt; 90°: P<sub>c</sub> turns negative and water only enters the
+          largest pores when pushed, leaving the rest open for gas. In a PEM water electrolyser the situation is the
+          reverse: water is the reactant and must wick to the anode, so its titanium transport layer is kept
+          hydrophilic, and the gas bubbles it produces have to escape through it.
         </p>
       </section>
     </article>

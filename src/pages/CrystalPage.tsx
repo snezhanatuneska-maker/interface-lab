@@ -350,7 +350,7 @@ export default function CrystalPage() {
               id="S"
               label={
                 <>
-                  Supersaturation <em>S</em> = <em>a</em>/<em>a</em>*
+                  Supersaturation <em>S</em> = <em>c</em>/<em>c</em>*
                 </>
               }
               value={S.toFixed(1)}
@@ -436,14 +436,16 @@ export default function CrystalPage() {
           <li>
             <strong>Fuel-cell catalysts.</strong> Pt-based nanocrystals catalyse the oxygen reduction reaction in PEM
             fuel cells, and their activity depends on which facets are exposed. Capping agents during synthesis slow
-            chosen faces, giving shapes such as octahedra that expose the more active {'{111}'} facets.{' '}
+            chosen faces, giving shapes such as Pt₃Ni octahedra whose {'{111}'} facets are especially active for oxygen reduction
+            (which facet is best depends on the alloy and the electrolyte: in sulfuric acid Pt{'{111}'} is the least active).{' '}
             <button type="button" className="link-button" onClick={showCapping}>
               Try it: cap the {'{11}'} faces in Tab 1
             </button>
           </li>
           <li>
             <strong>Lithium dendrites in batteries.</strong> At high charging current, Li deposition becomes
-            diffusion-limited and grows as branched dendrites, like Tab 2 at high S. A dendrite can pierce the
+            diffusion-limited and grows as branched, tip-growing dendrites, like Tab 2 at high S. (At low current lithium
+            can still grow as mossy or whisker deposits, pushed from the root through the SEI.) A dendrite can pierce the
             separator and short the cell.{' '}
             <button type="button" className="link-button" onClick={showDendrites}>
               Try it: high S in Tab 2

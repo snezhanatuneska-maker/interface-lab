@@ -7,9 +7,9 @@ export const ZismanInsight: React.FC = () => {
         <span>⚡</span> Clean Energy Link: Choosing Coatings and Membranes with the Right Wettability
       </h2>
       <p className="prose">
-        In proton-exchange membrane (PEM) fuel cells and water electrolyzers, gas diffusion layers (GDLs) must be impregnated with hydrophobic polymers like PTFE (Teflon) to maintain proper surface energy. 
-        If the critical surface tension is too high, liquid product water floods the porous electrode, cutting off oxygen (O<sub>2</sub>) and hydrogen (H<sub>2</sub>) supply. 
-        Engineered surface energy ensures optimal water management, balancing gas permeability with ionic conductivity.
+        In proton-exchange membrane (PEM) fuel cells, the gas diffusion layers (GDLs) are impregnated with PTFE to lower their surface energy.
+        If their critical surface tension were above that of water, product water would spread into the pores and block the oxygen (O<sub>2</sub>) supply to the cathode catalyst.
+        PEM water electrolysers need the opposite at the anode: water is the reactant there, so the titanium porous transport layer is kept hydrophilic, and the O<sub>2</sub> produced has to escape through it.
       </p>
     </section>
   );

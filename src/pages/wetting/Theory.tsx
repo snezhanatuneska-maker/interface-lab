@@ -30,7 +30,7 @@ export default function Theory() {
             <Term sym={String.raw`\theta_Y`}>Young contact angle</Term>
             <Term sym={String.raw`\gamma_{SV}`}>solid–vapor tension</Term>
             <Term sym={String.raw`\gamma_{SL}`}>solid–liquid tension</Term>
-            <Term sym={String.raw`\gamma_{LV}`}>liquid–vapor tension (water: 72.8 mN/m)</Term>
+            <Term sym={String.raw`\gamma_{LV}`}>liquid–vapor tension (water: 72.8 mN/m at 20 °C)</Term>
           </dl>
           <p className="note">The three tensions balance along the surface at the contact line.</p>
         </div>
@@ -63,7 +63,8 @@ export default function Theory() {
             <Term sym={String.raw`\theta_{CB}`}>apparent angle on the textured surface</Term>
             <Term sym="f_s">solid fraction under the drop (0–1); the rest is air</Term>
           </dl>
-          <p className="note">Less solid contact gives a higher angle. This is how lotus leaves reach &gt; 150°.</p>
+          <p className="note">Less solid contact gives a higher angle. This is how lotus leaves reach &gt; 150° with drops that roll
+            off.</p>
         </div>
       </div>
     </section>

@@ -58,7 +58,9 @@ export function CepRelation() {
       <p className="prose">
         In a water electrolyser for green hydrogen, H₂ and O₂ are produced at the electrodes and first dissolve, so
         the liquid next to the electrode becomes strongly supersaturated. Bubbles almost never form homogeneously in
-        the liquid: they nucleate heterogeneously on the electrode, at defects, pits and hydrophobic spots.
+        the liquid: they nucleate heterogeneously on the electrode, at defects, pits and hydrophobic spots. Often they
+        grow from tiny gas pockets already trapped in pits and scratches, which need no nucleation barrier at all;
+        classical nucleation on a flat surface would still need very high supersaturation.
       </p>
       <p className="prose">
         <strong>Mind the angle.</strong> In this tool θ is measured through the nucleus, here the gas. Wettability is

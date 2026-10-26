@@ -22,7 +22,7 @@ const COMPARE: [string, string, string][] = [
   ['Energy barrier?', 'Yes, ΔG*', 'None'],
   ['Composition change', 'Large and localized', 'Small and spread out at first'],
   ['Interface', 'Sharp from the start', 'Diffuse, sharpens later'],
-  ['Resulting structure', 'Isolated droplets', 'Interconnected network'],
+  ['Resulting structure', 'Isolated droplets', 'Interconnected network (near 50:50)'],
 ]
 
 export default function PhaseSeparationPage() {
@@ -37,8 +37,9 @@ export default function PhaseSeparationPage() {
         </a>
         <h1>Phase Separation: Nucleation vs Spinodal Decomposition</h1>
         <p className="lede">
-          A homogeneous mixture becomes unstable and splits into an x₁-rich and an x₂-rich phase. There are two ways
-          it can happen, and the phase diagram tells you which one occurs.
+          A homogeneous mixture is cooled into the two-phase region, where it becomes metastable or unstable and
+          splits into two phases of composition x₁ and x₂. There are two ways it can happen, and the phase diagram
+          tells you which one occurs.
         </p>
       </header>
 
@@ -108,12 +109,14 @@ export default function PhaseSeparationPage() {
         <ul className="why-list">
           <li>
             <strong>LiFePO₄ battery cathodes.</strong> During charging and discharging the material separates into
-            Li-rich and Li-poor phases. Fast cycling and small particles shift it between nucleation-type and
-            spinodal-type separation, which affects rate capability and stress.
+            Li-rich and Li-poor phases. In small nanoparticles and at fast cycling the separation can be suppressed
+            altogether: lithium enters along a solid-solution path instead, which lowers stress and helps the rate
+            capability.
           </li>
           <li>
-            <strong>Porous membranes by phase inversion.</strong> For separators and electrolyser or fuel-cell
-            membranes, the polymer solution is pushed into the two-phase region. Nucleation gives closed cellular pores;
+            <strong>Porous membranes by phase inversion.</strong> For porous separators and alkaline-electrolyser
+            diaphragms (e.g. Zirfon), the polymer solution is pushed into the two-phase region. (PEM membranes such
+            as Nafion are dense films and are made differently.) Nucleation gives closed cellular pores;
             spinodal decomposition gives an interconnected, bicontinuous pore network.
           </li>
           <li>

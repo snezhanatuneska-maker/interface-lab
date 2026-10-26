@@ -60,7 +60,7 @@ export default function RegimePlot({ S, theme }: { S: number; theme: ThemeColors
             ...baseLayout(theme),
             showlegend: false,
             margin: { l: 48, r: 12, t: 8, b: 44 },
-            xaxis: { ...axis(theme), title: { text: 'Supersaturation S = a/a*' }, range: [S_RANGE[0], S_RANGE[1] + 0.08] },
+            xaxis: { ...axis(theme), title: { text: 'Supersaturation S = c/c*' }, range: [S_RANGE[0], S_RANGE[1] + 0.08] },
             yaxis: { ...axis(theme), title: { text: 'Growth rate G (a.u.)' }, showticklabels: false, rangemode: 'tozero' },
             shapes,
           }}

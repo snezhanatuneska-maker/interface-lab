@@ -13,7 +13,7 @@ export const DLVO_BANK: BankQuestion[] = [
     question: 'How does the critical coagulation concentration (CCC) scale with counter-ion valency z (Schulze–Hardy rule)?',
     correct: 'CCC ∝ 1/z⁶',
     wrong: ['CCC is independent of z', 'CCC ∝ 1/z', 'CCC ∝ 1/z²'],
-    explanation: 'Multivalent counter-ions are far more effective coagulants: going from z = 1 to z = 2 lowers the CCC 64-fold.',
+    explanation: 'Multivalent counter-ions are far more effective coagulants: going from z = 1 to z = 2 lowers the CCC 64-fold. (This is the high-potential limit; at low surface potential DLVO gives a weaker 1/z².)',
   },
   {
     question: 'How do polymer chains anchored on particle surfaces provide steric stabilization?',

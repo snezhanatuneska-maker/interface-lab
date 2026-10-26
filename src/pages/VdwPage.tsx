@@ -407,8 +407,8 @@ export default function VdwPage() {
             cooling.
           </li>
           <li>
-            <strong>Physisorption.</strong> Storage in porous carbons or MOFs only works at cryogenic temperatures (~77
-            K).
+            <strong>Physisorption.</strong> Porous carbons and MOFs reach useful capacities only at cryogenic
+            temperatures (~77 K); at room temperature they hold about 1 wt% or less.
           </li>
         </ul>
         <p>

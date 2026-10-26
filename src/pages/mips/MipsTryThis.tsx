@@ -2,17 +2,30 @@ import { useEffect, useRef, useState } from 'react'
 import { Slider } from '../../components/Controls'
 import { useThemeColors } from '../../lib/themeColors'
 import { CANVAS_FONT, setupCanvas } from '../../lib/canvas'
+import { GAMMA_HG, THETA_HG } from '../../lib/trainMips'
 
 const W = 380
 const H = 240
+
+/** Washburn: −4γ cos θ in N/m, so d [nm] = WASHBURN / P [MPa] × 1000 (≈ 1486/P). */
+const WASHBURN = -4 * GAMMA_HG * Math.cos((THETA_HG * Math.PI) / 180)
+/** Smallest pore diameter (nm) mercury enters at P (MPa). */
+const entryDiameter = (P: number) => (WASHBURN / (P * 1e6)) * 1e9
+/** Pressure (MPa) needed to enter a pore of diameter d (nm). */
+const entryPressure = (d: number) => WASHBURN / (d * 1e-9) / 1e6
+/** Diameters of the drawn pores, nm. */
+const PORES = [45, 30, 20, 12, 6]
 
 export function MipsTryThis() {
   const [pressureMPa, setPressureMPa] = useState(20) // MPa
   const theme = useThemeColors()
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  const equivalentRadius = (1500 / pressureMPa).toFixed(1)
-  const intrusionPercentage = Math.min(100, Math.max(5, (pressureMPa / 200) * 100)).toFixed(0)
+  const dEntry = entryDiameter(pressureMPa)
+  // Share of the drawn pore volume that is filled: cylinders of equal length, so volume ∝ d².
+  const vol = (d: number) => d * d
+  const filled = PORES.filter((d) => pressureMPa >= entryPressure(d))
+  const intrusionPercentage = ((100 * filled.reduce((a, d) => a + vol(d), 0)) / PORES.reduce((a, d) => a + vol(d), 0)).toFixed(0)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -30,7 +43,7 @@ export function MipsTryThis() {
     ctx.lineWidth = 1
     ctx.strokeRect(20.5, 20.5, W - 41, H - 41)
 
-    const poreSizes = [45, 30, 20, 12, 6]
+    const poreSizes = PORES
     ctx.font = `11px ${CANVAS_FONT}`
     poreSizes.forEach((size, idx) => {
       const x = 50 + idx * 60
@@ -39,7 +52,7 @@ export function MipsTryThis() {
       ctx.fillStyle = theme.plotBg
       ctx.fillRect(x - size / 2, y, size, 110)
 
-      const thresholdPressure = 1500 / size
+      const thresholdPressure = entryPressure(size)
       const isIntruded = pressureMPa >= thresholdPressure
       if (isIntruded) {
         ctx.fillStyle = theme.axis
@@ -65,9 +78,10 @@ export function MipsTryThis() {
       <div className="hero-head">
         <div className="coverage">
           <span className="coverage-label">
-            Equivalent Entry Radius (<em>r</em>)
+            Smallest pore entered: diameter <em>d</em>
           </span>
-          <span className="coverage-value colloid">{equivalentRadius} nm</span>
+          <span className="coverage-value colloid">{dEntry.toFixed(1)} nm</span>
+          <span className="coverage-sub">radius r = {(dEntry / 2).toFixed(1)} nm</span>
         </div>
       </div>
 
@@ -76,17 +90,17 @@ export function MipsTryThis() {
           ref={canvasRef}
           className="sim-canvas"
           role="img"
-          aria-label={`Pores of 45 to 6 nm under a mercury reservoir at ${pressureMPa} MPa`}
+          aria-label={`Pores of 45 to 6 nm diameter under a mercury reservoir at ${pressureMPa} MPa`}
         />
         <dl className="results">
           <div>
-            <dt>Cumulative Volume Intrude</dt>
+            <dt>Drawn pore volume intruded</dt>
             <dd>{intrusionPercentage}%</dd>
           </div>
           <div>
             <dt>Washburn Mode</dt>
             <dd>
-              Non-Wetting (<em>θ &gt; 90°</em>)
+              Non-wetting: γ = {GAMMA_HG} N/m, θ = {THETA_HG}°
             </dd>
           </div>
         </dl>
@@ -111,7 +125,8 @@ export function MipsTryThis() {
         />
       </div>
       <figcaption>
-        <span className="figure-label">Figure 1.</span> Interactive MIP Intrusion Simulator
+        <span className="figure-label">Figure 1.</span> Five cylindrical pores (labels are diameters). A pore fills
+        once P exceeds its Washburn entry pressure; the intruded share counts each pore’s volume (∝ d²).
       </figcaption>
     </figure>
   )

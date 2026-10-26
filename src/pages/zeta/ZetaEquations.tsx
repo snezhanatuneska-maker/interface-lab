@@ -10,8 +10,16 @@ export function ZetaEquations() {
         <div className="card eq-card">
           <h3>Henry's / Smoluchowski Equation</h3>
           <p>
-            Relates particle electrophoretic mobility (<em>u<sub>e</sub></em>) directly to zeta potential (<em>ζ</em>):
+            Relates particle electrophoretic mobility (<em>u<sub>e</sub></em>) to zeta potential (<em>ζ</em>); ε =
+            ε₀ε<sub>r</sub> and η are the permittivity and viscosity of the liquid. Henry’s general form, with f(κa)
+            between 1 (Hückel, thick double layer, κa ≪ 1) and 1.5 (Smoluchowski, thin double layer, κa ≫ 1):
           </p>
+          <div className="formula">
+            <div className="formula-body">
+              <Tex display tex={String.raw`u_e = \frac{2\,\varepsilon\,\zeta}{3\,\eta}\,f(\kappa a)`} />
+            </div>
+          </div>
+          <p>For κa ≫ 1 (most particles in water) this becomes Smoluchowski:</p>
           <div className="formula">
             <div className="formula-body">
               <Tex display tex={String.raw`u_e = \frac{\varepsilon\,\zeta}{\eta}`} />
@@ -22,8 +30,8 @@ export function ZetaEquations() {
         <div className="card eq-card">
           <h3>Electrostatic Stabilization</h3>
           <p>
-            Particles remain stably dispersed in inks when electrostatic repulsion (high absolute <em>ζ</em>) overcomes
-            van der Waals attraction:
+            Particles remain stably dispersed when electrostatic repulsion (high absolute <em>ζ</em>) overcomes van der
+            Waals attraction. A common rule of thumb (it depends on salt concentration and particle size):
           </p>
           <div className="formula">
             <div className="formula-body">

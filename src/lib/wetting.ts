@@ -4,12 +4,13 @@ export type InputMode = 'angle' | 'tension'
 export type WetState = 'wenzel' | 'cassie'
 export type Wettability = 'hydrophilic' | 'hydrophobic' | 'superhydrophobic'
 
-export const THETA_RANGE: [number, number] = [0, 180]
+/** Young angle on a smooth surface: water never exceeds about 120° (–CF₃ monolayers). */
+export const THETA_RANGE: [number, number] = [0, 120]
 export const R_RANGE: [number, number] = [1, 3]
 export const FS_RANGE: [number, number] = [0.05, 1]
 export const GAMMA_RANGE: [number, number] = [0, 100]
 export const GAMMA_LV_RANGE: [number, number] = [20, 80]
-export const GAMMA_WATER = 72.8
+export const GAMMA_WATER = 72.8 // mN/m at 20 °C
 
 export const THETA_DEFAULT = 110
 export const R_DEFAULT = 1.5

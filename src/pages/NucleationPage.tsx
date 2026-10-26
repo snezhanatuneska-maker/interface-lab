@@ -307,7 +307,7 @@ export default function NucleationPage() {
                       range: [0, Math.log10(S_RANGE[1])],
                       tickvals: [1, 1.5, 2, 3, 5, 10, 20],
                     },
-                    yaxis: { ...axis(theme), title: { text: 'log₁₀ J' }, range: [RATE_FLOOR, LOG10_J0 + 3] },
+                    yaxis: { ...axis(theme), title: { text: 'log₁₀ (J / m⁻³ s⁻¹)' }, range: [RATE_FLOOR, LOG10_J0 + 3] },
                     shapes: [
                       { type: 'line', x0: S, x1: S, yref: 'paper', y0: 0, y1: 1, line: { color: COLORS.muted, width: 1.2, dash: 'dash' } },
                       { type: 'line', xref: 'paper', x0: 0, x1: 1, y0: 0, y1: 0, line: { color: COLORS.muted, width: 1, dash: 'dot' } },
@@ -409,7 +409,7 @@ export default function NucleationPage() {
             kT; dots mark the barriers at d*. Top right: the nucleus as a spherical cap on the substrate (dashed: the
             full sphere) and the shape factor f(θ). Bottom: log₁₀ of the nucleation rate against S (log scale), with
             the same illustrative prefactor J₀ = 10³⁰ for both cases, so only the exponential term is compared. Fixed:
-            V<sub>m</sub> = 3 × 10⁻²⁹ m³. For the cap, d is the diameter of the sphere it is cut from.
+            v<sub>m</sub> = 3 × 10⁻²⁹ m³. For the cap, d is the diameter of the sphere it is cut from.
           </figcaption>
         </figure>
       </section>

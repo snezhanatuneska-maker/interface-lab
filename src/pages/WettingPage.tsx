@@ -95,8 +95,9 @@ export default function WettingPage() {
         <h1>Wetting &amp; Contact Angle: Young, Wenzel, Cassie–Baxter</h1>
         <p className="lede">
           The contact angle θ is the angle between the solid and the liquid surface, measured through the drop, where
-          they meet. θ &lt; 90° is hydrophilic (the liquid wets), θ &gt; 90° is hydrophobic, and θ &gt; 150° is
-          superhydrophobic.
+          they meet. θ &lt; 90° is hydrophilic (the liquid wets), θ &gt; 90° is hydrophobic, and θ &gt; 150° with low
+          contact-angle hysteresis (drops roll off at a tilt of less than about 10°) is superhydrophobic. A smooth
+          surface never gets water above about 120°: higher angles need roughness.
         </p>
       </header>
 
@@ -156,7 +157,17 @@ export default function WettingPage() {
                 </>
               )}
             </p>
-            <p>Wenzel drops are “sticky” (pinned in the grooves); Cassie–Baxter drops roll off easily.</p>
+            <p>
+              Wenzel drops are “sticky” (pinned in the grooves); Cassie–Baxter drops roll off easily. The comparison
+              is of energies: below θ<sub>c</sub> a Cassie–Baxter state can still survive as a metastable state (the
+              lotus leaf is one), until a push or evaporation makes the liquid collapse into the grooves.
+            </p>
+            {view === 'cassie' && thetaY < 90 && (
+              <p>
+                With θ<sub>Y</sub> &lt; 90° no air stays trapped: the liquid wicks into the texture, so the
+                Cassie–Baxter angle shown here is not reached on a hydrophilic surface.
+              </p>
+            )}
           </div>
 
           <div className="figure-controls wet-controls">
@@ -182,6 +193,7 @@ export default function WettingPage() {
                 step={1}
                 pos={thetaSet}
                 onChange={setThetaSet}
+                hint="smooth surfaces: at most about 120° for water"
               />
             ) : (
               <>
@@ -214,7 +226,7 @@ export default function WettingPage() {
                   step={0.1}
                   pos={gLV}
                   onChange={setGLV}
-                  hint="water: 72.8 mN/m"
+                  hint="water: 72.8 mN/m at 20 °C"
                 />
                 <p className={`wet-young${young.limit ? ' limit' : ''}`} aria-live="polite">
                   {young.limit ? (

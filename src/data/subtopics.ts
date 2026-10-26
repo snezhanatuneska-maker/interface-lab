@@ -77,7 +77,7 @@ export const SUBTOPICS: Subtopic[] = [
     topic: 'Liquid Interfaces',
     description: 'Push mercury into pores and get the pore-size distribution.',
     concepts: ['Washburn equation', 'Non-wetting intrusion', 'Pore-size distribution'],
-    cepLink: 'Standard method for characterising fuel-cell catalyst layers.',
+    cepLink: 'A common method for characterising fuel-cell gas diffusion and catalyst layers.',
     href: '#/mips',
   },
 
@@ -162,7 +162,7 @@ export const SUBTOPICS: Subtopic[] = [
     topic: 'Colloidal Systems',
     description:
       'Titrate pH to find the isoelectric point.',
-    concepts: ['Slipping plane', 'Electrophoretic mobility', 'IEP = PZC', 'Potential-determining ions'],
+    concepts: ['Slipping plane', 'Electrophoretic mobility', 'IEP vs PZC', 'Potential-determining ions'],
     cepLink: 'Controlling dispersion of catalyst and electrode particles.',
     href: '#/zeta',
   },
@@ -184,7 +184,7 @@ export const SUBTOPICS: Subtopic[] = [
     topic: 'Nucleation & Growth',
     description:
       'See how supersaturation and a surface set the nucleation barrier.',
-    concepts: ['ΔG = −(πd³/6V_m)·kT·ln S + πd²γ', 'Critical nucleus d*', 'Nucleation rate J', 'Shape factor f(θ)'],
+    concepts: ['ΔG = −(πd³/6v_m)·kT·ln S + πd²γ', 'Critical nucleus d*', 'Nucleation rate J', 'Shape factor f(θ)'],
     cepLink: 'Where gas bubbles nucleate on electrolyser electrodes.',
     href: '#/nucleation',
   },

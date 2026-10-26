@@ -65,6 +65,8 @@ const CARDS: Card[] = [
     meaning: (
       <>
         Freely rotating dipoles, angle-averaged. Falls as <strong>1/T</strong>: thermal motion spoils the alignment.
+        Valid only while the dipole–dipole energy μ₁μ₂/(4πε₀r³) is below kT; closer in (e.g. water at 0.4 nm) the
+        dipoles lock together and the formula overestimates.
       </>
     ),
   },
@@ -73,10 +75,11 @@ const CARDS: Card[] = [
     title: 'Debye',
     kind: 'permanent dipole – induced dipole',
     sketch: DEBYE,
-    tex: String.raw`\varphi = -\frac{\mu^2\,\alpha_0}{(4\pi\varepsilon_0)^2\,r^6}`,
+    tex: String.raw`\varphi = -\frac{2\,\mu^2\,\alpha_0}{(4\pi\varepsilon_0)^2\,r^6}`,
     meaning: (
       <>
         A dipole polarizes its neighbour. The induced dipole follows it, so it is <strong>temperature-independent</strong>.
+        For two identical molecules each polarizes the other, hence the 2 (in general μ₁²α₀₂ + μ₂²α₀₁).
       </>
     ),
   },

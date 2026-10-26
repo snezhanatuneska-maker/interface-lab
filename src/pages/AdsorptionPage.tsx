@@ -398,7 +398,9 @@ export default function AdsorptionPage() {
         </p>
         <p>
           <strong className="bet-ink">BET:</strong> molecules also stack on each other. The first layer binds more
-          strongly, so it fills first: that is the knee at B. Near p₀ the gas condenses and the stacks keep growing.
+          strongly, so it fills first: that is the knee. B marks one monolayer’s worth (V = V<sub>m</sub>); for large C
+          this is close to the start of the straight middle part, the classic point B. Near p₀ the gas condenses and the
+          stacks keep growing.
         </p>
       </section>
 

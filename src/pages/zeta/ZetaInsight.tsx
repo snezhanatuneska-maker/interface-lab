@@ -5,12 +5,12 @@ export function ZetaInsight() {
         ⚡ Clean Energy Link: Controlling Dispersion of Catalyst & Electrode Particles
       </h2>
       <p className="prose">
-        In manufacturing proton-exchange membrane fuel cells (PEMFCs) and water electrolyzers, platinum-on-carbon
-        catalyst nanoparticles must be dispersed uniformly in solvent inks. Managing zeta potential (P<sub>c</sub> and
-        ζ) is vital: if the pH of the ink is near the isoelectric point (IEP), zero zeta potential causes severe particle
-        agglomeration, starving active sites of reactant gases (O<sub>2</sub> or H<sub>2</sub>). Tuning ink pH ensures
-        high positive or negative zeta potential, stabilizing the suspension for uniform, high-efficiency electrode
-        coating.
+        For proton-exchange membrane fuel cells (PEMFCs) and water electrolyzers, catalyst particles (Pt on carbon,
+        IrO<sub>2</sub>) are dispersed in water–alcohol inks with ionomer before coating. Agglomerated particles give
+        an uneven catalyst layer and bury active surface, lowering the electrochemically active area. In these inks the
+        adsorbed ionomer charges and sterically shields the particles (electrosteric stabilisation), and zeta-potential
+        measurements are used to judge how well the ink is dispersed: |ζ| well above zero means stable, ζ near zero
+        means agglomeration. For oxide particles in water, the pH relative to the IEP is the main handle.
       </p>
     </section>
   )

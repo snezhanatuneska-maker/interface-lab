@@ -39,7 +39,7 @@ export default function Equations() {
         <Formula n={3} tex={String.raw`R = \frac{3\alpha}{\beta}\,\rho_c\,G`} />
         <Formula
           n={4}
-          tex={String.raw`\begin{aligned} G &= \frac{\beta}{3\alpha}\,\frac{Sh\,D_{AB}\,M}{\rho_c\,x} \\ &\quad \times a^*\,(S - 1) \end{aligned}`}
+          tex={String.raw`\begin{aligned} G &= \frac{\beta}{3\alpha}\,\frac{Sh\,D_{AB}\,M}{\rho_c\,x} \\ &\quad \times c^*\,(S - 1) \end{aligned}`}
         />
         <dl className="terms">
           <Term sym="x">characteristic crystal size (m)</Term>
@@ -52,8 +52,8 @@ export default function Equations() {
           <Term sym="Sh">Sherwood number, k·x/D<sub>AB</sub> (k = mass-transfer coefficient); stirring raises it</Term>
           <Term sym={String.raw`D_{AB}`}>diffusion coefficient of solute A in solvent B, m²/s</Term>
           <Term sym="M">molar mass of the solute, kg/mol</Term>
-          <Term sym={String.raw`a^*`}>equilibrium (saturation) activity of the solute, mol/m³</Term>
-          <Term sym={String.raw`S = a/a^*`}>supersaturation; growth needs S &gt; 1</Term>
+          <Term sym={String.raw`c^*`}>equilibrium (saturation) concentration of the solute, mol/m³</Term>
+          <Term sym={String.raw`S = c/c^*`}>supersaturation (strictly a ratio of activities, a/a*, which are dimensionless); growth needs S &gt; 1</Term>
         </dl>
         <p className="note">
           (4) is the diffusion-controlled case: G grows linearly with (S − 1) and with Sh, so stirring speeds it up.

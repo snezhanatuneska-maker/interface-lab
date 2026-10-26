@@ -52,6 +52,6 @@ export const CRYSTAL_BANK: BankQuestion[] = [
     question: 'Lithium dendrites in batteries form mainly when…',
     correct: 'the charging current is high and growth becomes diffusion-limited',
     wrong: ['the charging current is very low', 'the electrolyte is stirred', 'the electrode is perfectly smooth'],
-    explanation: 'At high current Li⁺ is used up at the surface faster than it diffuses in, so deposition is diffusion-limited and branches.',
+    explanation: 'At high current Li⁺ is used up at the surface faster than it diffuses in, so deposition is diffusion-limited and grows as branched, tip-growing dendrites. (Mossy Li can still form at low current, but by a different, SEI-driven mechanism.)',
   },
 ]
