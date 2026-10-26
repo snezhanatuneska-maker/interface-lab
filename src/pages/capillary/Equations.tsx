@@ -46,7 +46,7 @@ export default function Equations() {
           <p className="note">
             V<sub>mol</sub>: molar volume of the liquid (water 18.07 cm³/mol); R: gas constant; T: temperature. The
             factor 2 is for a hemispherical meniscus (emptying); a pore filling through a cylindrical meniscus has
-            factor 1. In real pores an adsorbed film of thickness t lines the wall first, so the pore radius is r + t.
+            factor 1; the readout switches with the filling/emptying mode. In real pores an adsorbed film of thickness t lines the wall first, so the pore radius is r + t.
           </p>
         </div>
       </div>

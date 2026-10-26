@@ -29,9 +29,12 @@ export function jurinHeight(r: number, theta: number): number {
 }
 
 /**
- * Kelvin equation for a hemispherical meniscus of radius r/cos θ: p/p₀ = exp(−2γV_mol cos θ / (rRT)).
- * Below 1 for a wetting liquid (capillary condensation); above 1 for θ > 90° (no condensation below saturation).
+ * Kelvin equation, p/p₀ = exp(−kγV_mol cos θ / (rRT)). Emptying (drainage) goes through a hemispherical meniscus of
+ * radius r/cos θ, so k = 2; filling (imbibition) goes through a cylindrical meniscus along the wall (Cohan), so k = 1
+ * and the pore fills at a higher p/p₀ than it empties. Below 1 for a wetting liquid (capillary condensation); above 1
+ * for θ > 90° (no condensation below saturation).
  */
-export function kelvinRatio(r: number, theta: number): number {
-  return Math.exp((-2 * GAMMA * V_MOL * cosDeg(theta)) / (r * 1e-9 * R_GAS * T))
+export function kelvinRatio(r: number, theta: number, mode: Mode = 'drainage'): number {
+  const k = mode === 'imbibition' ? 1 : 2
+  return Math.exp((-k * GAMMA * V_MOL * cosDeg(theta)) / (r * 1e-9 * R_GAS * T))
 }

@@ -65,8 +65,9 @@ const CARDS: Card[] = [
     meaning: (
       <>
         Freely rotating dipoles, angle-averaged. Falls as <strong>1/T</strong>: thermal motion spoils the alignment.
-        Valid only while the dipole–dipole energy μ₁μ₂/(4πε₀r³) is below kT; closer in (e.g. water at 0.4 nm) the
-        dipoles lock together and the formula overestimates.
+        Valid only while the dipole–dipole energy μ₁μ₂/(4πε₀r³) is well below kT. For water at 0.4 nm it is already
+        about 1.3 kT, so the formula is only approximate there (it overestimates by roughly 10 %); much closer in, the
+        dipoles lock into alignment.
       </>
     ),
   },

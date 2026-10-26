@@ -94,9 +94,9 @@ export default function Equations() {
           <Term sym="n">number of sites where a nucleus can form (per volume, or per area on a surface)</Term>
         </dl>
         <p className="note">
-          The full form (left) is for homogeneous nucleation. The plot uses one constant prefactor J₀ = 10³⁰ m⁻³ s⁻¹ for both
-          cases: a simplification that compares only the exponential term, which is what changes by many orders of
-          magnitude.
+          The full form (left) is for homogeneous nucleation. The plot uses one constant prefactor J₀ = 10³⁰ for both cases (in
+          m⁻³ s⁻¹ for the bulk; a heterogeneous rate is really per area of substrate, m⁻² s⁻¹): a simplification that
+          compares only the exponential term, which is what changes by many orders of magnitude.
         </p>
       </div>
       <p className="callout">

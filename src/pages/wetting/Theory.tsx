@@ -30,7 +30,7 @@ export default function Theory() {
             <Term sym={String.raw`\theta_Y`}>Young contact angle</Term>
             <Term sym={String.raw`\gamma_{SV}`}>solid–vapor tension</Term>
             <Term sym={String.raw`\gamma_{SL}`}>solid–liquid tension</Term>
-            <Term sym={String.raw`\gamma_{LV}`}>liquid–vapor tension (water: 72.8 mN/m at 20 °C)</Term>
+            <Term sym={String.raw`\gamma_{LV}`}>liquid–vapor tension (water: 72.0 mN/m at 25 °C)</Term>
           </dl>
           <p className="note">The three tensions balance along the surface at the contact line.</p>
         </div>

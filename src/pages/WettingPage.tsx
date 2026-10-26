@@ -159,8 +159,8 @@ export default function WettingPage() {
             </p>
             <p>
               Wenzel drops are “sticky” (pinned in the grooves); Cassie–Baxter drops roll off easily. The comparison
-              is of energies: below θ<sub>c</sub> a Cassie–Baxter state can still survive as a metastable state (the
-              lotus leaf is one), until a push or evaporation makes the liquid collapse into the grooves.
+              is of energies: below θ<sub>c</sub> a Cassie–Baxter state can still survive as a metastable state, until a
+              push, drop impact or evaporation makes the liquid collapse into the grooves.
             </p>
             {view === 'cassie' && thetaY < 90 && (
               <p>
@@ -226,7 +226,7 @@ export default function WettingPage() {
                   step={0.1}
                   pos={gLV}
                   onChange={setGLV}
-                  hint="water: 72.8 mN/m at 20 °C"
+                  hint="water: 72.0 mN/m at 25 °C"
                 />
                 <p className={`wet-young${young.limit ? ' limit' : ''}`} aria-live="polite">
                   {young.limit ? (

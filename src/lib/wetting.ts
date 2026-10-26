@@ -10,7 +10,7 @@ export const R_RANGE: [number, number] = [1, 3]
 export const FS_RANGE: [number, number] = [0.05, 1]
 export const GAMMA_RANGE: [number, number] = [0, 100]
 export const GAMMA_LV_RANGE: [number, number] = [20, 80]
-export const GAMMA_WATER = 72.8 // mN/m at 20 °C
+export const GAMMA_WATER = 72.0 // mN/m at 25 °C, as on the capillary and surfactant pages
 
 export const THETA_DEFAULT = 110
 export const R_DEFAULT = 1.5

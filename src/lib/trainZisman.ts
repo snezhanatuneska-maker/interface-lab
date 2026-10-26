@@ -47,7 +47,7 @@ export const generateZisman: Generator<ZismanData> = (rng: Rng, difficulty: Diff
     steps: [
       { text: 'Zisman plot: cos θ falls roughly linearly with γ_LV. The fitted line is', tex: `\\cos\\theta = ${fmtTex(intercept)} ${slope < 0 ? '-' : '+'} ${fmtTex(Math.abs(slope))}\\,\\gamma_{LV}` },
       { text: 'γ_c is where the line reaches complete wetting, cos θ = 1:', tex: `\\gamma_c = \\frac{1 - ${fmtTex(intercept)}}{${fmtTex(slope)}} = ${fmtTex(gammaC)}\\ \\mathrm{mN/m}` },
-      { text: 'Liquids with γ_LV below γ_c spread completely on this solid.' },
+      { text: 'Liquids with γ_LV below γ_c spread completely on this solid. (The straight line strictly holds for non-polar liquids; polar test liquids such as water, glycerol and formamide scatter about it, so γ_c found with them is approximate.)' },
     ],
     data: { kind: 'zisman', gLV, theta, cos, slope, intercept, lineGiven, gammaC, trueGammaC },
   }

@@ -22,7 +22,7 @@ export const SurfaceExplorerQuiz: React.FC = () => {
         "D. Gas Adsorption Isotherms"
       ],
       correct: 1,
-      explanation: "Correct! AFM physically traces surface topography with a sharp cantilever tip, providing extraordinary vertical resolution."
+      explanation: "AFM physically traces surface topography with a sharp cantilever tip, providing extraordinary vertical resolution."
     },
     {
       id: 2,
@@ -36,7 +36,7 @@ export const SurfaceExplorerQuiz: React.FC = () => {
         "D. Electrostatic double-layer compression by salt"
       ],
       correct: 0,
-      explanation: "Correct! XPS bombards the sample with X-rays, ejecting core electrons via the photoelectric effect."
+      explanation: "XPS bombards the sample with X-rays, ejecting core electrons via the photoelectric effect."
     },
     {
       id: 3,
@@ -50,7 +50,7 @@ export const SurfaceExplorerQuiz: React.FC = () => {
         "D. Entire bulk thickness of the electrode"
       ],
       correct: 1,
-      explanation: "Correct! Because photoelectrons have short inelastic mean free paths in solids, XPS probes only the top ~1–10 nm."
+      explanation: "Because photoelectrons have short inelastic mean free paths in solids, XPS probes only the top ~1–10 nm."
     }
   ];
 

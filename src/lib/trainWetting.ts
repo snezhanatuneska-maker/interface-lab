@@ -37,7 +37,7 @@ const angleOptions = {
   fallback: (c: number, rng: Rng) => rng.shuffle([-40, -25, -15, 15, 25, 40]).concat([-60, 60, -80, 80]).map((d) => c + d),
 }
 
-/** Liquids with their surface tension γ_LV (mN/m, room temperature). */
+/** Liquids with their surface tension γ_LV (mN/m, 20 °C, a consistent tabulated set). */
 const LIQUIDS = [
   { name: 'water', gLV: 72.8 },
   { name: 'glycerol', gLV: 63.4 },

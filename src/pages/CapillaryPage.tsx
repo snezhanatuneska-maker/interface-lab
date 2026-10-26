@@ -34,7 +34,7 @@ export default function CapillaryPage() {
 
   const pc = capillaryPressure(r, theta).toFixed(1)
   const h = fmtHeight(jurinHeight(r, theta))
-  const kelvin = kelvinRatio(r, theta).toFixed(3)
+  const kelvin = kelvinRatio(r, theta, mode).toFixed(3)
 
   const reset = () => {
     setR(R_DEFAULT)
@@ -98,14 +98,16 @@ export default function CapillaryPage() {
             </div>
             <div>
               <dt>
-                Kelvin saturation (P/P<sub>0</sub>)
+                Kelvin saturation (P/P<sub>0</sub>), {mode === 'imbibition' ? 'filling' : 'emptying'}
               </dt>
               <dd>{kelvin}</dd>
             </div>
           </dl>
           <p className="note">
-            Water at 25 °C. The Jurin height is the formal value 2γ cos θ/(ρgr): in nanopores it is far beyond any real
-            column, because water cavitates long before such suction is reached.
+            Water at 25 °C. The Jurin height is the formal value 2γ cos θ/(ρgr): in a nanopore it only expresses the
+            suction as a water column; gravity plays no role at this scale, and no real pore is that long. Filling uses
+            a cylindrical meniscus (factor 1 in the Kelvin equation), emptying a hemispherical one (factor 2), so a pore
+            empties at a lower P/P<sub>0</sub> than it fills.
             {theta > 90 && ' With θ > 90° the pressure is negative: the liquid has to be pushed in, and no capillary condensation occurs below saturation.'}
           </p>
           </div>
@@ -165,7 +167,7 @@ export default function CapillaryPage() {
         <p className="prose">
           When a wetting liquid (θ &lt; 90°) touches a narrow capillary, the curved meniscus pulls the liquid upward until
           the hydrostatic pressure ρgh balances the capillary pressure. The height (<em>h</em>) is inversely proportional
-          to the radius (<em>r</em>): about 1.5 cm in a 1 mm tube, 15 m in a 1 µm pore. A non-wetting liquid (θ &gt;
+          to the radius (<em>r</em>): about 1.5 cm in a tube of 1 mm radius, 15 m in a pore of 1 µm radius. A non-wetting liquid (θ &gt;
           90°) is pushed down instead.
         </p>
         <h3>Capillary condensation</h3>

@@ -36,7 +36,8 @@ export function DlvoEquations() {
           </div>
           <p>
             This needs tanh(zeψ₀/4kT) ≈ 1. At low surface potential the same DLVO calculation gives CCC ∝ ψ₀⁴/z², a much
-            weaker valency effect. Set ψ₀ low or high in the simulator to see the difference.
+            weaker valency effect. In the simulator (ψ₀ = 10–100 mV) the ratio CCC(z = 1)/CCC(z = 2) therefore runs
+            from about 4 at 10 mV to about 24 at 100 mV; the full 64× is only approached at ψ₀ of 300 mV and more.
           </p>
         </div>
       </div>

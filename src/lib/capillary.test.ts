@@ -20,5 +20,7 @@ describe('capillary pore simulator', () => {
     expect(kelvinRatio(15, 21)).toBeCloseTo(0.937, 2)
     expect(kelvinRatio(50, 0)).toBeCloseTo(0.979, 2)
     expect(kelvinRatio(15, 120)).toBeGreaterThan(1)
+    // filling (cylindrical meniscus) has half the exponent: it fills at a higher p/p₀ than it empties
+    expect(Math.log(kelvinRatio(2, 0, 'imbibition'))).toBeCloseTo(Math.log(kelvinRatio(2, 0)) / 2, 9)
   })
 })
