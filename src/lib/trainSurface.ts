@@ -46,19 +46,24 @@ export const generateSurface: Generator<SurfaceData> = (rng: Rng, difficulty: Di
       data: { topic: 'afm' }
     }
   } else {
-    const photonEnergy = rng.pick([1253.6, 1486.6]) // eV (Mg or Al Ka)
+    const source = rng.pick([
+      { name: 'Mg', hv: 1253.6 },
+      { name: 'Al', hv: 1486.6 },
+    ]) // eV, Kα lines
+    const photonEnergy = source.hv
     const bindingEnergy = round(rng.uniform(280, 650), 1)
     const kineticEnergy = round(photonEnergy - bindingEnergy - 4.2, 1)
 
     const { options, answer } = numericOptions(
       rng,
       bindingEnergy,
-      [bindingEnergy + 25.5, photonEnergy - bindingEnergy, kineticEnergy + 4.2],
+      // took E_k as E_b; added Φ instead of subtracting it; took hν as E_b
+      [kineticEnergy, photonEnergy - kineticEnergy + 4.2, photonEnergy],
       { format: (v) => `${fmt(v, 1)} eV` }
     )
 
     return {
-      question: `In an XPS setup using an Al K$\alpha$ source ($h\\nu = ${photonEnergy}$ eV) with a spectrometer work function of 4.2 eV, a core-level photoelectron peak appears at a kinetic energy of ${kineticEnergy} eV. What is its binding energy ($E_b$)?`,
+      question: `In an XPS setup using an ${source.name} K$\\alpha$ source ($h\\nu = ${photonEnergy}$ eV) with a spectrometer work function of 4.2 eV, a core-level photoelectron peak appears at a kinetic energy of ${kineticEnergy} eV. What is its binding energy ($E_b$)?`,
       options,
       answer,
       steps: [
