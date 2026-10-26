@@ -128,6 +128,7 @@ export function DlvoTryThis() {
           <canvas
             ref={canvasRef}
             className="sim-canvas"
+            style={{ maxWidth: W, margin: '0 auto', display: 'block' }}
             role="img"
             aria-label={`Particles: ${isStable ? 'dispersed' : 'coagulated'}`}
           />
