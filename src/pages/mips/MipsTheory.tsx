@@ -23,7 +23,8 @@ export function MipsTheory() {
           <h3>Pore-Size Distribution</h3>
           <p>
             By recording cumulative mercury volume vs. applied pressure, porosimeters generate comprehensive pore-size
-            distributions, distinguishing macro-, meso-, and micro-pore networks.
+            distributions for macropores and mesopores. At the usual maximum of about 400 MPa mercury reaches pores of
+            about 3–4 nm diameter; micropores (&lt; 2 nm) need gas adsorption instead.
           </p>
         </div>
       </div>

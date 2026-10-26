@@ -19,6 +19,10 @@ export function MipsEquations() {
             </div>
             <span className="formula-number">(1)</span>
           </div>
+          <p className="note">
+            For a cylindrical pore of radius r (diameter d = 2r, so P = −4γ cos θ/d). Mercury: γ = 0.485 N/m and
+            θ ≈ 130–140° (140° assumed here), so cos θ &lt; 0 and P &gt; 0. Rule of thumb: d [nm] ≈ 1490/P [MPa].
+          </p>
         </div>
         <div className="card eq-card">
           <h3>Work of Intrusion</h3>

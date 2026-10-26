@@ -77,7 +77,7 @@ export const SUBTOPICS: Subtopic[] = [
     topic: 'Liquid Interfaces',
     description: 'Push mercury into pores and get the pore-size distribution.',
     concepts: ['Washburn equation', 'Non-wetting intrusion', 'Pore-size distribution'],
-    cepLink: 'Standard method for characterising fuel-cell catalyst layers.',
+    cepLink: 'A common method for characterising fuel-cell gas diffusion and catalyst layers.',
     href: '#/mips',
   },
 
