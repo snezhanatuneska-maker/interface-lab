@@ -55,67 +55,65 @@ export const SurfaceExplorerQuiz: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
-      <h3 className="text-2xl font-bold text-gray-900 border-b pb-3">Interactive Exercises & Knowledge Check</h3>
+    <section className="section" aria-labelledby="surface-quiz-title">
+      <h2 id="surface-quiz-title" className="section-title">Interactive Exercises & Knowledge Check</h2>
       
       {questions.map((q) => {
         const selected = answers[q.id];
         const revealed = showResults[q.id];
 
         return (
-          <div key={q.id} className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-gray-100 pb-3">
+          <div key={q.id} className="card quiz-card">
+            <div className="eq-head">
               <div>
-                <h4 className="font-bold text-gray-900 text-lg">
+                <h3>
                   {q.id}. {q.title}
-                </h4>
-                <p className="text-sm text-gray-600">{q.description}</p>
+                </h3>
+                <p className="note">{q.description}</p>
               </div>
               <button 
+                type="button"
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                className="text-xs bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium px-3 py-1.5 rounded-lg border border-gray-300 transition-colors shrink-0"
+                className="button"
               >
                 Set it up
               </button>
             </div>
 
-            <p className="font-medium text-sm text-gray-900 pt-1">{q.prompt}</p>
-
-            <div className="flex flex-col space-y-2">
+            <fieldset className="choices">
+              <legend>{q.prompt}</legend>
               {q.options.map((opt, optIdx) => {
-                let style = "w-full text-left p-3 rounded-lg border text-sm transition-all block ";
+                let state = "";
                 if (revealed) {
                   if (optIdx === q.correct) {
-                    style += "bg-emerald-50 border-emerald-400 text-emerald-900 font-medium";
+                    state = " correct";
                   } else if (optIdx === selected) {
-                    style += "bg-rose-50 border-rose-300 text-rose-900";
-                  } else {
-                    style += "bg-gray-50 border-gray-200 text-gray-500 opacity-60";
+                    state = " wrong";
                   }
-                } else {
-                  style += "bg-white hover:bg-gray-50 border-gray-200 text-gray-800";
                 }
 
                 return (
                   <button
                     key={optIdx}
+                    type="button"
+                    aria-pressed={selected === optIdx}
                     onClick={() => handleSelect(q.id, optIdx)}
-                    className={style}
+                    className={`choice${state}`}
                   >
                     {opt}
                   </button>
                 );
               })}
-            </div>
+            </fieldset>
 
             {revealed && (
-              <div className={`p-3 rounded-lg text-sm font-medium ${selected === q.correct ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800'}`}>
+              <p className={selected === q.correct ? 'insight' : 'result-warning'} role="status">
                 {selected === q.correct ? `✓ ${q.explanation}` : `✕ Not quite right. ${q.explanation}`}
-              </div>
+              </p>
             )}
           </div>
         );
       })}
-    </div>
+    </section>
   );
 };
