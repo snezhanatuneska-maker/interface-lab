@@ -307,7 +307,7 @@ export default function NucleationPage() {
                       range: [0, Math.log10(S_RANGE[1])],
                       tickvals: [1, 1.5, 2, 3, 5, 10, 20],
                     },
-                    yaxis: { ...axis(theme), title: { text: 'log₁₀ J' }, range: [RATE_FLOOR, LOG10_J0 + 3] },
+                    yaxis: { ...axis(theme), title: { text: 'log₁₀ (J / m⁻³ s⁻¹)' }, range: [RATE_FLOOR, LOG10_J0 + 3] },
                     shapes: [
                       { type: 'line', x0: S, x1: S, yref: 'paper', y0: 0, y1: 1, line: { color: COLORS.muted, width: 1.2, dash: 'dash' } },
                       { type: 'line', xref: 'paper', x0: 0, x1: 1, y0: 0, y1: 0, line: { color: COLORS.muted, width: 1, dash: 'dot' } },

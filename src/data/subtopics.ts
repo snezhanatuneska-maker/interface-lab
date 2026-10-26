@@ -184,7 +184,7 @@ export const SUBTOPICS: Subtopic[] = [
     topic: 'Nucleation & Growth',
     description:
       'See how supersaturation and a surface set the nucleation barrier.',
-    concepts: ['ΔG = −(πd³/6V_m)·kT·ln S + πd²γ', 'Critical nucleus d*', 'Nucleation rate J', 'Shape factor f(θ)'],
+    concepts: ['ΔG = −(πd³/6v_m)·kT·ln S + πd²γ', 'Critical nucleus d*', 'Nucleation rate J', 'Shape factor f(θ)'],
     cepLink: 'Where gas bubbles nucleate on electrolyser electrodes.',
     href: '#/nucleation',
   },

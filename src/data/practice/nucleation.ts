@@ -13,7 +13,7 @@ export const NUCLEATION_BANK: BankQuestion[] = [
     question: 'What happens to the critical diameter d* when the supersaturation S increases?',
     correct: 'It decreases',
     wrong: ['It increases', 'It stays the same', 'It becomes negative'],
-    explanation: 'd* = 4γV_m/(kT ln S); larger ln S gives a smaller d*.',
+    explanation: 'd* = 4γv_m/(kT ln S); larger ln S gives a smaller d*.',
   },
   {
     question: 'Why is heterogeneous nucleation usually easier than homogeneous nucleation?',

@@ -37,14 +37,14 @@ export default function Equations() {
           <Formula n={1} tex={String.raw`S = \frac{p}{p_\text{sat}} \;\;\text{or}\;\; \frac{c}{c_\text{sat}}`} />
           <Formula
             n={2}
-            tex={String.raw`\Delta G(d) = -\frac{\pi d^3}{6\,V_m}\,kT\ln S \;+\; \pi d^2\,\gamma`}
+            tex={String.raw`\Delta G(d) = -\frac{\pi d^3}{6\,v_m}\,kT\ln S \;+\; \pi d^2\,\gamma`}
           />
-          <Formula n={3} tex={String.raw`d^* = \frac{4\,\gamma\,V_m}{kT\ln S}`} />
-          <Formula n={4} tex={String.raw`\Delta G^*_\text{hom} = \frac{16\pi\,\gamma^3\,V_m^2}{3\,(kT\ln S)^2}`} />
+          <Formula n={3} tex={String.raw`d^* = \frac{4\,\gamma\,v_m}{kT\ln S}`} />
+          <Formula n={4} tex={String.raw`\Delta G^*_\text{hom} = \frac{16\pi\,\gamma^3\,v_m^2}{3\,(kT\ln S)^2}`} />
           <dl className="terms">
             <Term sym="S">supersaturation. S &gt; 1 drives nucleation; for S ≤ 1, ln S ≤ 0 and no nucleus is stable</Term>
             <Term sym="d">diameter of the cluster</Term>
-            <Term sym="V_m">volume of one molecule in the new phase</Term>
+            <Term sym="v_m">volume of one molecule in the new phase (lower-case v: not a molar volume)</Term>
             <Term sym="\gamma">interfacial tension between the nucleus and its surroundings, J/m²</Term>
             <Term sym="kT">thermal energy (k = Boltzmann constant)</Term>
           </dl>
@@ -94,7 +94,7 @@ export default function Equations() {
           <Term sym="n">number of sites where a nucleus can form (per volume, or per area on a surface)</Term>
         </dl>
         <p className="note">
-          The full form (left) is for homogeneous nucleation. The plot uses one constant prefactor J₀ = 10³⁰ for both
+          The full form (left) is for homogeneous nucleation. The plot uses one constant prefactor J₀ = 10³⁰ m⁻³ s⁻¹ for both
           cases: a simplification that compares only the exponential term, which is what changes by many orders of
           magnitude.
         </p>

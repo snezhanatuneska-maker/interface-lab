@@ -2,7 +2,7 @@ import { criticalDiameter, shapeFactor, V_M } from './nucleation'
 import type { Rng } from './random'
 import { fmt, fmtTex, numericOptions, type Difficulty, type Generator } from './training'
 
-// Classical nucleation training: the critical diameter d* = 4γV_m/(kT ln S), the heterogeneous shape factor f(θ),
+// Classical nucleation training: the critical diameter d* = 4γv_m/(kT ln S), the heterogeneous shape factor f(θ),
 // and how the barrier ΔG* ∝ γ³/(ln S)² scales (src/lib/nucleation.ts).
 
 export interface NucleationData {
@@ -27,11 +27,11 @@ export const generateNucleation: Generator<NucleationData> = (rng: Rng, difficul
       { format: (v) => `${fmt(v)} nm` },
     )
     return {
-      question: `A solution at T = ${T} K has supersaturation S = ${S}. The nucleus has surface tension $\\gamma$ = ${gamma} J/m² and molecular volume $V_m$ = 3 × 10⁻²⁹ m³. What is the critical diameter d*?`,
+      question: `A solution at T = ${T} K has supersaturation S = ${S}. The nucleus has surface tension $\\gamma$ = ${gamma} J/m² and molecular volume $v_m$ = 3 × 10⁻²⁹ m³. What is the critical diameter d*?`,
       options,
       answer,
       steps: [
-        { text: 'd* is where ΔG(d) = −(πd³/6V_m)·kT ln S + πd²γ has its maximum:', tex: 'd^* = \\frac{4\\gamma V_m}{kT\\ln S}' },
+        { text: 'd* is where ΔG(d) = −(πd³/6v_m)·kT ln S + πd²γ has its maximum:', tex: 'd^* = \\frac{4\\gamma v_m}{kT\\ln S}' },
         {
           text: `kT = ${fmtTex(1.380649e-23 * T)} J and ln ${S} = ${Math.log(S).toFixed(3)}:`,
           tex: `d^* = \\frac{4 \\times ${gamma} \\times ${fmtTex(V_M)}}{${fmtTex(1.380649e-23 * T)} \\times ${Math.log(S).toFixed(3)}}\\ \\mathrm{m} = ${fmtTex(d)}\\ \\mathrm{nm}`,
@@ -78,7 +78,7 @@ export const generateNucleation: Generator<NucleationData> = (rng: Rng, difficul
     options,
     answer,
     steps: [
-      { text: 'Homogeneous nucleation barrier:', tex: '\\Delta G^*_\\text{hom} = \\frac{16\\pi\\gamma^3 V_m^2}{3(kT\\ln S)^2}' },
+      { text: 'Homogeneous nucleation barrier:', tex: '\\Delta G^*_\\text{hom} = \\frac{16\\pi\\gamma^3 v_m^2}{3(kT\\ln S)^2}' },
       { text: byGamma ? `ΔG* ∝ γ³, so the barrier changes by ${k}³ = ${fmt(factor)}.` : `ΔG* ∝ 1/(ln S)², so the barrier changes by 1/${k}² = ${fmt(factor)}.` },
     ],
     data: { kind: 'nucleation', ask, value: factor },
