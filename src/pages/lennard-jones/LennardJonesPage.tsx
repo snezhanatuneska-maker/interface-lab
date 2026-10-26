@@ -1,8 +1,11 @@
 import React, { useState } from 'react'
+import type { Annotation, Data, Shape } from 'plotly.js'
+import PlotlyChart from '../../components/Plot'
+import { Slider } from '../../components/Controls'
+import { useThemeColors, type ThemeColors } from '../../lib/themeColors'
+import { axis, baseLayout, staticConfig } from '../../lib/plotTheme'
 
-const W = 600
-const H = 300
-const M = { l: 58, r: 16, t: 14, b: 40 }
+const MARK = '#dc2626' // the caption calls the potential minimum the "red marker"
 
 interface PlotProps {
   fn: (r: number) => number
@@ -15,84 +18,84 @@ interface PlotProps {
   sigma: number
   mark: { r: number; y: number; label: string }
   ariaLabel: string
+  theme: ThemeColors
 }
 
-const Plot: React.FC<PlotProps> = ({ fn, rMin, rMax, yMin, yMax, color, yLabel, sigma, mark, ariaLabel }) => {
-  const pw = W - M.l - M.r
-  const ph = H - M.t - M.b
-  const X = (r: number) => M.l + ((r - rMin) / (rMax - rMin)) * pw
-  const Y = (v: number) => M.t + ((yMax - v) / (yMax - yMin)) * ph
-
-  // Build the path, lifting the pen where the curve leaves the plot area
-  let d = ''
-  let pen = false
+const Plot: React.FC<PlotProps> = ({ fn, rMin, rMax, yMin, yMax, color, yLabel, sigma, mark, ariaLabel, theme }) => {
+  // Sample the curve, leaving a gap where it leaves the plot area
+  const xs: number[] = []
+  const ys: (number | null)[] = []
   const N = 300
   for (let i = 0; i <= N; i++) {
     const r = rMin + ((rMax - rMin) * i) / N
     const v = fn(r)
-    if (v > yMax || v < yMin) {
-      pen = false
-      continue
-    }
-    d += `${pen ? 'L' : 'M'}${X(r).toFixed(1)} ${Y(v).toFixed(1)} `
-    pen = true
+    xs.push(r)
+    ys.push(v > yMax || v < yMin ? null : v)
   }
 
   const xTicks = [0, 1, 2, 3, 4].map((i) => rMin + ((rMax - rMin) * i) / 4)
   const yTicks = [0, 1, 2, 3, 4].map((i) => yMin + ((yMax - yMin) * i) / 4)
-  const muted = 'var(--muted, #6b6b66)'
-  const line = 'var(--border, #e3e3de)'
+
+  const data: Data[] = [
+    { x: xs, y: ys, type: 'scatter', mode: 'lines', line: { color, width: 3 } },
+    {
+      x: [mark.r],
+      y: [mark.y],
+      type: 'scatter',
+      mode: 'markers',
+      marker: { size: 12, color: MARK, line: { color: theme.plotBg, width: 2 } },
+    },
+  ]
+  const shapes: Partial<Shape>[] = [
+    // zero line
+    { type: 'line', xref: 'paper', x0: 0, x1: 1, y0: 0, y1: 0, line: { color: theme.muted, width: 1.5 } },
+    // hard-sphere diameter r = sigma
+    { type: 'line', xref: 'x', yref: 'paper', x0: sigma, x1: sigma, y0: 0, y1: 1, line: { color: theme.muted, width: 1.2, dash: 'dash' } },
+  ]
+  const annotations: Partial<Annotation>[] = [
+    { xref: 'x', yref: 'paper', x: sigma, y: 1, xanchor: 'right', yanchor: 'top', xshift: -4, text: 'r = σ', showarrow: false, font: { size: 12, color: theme.muted } },
+    { x: mark.r, y: mark.y, xanchor: 'left', yanchor: 'bottom', xshift: 8, yshift: 4, text: mark.label, showarrow: false, font: { size: 12, color: theme.text } },
+  ]
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="lj-plot" role="img" aria-label={ariaLabel} style={{ width: '100%', height: 'auto' }}>
-      {yTicks.map((v, i) => (
-        <g key={`y${i}`}>
-          <line x1={M.l} x2={W - M.r} y1={Y(v)} y2={Y(v)} stroke={line} />
-          <text x={M.l - 8} y={Y(v) + 4} textAnchor="end" fontSize="11" fill={muted}>
-            {v.toFixed(Math.abs(yMax - yMin) < 5 ? 2 : 1)}
-          </text>
-        </g>
-      ))}
-      {xTicks.map((r, i) => (
-        <text key={`x${i}`} x={X(r)} y={H - 20} textAnchor="middle" fontSize="11" fill={muted}>
-          {r.toFixed(1)}
-        </text>
-      ))}
-      <text x={M.l + pw / 2} y={H - 4} textAnchor="middle" fontSize="12" fill={muted}>
-        r (Å)
-      </text>
-      <text
-        x={14}
-        y={M.t + ph / 2}
-        textAnchor="middle"
-        fontSize="12"
-        fill={muted}
-        transform={`rotate(-90 14 ${M.t + ph / 2})`}
-      >
-        {yLabel}
-      </text>
-
-      {/* zero line */}
-      <line x1={M.l} x2={W - M.r} y1={Y(0)} y2={Y(0)} stroke={muted} strokeWidth="1.5" />
-      {/* hard-sphere diameter r = sigma */}
-      <line x1={X(sigma)} x2={X(sigma)} y1={M.t} y2={M.t + ph} stroke={muted} strokeDasharray="5 4" />
-      <text x={X(sigma) - 6} y={M.t + 12} textAnchor="end" fontSize="11" fill={muted}>
-        r = σ
-      </text>
-
-      <path d={d} fill="none" stroke={color} strokeWidth="3" strokeLinejoin="round" />
-
-      <circle cx={X(mark.r)} cy={Y(mark.y)} r="6" fill="#dc2626" />
-      <text x={X(mark.r) + 10} y={Y(mark.y) - 8} fontSize="11" fill="var(--text, #1d1d1b)">
-        {mark.label}
-      </text>
-    </svg>
+    <div role="img" aria-label={ariaLabel}>
+      <PlotlyChart
+        data={data}
+        layout={{
+          ...baseLayout(theme),
+          // Room for the last x tick label, which sits on the right edge
+          margin: { ...baseLayout(theme).margin, r: 24 },
+          showlegend: false,
+          xaxis: {
+            ...axis(theme),
+            title: { text: 'r (Å)' },
+            // A hair of padding: Plotly hides a tick label that sits exactly on the range end.
+            range: [rMin - (rMax - rMin) * 1e-6, rMax + (rMax - rMin) * 1e-6],
+            tickvals: xTicks,
+            ticktext: xTicks.map((r) => r.toFixed(1)),
+          },
+          yaxis: {
+            ...axis(theme),
+            title: { text: yLabel },
+            range: [yMin, yMax],
+            tickvals: yTicks,
+            ticktext: yTicks.map((v) => v.toFixed(Math.abs(yMax - yMin) < 5 ? 2 : 1)),
+          },
+          shapes,
+          annotations,
+        }}
+        config={staticConfig}
+        useResizeHandler
+        className="plot"
+      />
+    </div>
   )
 }
 
 export const LennardJonesPage: React.FC = () => {
   const [epsilon, setEpsilon] = useState<number>(1.0) // well depth, kJ/mol
   const [sigma, setSigma] = useState<number>(3.4) // distance where V = 0, Å
+  const theme = useThemeColors()
 
   const rm = Math.pow(2, 1 / 6) * sigma // equilibrium distance
   const rF = Math.pow(26 / 7, 1 / 6) * sigma // distance of maximum attraction
@@ -111,102 +114,105 @@ export const LennardJonesPage: React.FC = () => {
   const rHi = 3.0 * sigma
 
   return (
-    <div className="container wide page">
-      <header className="page-header">
+    <article className="page">
+      <header className="page-intro compact">
         <h1>Lennard-Jones Potential Explorer</h1>
-        <p className="subtitle">
+        <p className="lede">
           The molecular basis of adhesion, adsorption, and cohesion via the 12-6 potential model.
         </p>
       </header>
 
-      <div className="grid two-column">
-        <div className="card controls-card">
-          <h2>Parameters</h2>
-          <div className="control-group">
-            <label htmlFor="lj-eps">
-              Well depth (ε): <strong>{epsilon.toFixed(2)} kJ/mol</strong>
-            </label>
-            <input
-              id="lj-eps"
-              type="range"
-              min="0.2"
-              max="3.0"
-              step="0.1"
-              value={epsilon}
-              onChange={(e) => setEpsilon(parseFloat(e.target.value))}
+      <figure id="sim-figure" className="figure hero" aria-label="Lennard-Jones potential and force">
+        <div className="sim-grid">
+          <div className="plot-col">
+            <h2 className="panel-title">Potential energy V(r)</h2>
+            <Plot
+              fn={V}
+              rMin={rLo}
+              rMax={rHi}
+              yMin={-1.3 * epsilon}
+              yMax={2.5 * epsilon}
+              color={theme.data1}
+              yLabel="V (kJ/mol)"
+              sigma={sigma}
+              mark={{ r: rm, y: -epsilon, label: 'r_m, −ε' }}
+              ariaLabel="Lennard-Jones potential energy curve"
+              theme={theme}
             />
           </div>
-
-          <div className="control-group">
-            <label htmlFor="lj-sigma">
-              Distance parameter (σ): <strong>{sigma.toFixed(2)} Å</strong>
-            </label>
-            <input
-              id="lj-sigma"
-              type="range"
-              min="2.0"
-              max="5.0"
-              step="0.1"
-              value={sigma}
-              onChange={(e) => setSigma(parseFloat(e.target.value))}
+          <div className="plot-col">
+            <h2 className="panel-title">Force F(r) = −dV/dr</h2>
+            <Plot
+              fn={F}
+              rMin={rLo}
+              rMax={rHi}
+              yMin={-1.5 * fAttract}
+              yMax={2.5 * fAttract}
+              color={theme.data2}
+              yLabel="F (kJ/(mol·Å))"
+              sigma={sigma}
+              mark={{ r: rm, y: 0, label: 'F = 0 at r_m' }}
+              ariaLabel="Lennard-Jones force curve"
+              theme={theme}
             />
-          </div>
-
-          <div className="stats-box">
-            <h3>Key Metrics</h3>
-            <p>
-              <strong>Equilibrium distance (r<sub>m</sub>):</strong> {rm.toFixed(3)} Å (2<sup>1/6</sup>σ ≈ 1.122σ)
-            </p>
-            <p>
-              <strong>Well depth:</strong> V(r<sub>m</sub>) = −{epsilon.toFixed(2)} kJ/mol
-            </p>
-            <p>
-              <strong>Zero crossing:</strong> V = 0 at r = σ = {sigma.toFixed(2)} Å
-            </p>
-            <p>
-              <strong>Maximum attraction:</strong> {fAttract.toFixed(3)} kJ/(mol·Å) at r = {rF.toFixed(2)} Å
-            </p>
-            <p>
-              <strong>Hard-sphere limit:</strong> steep repulsion as r → σ and below (r<sup>−12</sup> dominance),
-              so the molecule acts like a rigid sphere of diameter ≈ σ.
-            </p>
           </div>
         </div>
 
-        <div className="card plot-card">
-          <h2>Potential energy V(r)</h2>
-          <Plot
-            fn={V}
-            rMin={rLo}
-            rMax={rHi}
-            yMin={-1.3 * epsilon}
-            yMax={2.5 * epsilon}
-            color="var(--accent-color, #2563eb)"
-            yLabel="V (kJ/mol)"
-            sigma={sigma}
-            mark={{ r: rm, y: -epsilon, label: 'r_m, −ε' }}
-            ariaLabel="Lennard-Jones potential energy curve"
+        <div className="figure-controls hero-controls">
+          <h2 className="panel-title">Parameters</h2>
+          <Slider
+            id="lj-eps"
+            label={<>Well depth (ε):{' '}</>}
+            value={`${epsilon.toFixed(2)} kJ/mol`}
+            min={0.2}
+            max={3.0}
+            step={0.1}
+            pos={epsilon}
+            onChange={setEpsilon}
           />
+          <Slider
+            id="lj-sigma"
+            label={<>Distance parameter (σ):{' '}</>}
+            value={`${sigma.toFixed(2)} Å`}
+            min={2.0}
+            max={5.0}
+            step={0.1}
+            pos={sigma}
+            onChange={setSigma}
+          />
+        </div>
 
-          <h2 style={{ marginTop: '1.5rem' }}>Force F(r) = −dV/dr</h2>
-          <Plot
-            fn={F}
-            rMin={rLo}
-            rMax={rHi}
-            yMin={-1.5 * fAttract}
-            yMax={2.5 * fAttract}
-            color="#c2410c"
-            yLabel="F (kJ/(mol·Å))"
-            sigma={sigma}
-            mark={{ r: rm, y: 0, label: 'F = 0 at r_m' }}
-            ariaLabel="Lennard-Jones force curve"
-          />
-          <p className="caption">
-            Red marker: the potential minimum (r<sub>m</sub>, −ε), where the force is zero. Positive force is
-            repulsive, negative is attractive.
+        <div className="figure-results">
+          <h3 className="panel-title">Key Metrics</h3>
+          <dl className="results">
+            <div>
+              <dt>Equilibrium distance (r<sub>m</sub>):</dt>{' '}
+              <dd>{rm.toFixed(3)} Å (2<sup>1/6</sup>σ ≈ 1.122σ)</dd>
+            </div>
+            <div>
+              <dt>Well depth:</dt>{' '}
+              <dd>V(r<sub>m</sub>) = −{epsilon.toFixed(2)} kJ/mol</dd>
+            </div>
+            <div>
+              <dt>Zero crossing:</dt>{' '}
+              <dd>V = 0 at r = σ = {sigma.toFixed(2)} Å</dd>
+            </div>
+            <div>
+              <dt>Maximum attraction:</dt>{' '}
+              <dd>{fAttract.toFixed(3)} kJ/(mol·Å) at r = {rF.toFixed(2)} Å</dd>
+            </div>
+          </dl>
+          <p className="note">
+            <strong>Hard-sphere limit:</strong> steep repulsion as r → σ and below (r<sup>−12</sup> dominance),
+            so the molecule acts like a rigid sphere of diameter ≈ σ.
           </p>
         </div>
-      </div>
-    </div>
+
+        <figcaption>
+          Red marker: the potential minimum (r<sub>m</sub>, −ε), where the force is zero. Positive force is
+          repulsive, negative is attractive.
+        </figcaption>
+      </figure>
+    </article>
   )
 }
