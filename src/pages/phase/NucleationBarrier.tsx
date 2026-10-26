@@ -89,11 +89,11 @@ export default function NucleationBarrier({ theme, narrow }: { theme: ThemeColor
             display
             tex={
               narrow
-                ? String.raw`\Delta G(d) = -\frac{\pi d^3}{6V_m}\,kT\ln S + \pi d^2\gamma`
-                : String.raw`\Delta G(d) = \underbrace{-\frac{\pi d^3}{6V_m}\,kT\ln S}_{\text{volume: favours}} + \underbrace{\pi d^2\gamma}_{\text{surface: resists}}`
+                ? String.raw`\Delta G(d) = -\frac{\pi d^3}{6v_m}\,kT\ln S + \pi d^2\gamma`
+                : String.raw`\Delta G(d) = \underbrace{-\frac{\pi d^3}{6v_m}\,kT\ln S}_{\text{volume: favours}} + \underbrace{\pi d^2\gamma}_{\text{surface: resists}}`
             }
           />
-          <Tex display tex={String.raw`d^* = \frac{4\gamma V_m}{kT\ln S},\qquad \Delta G^* = \frac{\pi d^{*2}\gamma}{3}`} />
+          <Tex display tex={String.raw`d^* = \frac{4\gamma v_m}{kT\ln S},\qquad \Delta G^* = \frac{\pi d^{*2}\gamma}{3}`} />
         </div>
       </div>
 
@@ -164,7 +164,7 @@ export default function NucleationBarrier({ theme, narrow }: { theme: ThemeColor
               </div>
             </dl>
             <p className="note">
-              V<sub>m</sub> = 0.03 nm³ per molecule, T = 298 K.
+              v<sub>m</sub> = 0.03 nm³ per molecule, T = 298 K.
             </p>
           </div>
         </div>

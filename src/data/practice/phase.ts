@@ -32,7 +32,7 @@ export const PHASE_BANK: BankQuestion[] = [
     question: 'Increasing the supersaturation S does what to the critical diameter d*?',
     correct: 'Decreases it',
     wrong: ['Increases it', 'No effect', 'Makes it negative'],
-    explanation: 'd* = 4γV_m/(kT ln S): a larger ln S gives a smaller critical nucleus and a lower barrier.',
+    explanation: 'd* = 4γv_m/(kT ln S): a larger ln S gives a smaller critical nucleus and a lower barrier.',
   },
   {
     question: 'For S < 1, small clusters…',
@@ -52,6 +52,6 @@ export const PHASE_BANK: BankQuestion[] = [
     question: 'A membrane with an interconnected (bicontinuous) pore structure most likely formed by…',
     correct: 'spinodal decomposition',
     wrong: ['nucleation & growth', 'adsorption', 'crystallization from the melt'],
-    explanation: 'Spinodal decomposition grows everywhere at once with one wavelength, giving a connected network.',
+    explanation: 'Spinodal decomposition grows everywhere at once with one wavelength, giving a connected network (for compositions near the critical one).',
   },
 ]
