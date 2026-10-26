@@ -1,23 +1,30 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Segmented } from '../../components/Controls';
+import { useThemeColors } from '../../lib/themeColors';
+import { CANVAS_FONT, setupCanvas } from '../../lib/canvas';
+
+const W = 380;
+const H = 230;
 
 export const SurfaceExplorerTryThis: React.FC = () => {
   const [mode, setMode] = useState<'sem' | 'afm' | 'xps'>('sem');
+  const theme = useThemeColors();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = setupCanvas(canvas, W, H);
     if (!ctx) return;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = theme.plotBg;
+    ctx.fillRect(0, 0, W, H);
 
     if (mode === 'sem') {
       // SEM grayscale secondary electron look
       ctx.fillStyle = '#334155';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, W, H);
       // Draw simulated nanoparticles
       for (let i = 0; i < 20; i++) {
         const cx = 50 + (i * 45) % 320;
@@ -31,21 +38,22 @@ export const SurfaceExplorerTryThis: React.FC = () => {
         ctx.arc(cx - 3, cy - 3, 4, 0, Math.PI * 2);
         ctx.fill();
       }
+      // The SEM image fills the canvas, so its label stays light on dark in both themes.
       ctx.fillStyle = '#ffffff';
-      ctx.font = '12px sans-serif';
+      ctx.font = `12px ${CANVAS_FONT}`;
       ctx.fillText('SEM View: Secondary Electron Topography (Resolution: ~2 nm)', 20, 30);
 
     } else if (mode === 'afm') {
       // AFM false-color height map look
-      const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      const grad = ctx.createLinearGradient(0, 0, W, H);
       grad.addColorStop(0, '#1e1b4b');
       grad.addColorStop(0.5, '#4338ca');
       grad.addColorStop(1, '#f43f5e');
       ctx.fillStyle = grad;
-      ctx.fillRect(20, 40, canvas.width - 40, canvas.height - 60);
+      ctx.fillRect(20, 40, W - 40, H - 60);
 
       // Cantilever tip illustration overlay
-      ctx.strokeStyle = '#ffffff';
+      ctx.strokeStyle = theme.text;
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(150, 10);
@@ -53,13 +61,13 @@ export const SurfaceExplorerTryThis: React.FC = () => {
       ctx.lineTo(210, 80);
       ctx.stroke();
 
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '12px sans-serif';
+      ctx.fillStyle = theme.text;
+      ctx.font = `12px ${CANVAS_FONT}`;
       ctx.fillText('AFM View: Cantilever Tip & 3D Height Map (Vertical Z: < 0.1 nm)', 20, 30);
 
     } else {
       // XPS spectrum graph view
-      ctx.strokeStyle = '#38bdf8';
+      ctx.strokeStyle = theme.data1;
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(30, 200);
@@ -71,57 +79,58 @@ export const SurfaceExplorerTryThis: React.FC = () => {
       }
       ctx.stroke();
 
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '12px sans-serif';
+      ctx.fillStyle = theme.text;
+      ctx.font = `12px ${CANVAS_FONT}`;
       ctx.fillText('XPS View: Binding Energy Spectra (~1-10 nm Depth)', 20, 30);
-      ctx.fillStyle = '#94a3b8';
+      ctx.fillStyle = theme.muted;
       ctx.fillText('Intensity (Counts)', 25, 215);
       ctx.fillText('Binding Energy (eV)', 240, 215);
     }
-  }, [mode]);
+  }, [mode, theme]);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm border-l-4 border-l-blue-600">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Interactive Characterization Viewer</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-        <div className="space-y-4">
+    <figure id="sim-figure" className="figure hero" aria-label="Interactive Characterization Viewer">
+      <div className="sim-grid">
+        <canvas
+          ref={canvasRef}
+          className="sim-canvas"
+          role="img"
+          aria-label={`${mode.toUpperCase()} view of the catalyst surface`}
+        />
+        <dl className="results">
           <div>
-            <label className="block font-medium text-sm text-gray-700 mb-2">
-              Select Analytical Technique
-            </label>
-            <div className="flex gap-2">
-              <button 
-                onClick={() => setMode('sem')} 
-                className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${mode === 'sem' ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 text-gray-700 border-gray-300'}`}
-              >
-                SEM
-              </button>
-              <button 
-                onClick={() => setMode('afm')} 
-                className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${mode === 'afm' ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 text-gray-700 border-gray-300'}`}
-              >
-                AFM
-              </button>
-              <button 
-                onClick={() => setMode('xps')} 
-                className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${mode === 'xps' ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 text-gray-700 border-gray-300'}`}
-              >
-                XPS
-              </button>
-            </div>
+            <dt>Active Technique:</dt>{' '}
+            <dd>{mode.toUpperCase()}</dd>
           </div>
-
-          <div className="bg-blue-50/60 border border-blue-100 p-4 rounded-lg space-y-1 text-sm">
-            <p><strong>Active Technique:</strong> {mode.toUpperCase()}</p>
-            <p><strong>Primary Strength:</strong> {mode === 'sem' ? 'High lateral resolution morphology' : mode === 'afm' ? 'Sub-nanometer vertical roughness profiling' : 'Surface chemical state & stoichiometry'}</p>
-            <p><strong>Information Depth:</strong> {mode === 'xps' ? '~1–10 nm (Surface sensitive)' : 'Topographical surface view'}</p>
+          <div>
+            <dt>Primary Strength:</dt>{' '}
+            <dd>{mode === 'sem' ? 'High lateral resolution morphology' : mode === 'afm' ? 'Sub-nanometer vertical roughness profiling' : 'Surface chemical state & stoichiometry'}</dd>
           </div>
-        </div>
+          <div>
+            <dt>Information Depth:</dt>{' '}
+            <dd>{mode === 'xps' ? '~1–10 nm (Surface sensitive)' : 'Topographical surface view'}</dd>
+          </div>
+        </dl>
+      </div>
 
-        <div className="flex flex-col items-center">
-          <canvas ref={canvasRef} width={380} height={230} className="rounded-lg shadow-inner w-full max-w-[380px]" />
+      <div className="figure-controls hero-controls wrap-controls">
+        <div className="model-control">
+          <span className="control-label">Select Analytical Technique</span>
+          <Segmented
+            label="Select Analytical Technique"
+            value={mode}
+            onChange={setMode}
+            options={[
+              { value: 'sem', label: 'SEM' },
+              { value: 'afm', label: 'AFM' },
+              { value: 'xps', label: 'XPS' },
+            ]}
+          />
         </div>
       </div>
-    </div>
+      <figcaption>
+        <span className="figure-label">Interactive Characterization Viewer</span>
+      </figcaption>
+    </figure>
   );
 };
