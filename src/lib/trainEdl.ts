@@ -33,7 +33,7 @@ function sternProblem(rng: Rng): Problem<EdlData> {
         text: '1 F/m² = 100 µF/cm²:',
         tex: `C_\\text{Stern} = \\frac{${fmtTex(E0, 4)} \\times ${EPS_STERN}}{${delta} \\times 10^{-9}}\\ \\mathrm{F/m^2} = ${fmtTex(c)}\\ \\mathrm{\\mu F/cm^2}`,
       },
-      { text: 'Measured double-layer capacitances are of this order (10–30 µF/cm²).' },
+      { text: 'Measured double-layer capacitances are of this order (about 5–30 µF/cm²).' },
     ],
     data: { kind: 'edl', ask: 'stern', cStern: c },
   }

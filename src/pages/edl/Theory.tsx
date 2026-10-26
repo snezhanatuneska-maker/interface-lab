@@ -61,16 +61,19 @@ export function WhyItMatters() {
         </li>
         <li>
           <strong>Stern sets the limit.</strong> C_Stern and C_diffuse are in series, so the smaller one wins. With a
-          concentrated electrolyte C_diffuse is large and C_tot ≈ C_Stern, which is why measured values sit near 5–20
+          concentrated electrolyte C_diffuse is large and C_tot ≈ C_Stern, which is why measured values sit near 5–30
           µF/cm².
         </li>
         <li>
-          <strong>Concentrated electrolytes.</strong> 1 M salts or ionic liquids keep κ⁻¹ well below 1 nm, so the
-          diffuse layer stays thin and its capacitance high.
+          <strong>Concentrated electrolytes.</strong> 1 M salts keep κ⁻¹ well below 1 nm, so the diffuse layer stays
+          thin and its capacitance high. (At such concentrations, and in ionic liquids, Gouy–Chapman no longer holds:
+          finite ion size causes crowding and overscreening, but the capacitance stays limited by the Stern layer.)
         </li>
         <li>
-          <strong>Pore size.</strong> Pores must be wider than the double layer (and the ions) to use their surface;
-          when the pore size approaches κ⁻¹ the layers from opposite walls overlap.
+          <strong>Pore size.</strong> Pores must at least admit the ions. When the pore size approaches κ⁻¹ the layers
+          from opposite walls overlap, so the simple flat-wall picture fails. In pores below about 1 nm, ions that
+          shed part of their solvation shell sit closer to the wall, and the capacitance per area actually rises
+          (Chmiola et al., 2006).
         </li>
       </ul>
       <p className="prose note">
