@@ -105,7 +105,7 @@ The trainer `trainCapillary.ts` is correct. Two of the three readouts are invent
 
 - **CAP-1 CRITICAL**, `lib/capillary.ts:18-21`: `return 1500 / r` labelled "Jurin rise height (µm)".
   This is not Jurin's law: there is no γ, θ, ρ or g, and the value is wrong by about 10⁷. Jurin gives
-  h = 2γcosθ/(ρgr). At the default (r = 15 nm, θ = 21°) that is about 9 × 10⁵ m; the page shows 100 µm (Node
+  h = 2γcosθ/(ρgr). At the default (r = 15 nm, θ = 21°) that is about 920 m; the page shows 100 µm (Node
   check). The page also never shows the Jurin equation. For nanometre pores the Jurin height is not physically
   meaningful (cavitation, gravity irrelevant). *Fix:* use h = 2γcosθ/(ρgr) and show it for µm–mm capillaries, or
   replace this readout with the capillary suction head Pc/(ρg) plus a note. Butt/Graf/Kappl ch. 2. Confidence: high.
