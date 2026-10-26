@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import type { Data, Shape, Annotation } from 'plotly.js'
 import PlotlyChart from '../../components/Plot'
 import { Slider } from '../../components/Controls'
+import Tex from '../../components/Tex'
 import { useThemeColors, type ThemeColors } from '../../lib/themeColors'
 import { axis, baseLayout, staticConfig } from '../../lib/plotTheme'
 
@@ -11,7 +12,9 @@ interface Material {
   n: number // refractive index (visible)
 }
 
-// Approximate textbook values (Israelachvili, Intermolecular and Surface Forces)
+// Approximate textbook values (Israelachvili, Intermolecular and Surface Forces). All share one absorption
+// frequency ν_e, which suits dielectrics with n ≈ 1.3–1.8; high-index oxides such as TiO₂ absorb much lower in the UV,
+// so the single-ν_e formula would overestimate them several times and they are left out.
 const MATERIALS: Material[] = [
   { name: 'Vacuum / air', eps: 1.0, n: 1.0 },
   { name: 'Water', eps: 80, n: 1.333 },
@@ -23,7 +26,6 @@ const MATERIALS: Material[] = [
   { name: 'Silica (SiO₂)', eps: 3.8, n: 1.46 },
   { name: 'Mica', eps: 7.0, n: 1.58 },
   { name: 'Alumina (Al₂O₃)', eps: 10.0, n: 1.75 },
-  { name: 'Titania (TiO₂)', eps: 100, n: 2.6 },
 ]
 
 const KT = 1.380649e-23 * 298 // J at 298 K
@@ -281,12 +283,36 @@ export const HamakerPage: React.FC = () => {
         </figcaption>
       </figure>
 
+      <section className="section" aria-labelledby="hamaker-eq-title">
+        <h2 id="hamaker-eq-title" className="section-title">The equations</h2>
+        <p className="prose">
+          Lifshitz theory with one main UV absorption frequency ν<sub>e</sub> ≈ 3 × 10¹⁵ Hz for all three media
+          (Israelachvili):
+        </p>
+        <div className="formula">
+          <div className="formula-body eq-math">
+            <Tex
+              display
+              tex={String.raw`A_{132} \approx \tfrac34 kT\,\frac{\varepsilon_1-\varepsilon_3}{\varepsilon_1+\varepsilon_3}\,\frac{\varepsilon_2-\varepsilon_3}{\varepsilon_2+\varepsilon_3} + \frac{3h\nu_e}{8\sqrt2}\,\frac{(n_1^2-n_3^2)(n_2^2-n_3^2)}{\sqrt{n_1^2+n_3^2}\,\sqrt{n_2^2+n_3^2}\,\left(\sqrt{n_1^2+n_3^2}+\sqrt{n_2^2+n_3^2}\right)}`}
+            />
+            <Tex display tex={String.raw`W_\text{sphere–plane} = -\frac{A_{132}R}{6D},\qquad W_\text{plane–plane} = -\frac{A_{132}}{12\pi D^2}`} />
+          </div>
+        </div>
+        <p className="note">
+          ε: static dielectric constants; n: refractive indices; 1 and 2 are the materials, 3 the medium. The first
+          (static) term is screened by dissolved ions: in salt water it largely disappears and only the dispersion term
+          remains.
+        </p>
+      </section>
+
       <section className="section" aria-labelledby="hamaker-why-title">
         <h2 id="hamaker-why-title" className="section-title">Clean energy link</h2>
         <p className="prose">
           Particle adhesion in electrode slurries and coatings: if A<sub>132</sub> is large and positive in the solvent,
-          particles stick together (agglomerate) and coatings become uneven. Choosing a solvent whose refractive index is
-          close to the particles makes A<sub>132</sub> small and keeps the slurry dispersed.
+          particles stick together (agglomerate) and coatings become uneven. For transparent particles a solvent with a
+          refractive index close to theirs makes A<sub>132</sub> small. Electrode particles (carbon black, Pt,
+          graphite, NMC) absorb light and have large Hamaker constants in any solvent, so their slurries are kept
+          dispersed by binders and polymers (steric repulsion) or by surface charge instead.
         </p>
         <p className="note">
           Values are approximate (Lifshitz theory with a single absorption frequency, no retardation). Real
