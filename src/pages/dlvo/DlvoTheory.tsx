@@ -24,7 +24,8 @@ export function DlvoTheory() {
           <h3>The Schulze-Hardy Rule</h3>
           <p>
             Adding salt compresses the electrical double layer. Counter-ion valency (<em>z</em>) drastically impacts
-            stability, with the Critical Coagulation Concentration scaling as CCC ∝ 1/z<sup>6</sup>.
+            stability, with the Critical Coagulation Concentration scaling as CCC ∝ 1/z<sup>6</sup> at high surface
+            potential (∝ 1/z² at low potential).
           </p>
         </div>
       </div>
