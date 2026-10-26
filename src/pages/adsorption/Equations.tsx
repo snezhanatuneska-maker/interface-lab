@@ -43,7 +43,7 @@ export default function Equations({ mode }: { mode: Model }) {
             <Term sym="V">amount adsorbed, cm³(STP)/g</Term>
             <Term sym="V_m">amount in one full layer</Term>
             <Term sym="K">
-              binding strength (adsorption ÷ desorption rate). Higher K = fills at lower pressure
+              binding strength (ratio of the adsorption and desorption rate constants). Higher K = fills at lower pressure
             </Term>
           </dl>
           <p className="note">
