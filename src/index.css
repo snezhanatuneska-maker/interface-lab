@@ -733,7 +733,7 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
 
 .vdw-grid { align-items: start; }
 .vdw-side { min-width: 0; }
-.vdw-side-title { font-family: var(--font-sans); font-size: var(--text-sm); margin: 0 0 var(--space-1); }
+.vdw-side-title, .panel-title { font-family: var(--font-sans); font-size: var(--text-sm); margin: 0 0 var(--space-1); }
 .plot.vdw-bar { height: 64px; margin-bottom: var(--space-3); }
 .vdw-results .result-main dd { color: var(--color-text); }
 .key-line.dashed { border-top-style: dashed; }
@@ -821,8 +821,8 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
 }
 @media (max-width: 600px) {
   /* Too many controls for the sticky bar used by the other tools: they stay in the flow here. */
-  .hero-controls.crystal-controls { position: static; box-shadow: none; padding: var(--space-3) 0 0; gap: var(--space-3); }
-  .hero-controls.crystal-controls .slider small { display: block; }
+  .hero-controls.crystal-controls, .hero-controls.flow-controls { position: static; box-shadow: none; padding: var(--space-3) 0 0; gap: var(--space-3); }
+  .hero-controls.crystal-controls .slider small, .hero-controls.flow-controls .slider small { display: block; }
   .hero-controls.crystal-controls .slider.inactive { display: flex; }
   .crystal-tabs .tab { font-size: var(--text-sm); }
   .plot.regime-plot { height: 210px; }
@@ -886,4 +886,31 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
 @media (max-width: 820px) {
   .cnt-grid { grid-template-columns: minmax(0, 1fr); }
   .cnt-grid .plot { height: 240px; }
+}
+
+/* ================= Zisman, surface characterisation, Lennard-Jones, Hamaker ================= */
+/* These tools reuse the adsorption page's figure, controls, results, equation and section styles; only the
+   pieces below are new. */
+
+.hero-controls > .panel-title { flex: 1 1 100%; margin: 0; }
+.sim-side { min-width: 0; }
+.sim-side .insight { margin: 0 0 var(--space-3); }
+.figure-results { margin-top: var(--space-4); }
+.figure-results .note { max-width: var(--measure); }
+.figure .results + .note { margin-top: var(--space-3); }
+
+/* Text-only formulas in equation cards */
+.formula-body.formula-text { text-align: center; }
+
+/* Multiple-choice knowledge check */
+.quiz-card + .quiz-card { margin-top: var(--space-4); }
+.quiz-card .note { margin: var(--space-1) 0 0; }
+.quiz-card .choices legend { font-weight: 600; }
+.quiz-card .insight, .quiz-card .result-warning { margin: var(--space-3) 0 0; }
+@media (max-width: 600px) {
+  /* In the stacked bar a select's flex-basis would become its height. */
+  .hero-controls.select-controls .select { flex: none; max-width: 100%; }
+  .hero-controls.select-controls .select select { width: 100%; }
+  /* A long label pushes the segmented buttons past the edge; let them drop to the next line. */
+  .hero-controls.wrap-controls .model-control { flex-wrap: wrap; gap: var(--space-1) var(--space-3); }
 }
