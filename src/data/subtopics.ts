@@ -162,7 +162,7 @@ export const SUBTOPICS: Subtopic[] = [
     topic: 'Colloidal Systems',
     description:
       'Titrate pH to find the isoelectric point.',
-    concepts: ['Slipping plane', 'Electrophoretic mobility', 'IEP = PZC', 'Potential-determining ions'],
+    concepts: ['Slipping plane', 'Electrophoretic mobility', 'IEP vs PZC', 'Potential-determining ions'],
     cepLink: 'Controlling dispersion of catalyst and electrode particles.',
     href: '#/zeta',
   },

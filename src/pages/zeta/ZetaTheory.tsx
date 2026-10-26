@@ -8,8 +8,8 @@ export function ZetaTheory() {
         <div>
           <h3>Potential-Determining Ions</h3>
           <p>
-            In metal oxides, <em>H<sup>+</sup></em> and <em>OH<sup>-</sup></em> adsorb specifically onto the surface,
-            directly governing the net surface charge depending on the solution pH.
+            On metal oxides, <em>H<sup>+</sup></em> and <em>OH<sup>-</sup></em> are the potential-determining ions:
+            surface –OH groups take up H⁺ (–OH₂⁺) or release it (–O⁻), so the pH sets the surface charge.
           </p>
         </div>
         <div>
@@ -24,10 +24,12 @@ export function ZetaTheory() {
           </p>
         </div>
         <div>
-          <h3>IEP = PZC</h3>
+          <h3>IEP and PZC</h3>
           <p>
-            At the <strong>Isoelectric Point (IEP)</strong>, the zeta potential is zero (<em>ζ</em> = 0), corresponding
-            to zero net surface charge (Point of Zero Charge, PZC), leading to particle flocculation.
+            At the <strong>Isoelectric Point (IEP)</strong>, the zeta potential is zero (<em>ζ</em> = 0) and particles
+            flocculate. In an indifferent electrolyte this coincides with zero surface charge, the{' '}
+            <strong>Point of Zero Charge (PZC)</strong>. Ions that adsorb specifically shift the IEP and the PZC in
+            opposite directions, so IEP = PZC holds only without specific adsorption.
           </p>
         </div>
       </div>
