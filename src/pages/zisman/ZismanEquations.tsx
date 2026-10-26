@@ -7,7 +7,7 @@ export const ZismanEquations: React.FC = () => {
       <div className="eq-grid">
         <div className="card eq-card">
           <h3>The Zisman Empirical Relation</h3>
-          <p>Relates cosine of contact angle (<em>cos(&theta;)</em>) linearly to liquid surface tension (<em>&gamma;<sub>lv</sub></em>):</p>
+          <p>Relates cosine of contact angle (<em>cos(&theta;)</em>) linearly to liquid surface tension (<em>&gamma;<sub>lv</sub></em>); b is the empirical slope, typically about 0.03 m/mN:</p>
           <div className="formula">
             <div className="formula-body formula-text">
               cos(&theta;) = 1 - b &middot; (&gamma;<sub>lv</sub> - &gamma;<sub>c</sub>)
