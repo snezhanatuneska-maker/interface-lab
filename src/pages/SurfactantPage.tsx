@@ -165,7 +165,12 @@ function captionFor(prop: PropId, beta: number | null) {
         </>
       )
     case 'osmotic':
-      return <>{label} Qualitative. A whole micelle counts as one particle, so Π almost stops rising above the CMC.</>
+      return (
+        <>
+          {label} Qualitative. A whole micelle counts as one particle, so Π almost stops rising above the CMC. (Free
+          counter-ions released by ionic micelles, ignored here, keep it rising somewhat.)
+        </>
+      )
     case 'turbidity':
       return <>{label} Qualitative. Micelles are big enough to scatter light; monomers are not.</>
     case 'diffusion':
@@ -182,7 +187,7 @@ function insight(sys: System, c: number): string {
   if (ratio < 1)
     return 'Below the CMC: each added molecule goes to the surface or stays a free monomer. γ keeps falling as the surface fills.'
   if (ratio < 1.5)
-    return 'At the CMC: the surface is (nearly) full and the free monomer concentration has reached its limit, so the first micelles form.'
+    return 'At the CMC: the free monomer concentration has reached its limit, so the first micelles form. The surface is already nearly full.'
   return `Above the CMC: free monomers stay at the CMC, and everything you add (${fmtC(c - sys.cmc)} here) goes into micelles. γ no longer changes.`
 }
 
@@ -226,9 +231,9 @@ export default function SurfactantPage() {
         </a>
         <h1>Surfactants &amp; Micelle Formation</h1>
         <p className="lede">
-          Add surfactant to water. First it crowds onto the surface and lowers the surface tension; once the surface is
-          full, the extra molecules hide their tails in micelles. That switch happens at the critical micelle
-          concentration, the CMC.
+          Add surfactant to water. First it crowds onto the surface and lowers the surface tension. Above the critical
+          micelle concentration, the CMC, extra molecules hide their tails in micelles instead; by then the surface is
+          already nearly full.
         </p>
       </header>
 

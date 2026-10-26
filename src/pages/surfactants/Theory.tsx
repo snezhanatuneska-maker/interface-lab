@@ -129,8 +129,9 @@ export default function Theory() {
             tension γ falls.
           </li>
           <li>
-            <strong>Hide in a micelle.</strong> Once the surface is full, extra molecules cluster in the bulk:
-            tails together in an oily core, heads outside facing the water.
+            <strong>Hide in a micelle.</strong> Above the CMC, extra molecules cluster in the bulk: tails together in
+            an oily core, heads outside facing the water. The surface is nearly saturated well before this, but it is
+            the monomer concentration in the bulk, not a full surface, that sets when micelles form.
           </li>
         </ol>
         <p className="callout">
@@ -164,8 +165,11 @@ export default function Theory() {
               <tr>
                 <th scope="row">Osmotic pressure Π</th>
                 <td>increases</td>
-                <td>almost constant</td>
-                <td>a micelle of ~60 molecules counts as one particle</td>
+                <td>almost constant (still rising for ionic surfactants)</td>
+                <td>
+                  a micelle of ~60 molecules counts as one particle; for ionic surfactants the unbound counter-ions
+                  (about 1 − β of them) still add
+                </td>
               </tr>
               <tr>
                 <th scope="row">Conductivity κ (ionic only)</th>
@@ -205,8 +209,8 @@ export default function Theory() {
             tail length their CMC is one to two orders of magnitude lower.
           </li>
           <li>
-            <strong>Salt → lower CMC (ionic only).</strong> Added Na⁺ or Cl⁻ ions crowd around the charged heads and
-            screen their repulsion, so micelles form more easily (Corrin–Harkins). Non-ionic CMCs barely change.
+            <strong>Salt → lower CMC (ionic only).</strong> Added counter-ions (Na⁺ for SDS, Cl⁻ for CTAB) crowd around the
+            charged heads and screen their repulsion, so micelles form more easily (Corrin–Harkins). Non-ionic CMCs barely change.
           </li>
         </ul>
       </section>
