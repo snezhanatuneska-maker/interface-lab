@@ -409,7 +409,7 @@ export default function NucleationPage() {
             kT; dots mark the barriers at d*. Top right: the nucleus as a spherical cap on the substrate (dashed: the
             full sphere) and the shape factor f(θ). Bottom: log₁₀ of the nucleation rate against S (log scale), with
             the same illustrative prefactor J₀ = 10³⁰ for both cases, so only the exponential term is compared. Fixed:
-            V<sub>m</sub> = 3 × 10⁻²⁹ m³. For the cap, d is the diameter of the sphere it is cut from.
+            v<sub>m</sub> = 3 × 10⁻²⁹ m³. For the cap, d is the diameter of the sphere it is cut from.
           </figcaption>
         </figure>
       </section>
