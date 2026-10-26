@@ -94,7 +94,7 @@ export default function CapillaryPage() {
               <dt>
                 Jurin rise height (<em>h</em>)
               </dt>
-              <dd>{h} µm</dd>
+              <dd>{h}</dd>
             </div>
             <div>
               <dt>

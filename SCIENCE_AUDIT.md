@@ -21,7 +21,7 @@ are quoted below as "Node check".
 | # | Demo | Critical | Major | Minor | Verdict |
 |---|------|:-:|:-:|:-:|---|
 | 1 | Langmuir vs BET Adsorption | 0 | 0 | 2 | correct |
-| 2 | Capillary Pressure & Pore Filling | **2** | 2 | 3 | **seriously wrong** |
+| 2 | Capillary Pressure & Pore Filling | **2** | 3 | 3 | **seriously wrong** |
 | 3 | Mercury Intrusion Porosimetry | **1** | 2 | 2 | **seriously wrong** |
 | 4 | Surfactants & Micelle Formation | 0 | 0 | 3 | correct |
 | 5 | Wetting & Contact Angle | 0 | 0 | 3 | correct |
@@ -36,7 +36,7 @@ are quoted below as "Node check".
 | 14 | Classical Nucleation Theory | 0 | 0 | 2 | correct |
 | 15 | Phase Separation | 0 | 0 | 4 | correct |
 | 16 | Crystal Growth & Shape | 0 | 0 | 3 | correct |
-| | **Total** | **5** | **11** | **44** | |
+| | **Total** | **5** | **12** | **44** | |
 
 Plus 7 cross-demo consistency items (section 17), all minor.
 
@@ -136,6 +136,9 @@ The trainer `trainCapillary.ts` is correct. Two of the three readouts are invent
   nanoscale porous carbon networks". GDL carbon paper has pores of roughly 10–100 µm and the microporous layer
   about 0.1–1 µm. Only the catalyst layer is nanoscale (roughly 10–100 nm). Confidence: high.
 - **CAP-7 MINOR**, `lib/capillary.ts:5`: γ = 72.8 mN/m is the 20 °C value. See C-1. Confidence: high.
+- **CAP-8 MAJOR** (found during Phase 2), `capillary/PoreView.tsx:22`: the meniscus curvature was set by the
+  imbibition/drainage mode (convex when filling, concave when emptying) instead of by θ. A wetting liquid (θ < 90°)
+  always has a concave meniscus; θ > 90° gives a convex one. Butt/Graf/Kappl ch. 2. Confidence: high.
 
 ## 3. Mercury Intrusion Porosimetry: seriously wrong
 
