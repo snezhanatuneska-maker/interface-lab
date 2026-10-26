@@ -110,8 +110,8 @@ export default function PhaseSeparationPage() {
           <li>
             <strong>LiFePO₄ battery cathodes.</strong> During charging and discharging the material separates into
             Li-rich and Li-poor phases. In small nanoparticles and at fast cycling the separation can be suppressed
-            altogether: lithium enters along a solid-solution path instead, which lowers stress and helps the rate
-            capability.
+            altogether: lithium enters along a solid-solution path instead, which helps the rate capability and
+            the cycle life.
           </li>
           <li>
             <strong>Porous membranes by phase inversion.</strong> For porous separators and alkaline-electrolyser

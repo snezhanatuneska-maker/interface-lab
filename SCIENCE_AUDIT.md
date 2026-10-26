@@ -457,3 +457,19 @@ generator keys are correct.
   typical, but IrO₂ in particular varies widely (about 10–200 m²/g) with synthesis.
 - **Legacy `public/lennard-jones.html`.** It is not linked from the app and was only skimmed: a generalised n-6
   potential, which looked correct.
+
+## Follow-up: medium-confidence items checked against sources
+
+| Item | Result | Action |
+|---|---|---|
+| HAM-1 TiO₂ Hamaker constant | Confirmed. Bergström lists rutile/water/rutile as 12.8 kT (≈ 5 × 10⁻²⁰ J); other estimates are 7 × 10⁻²⁰ J (1993) and 22.3 kT (≈ 9 × 10⁻²⁰ J, TDDFT, 2026). The old page value of 26 × 10⁻²⁰ J was 3–5× too high. | TiO₂ stays removed. |
+| PHA-2 LiFePO₄ | Confirmed. Above a critical current the spinodal disappears and particles fill homogeneously (Bai, Cogswell, Bazant, Nano Lett. 2011); coherency strain also suppresses separation, which improves rate capability and cycle life (Cogswell & Bazant, ACS Nano 2012). | Wording changed to "rate capability and cycle life". |
+| CRY-2 Pt facets | Confirmed for H₂SO₄: (111) < (100) < (110), caused by (bi)sulfate adsorption on (111). The ordering in HClO₄ differs between studies, and the page makes no claim about it. | None. |
+| EDL-1 sub-nm pores | The paper is real (Chmiola et al., Science 313, 1760, 2006), but the effect is **disputed**: later work traces it to BET area errors and finds a roughly constant capacitance per area. | Page now says "reported … still debated". |
+| ZET-6 ink stabilisation | Partly confirmed. Ionomer adsorbs on carbon and raises \|ζ\| until the surface is saturated, and ink ζ correlates with catalyst-layer performance (NREL 2022). The steric contribution was not found quantified. | The unverified "electrosteric" claim was replaced with the confirmed findings. |
+| ZIS-1 nylon 6,6 γ_c (value added in the fix) | Compiled tables give 42.2 mN/m; PTFE 18–19.4, PE 31–35. | Nylon set to 42 mN/m. |
+| PHA-3 Zirfon | Confirmed: ZrO₂/polysulfone, made by phase inversion (NIPS). | None. |
+| VDW-3 room-temperature H₂ physisorption | Mostly confirmed, but "about 1 wt% or less" was too strong: excess uptakes are mostly well under 1 wt%, while MOF-210 reaches 2.7 wt% at 298 K and high pressure. | Wording adjusted. |
+| NUC-2 bubbles from pre-existing gas cavities | Confirmed: the Jones et al. type III/IV mechanisms; nucleation at pits and scratches. | None. |
+| MIP-5 limits of MIP | Mercury being non-wetting in every pore is basic physics. MIP is used on catalyst layers (Malik 2016). No source found that quantifies compression of catalyst layers during intrusion. | None ("can compress" stays). |
+

@@ -408,7 +408,8 @@ export default function VdwPage() {
           </li>
           <li>
             <strong>Physisorption.</strong> Porous carbons and MOFs reach useful capacities only at cryogenic
-            temperatures (~77 K); at room temperature they hold about 1 wt% or less.
+            temperatures (~77 K); at room temperature even the best hold only a few wt% under high pressure, and most well under 1 wt%
+            (excess uptake).
           </li>
         </ul>
         <p>

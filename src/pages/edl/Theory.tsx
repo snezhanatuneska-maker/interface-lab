@@ -72,8 +72,9 @@ export function WhyItMatters() {
         <li>
           <strong>Pore size.</strong> Pores must at least admit the ions. When the pore size approaches κ⁻¹ the layers
           from opposite walls overlap, so the simple flat-wall picture fails. In pores below about 1 nm, ions that
-          shed part of their solvation shell sit closer to the wall, and the capacitance per area actually rises
-          (Chmiola et al., 2006).
+          shed part of their solvation shell can still enter and store charge; Chmiola et al. (2006) reported that
+          the capacitance per area even rises there, though later work traced part of that rise to how BET measures
+          the area of such small pores, and the question is still debated.
         </li>
       </ul>
       <p className="prose note">

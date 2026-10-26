@@ -8,7 +8,7 @@ const H = 230;
 
 type Substrate = 'teflon' | 'pe' | 'nylon';
 /** Zisman critical surface tensions, mN/m. */
-const GAMMA_C: Record<Substrate, number> = { teflon: 18, pe: 31, nylon: 43 };
+const GAMMA_C: Record<Substrate, number> = { teflon: 18, pe: 31, nylon: 42 };
 const SUBSTRATE_NAME: Record<Substrate, string> = { teflon: 'PTFE', pe: 'PE', nylon: 'Nylon 6,6' };
 
 export const ZismanTryThis: React.FC = () => {
@@ -136,7 +136,7 @@ export const ZismanTryThis: React.FC = () => {
           >
             <option value="teflon">PTFE / Teflon (Low Energy, γ_c ≈ 18 mN/m)</option>
             <option value="pe">Polyethylene (Medium Energy, γ_c ≈ 31 mN/m)</option>
-            <option value="nylon">Nylon 6,6 (Higher Energy, γ_c ≈ 43 mN/m)</option>
+            <option value="nylon">Nylon 6,6 (Higher Energy, γ_c ≈ 42 mN/m)</option>
           </select>
         </label>
 
