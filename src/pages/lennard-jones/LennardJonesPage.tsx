@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import type { Annotation, Data, Shape } from 'plotly.js'
 import PlotlyChart from '../../components/Plot'
 import { Slider } from '../../components/Controls'
+import Tex from '../../components/Tex'
 import { useThemeColors, type ThemeColors } from '../../lib/themeColors'
 import { axis, baseLayout, staticConfig } from '../../lib/plotTheme'
 
@@ -119,6 +120,16 @@ export const LennardJonesPage: React.FC = () => {
         <h1>Lennard-Jones Potential Explorer</h1>
         <p className="lede">
           The molecular basis of adhesion, adsorption, and cohesion via the 12-6 potential model.
+        </p>
+        <div className="formula">
+          <div className="formula-body eq-math">
+            <Tex display tex={String.raw`V(r) = 4\varepsilon\left[\left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^{6}\right]`} />
+          </div>
+        </div>
+        <p className="note">
+          ε: well depth; σ: distance where V = 0; r: distance between the two atom centres. The r⁻¹² term is the
+          short-range repulsion from overlapping electron clouds, the r⁻⁶ term the van der Waals attraction. Defaults are
+          those of argon (ε ≈ 1.0 kJ/mol, σ = 3.4 Å).
         </p>
       </header>
 

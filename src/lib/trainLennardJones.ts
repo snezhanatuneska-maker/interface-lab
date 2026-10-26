@@ -10,7 +10,7 @@ export const generateLennardJones: Generator<LennardJonesData> = (
   rng: Rng,
   difficulty: Difficulty,
 ): Problem<LennardJonesData> => {
-  const epsilon = round(rng.uniform(0.5, 2.5), 2) // kJ/mol or eV
+  const epsilon = round(rng.uniform(0.5, 2.5), 2) // kJ/mol
   const sigma = round(rng.uniform(2.5, 4.5), 2) // Å
 
   const ask = difficulty === 'easy' ? 'rm' : rng.pick(['rm', 'force'] as const)
@@ -41,16 +41,16 @@ export const generateLennardJones: Generator<LennardJonesData> = (
       rng,
       forceAtSigma,
       [round(forceAtSigma * 0.5, 2), round(forceAtSigma * 2, 2), 0],
-      { format: (v) => `${fmt(v, 2)} units` },
+      { format: (v) => `${fmt(v, 2)} kJ/(mol·Å)` },
     )
 
     return {
-      question: `Given a Lennard-Jones potential with $\\epsilon = ${epsilon}$ and $\\sigma = ${sigma}$ Å, what is the magnitude of the conservative force $F(r) = -dV/dr$ exactly at $r = \\sigma$?`,
+      question: `Given a Lennard-Jones potential with $\\epsilon = ${epsilon}$ kJ/mol and $\\sigma = ${sigma}$ Å, what is the magnitude of the conservative force $F(r) = -dV/dr$ exactly at $r = \\sigma$?`,
       options,
       answer,
       steps: [
         { text: 'Force derivative equation:', tex: `F(r) = -\\frac{dV}{dr} = 4\\epsilon \\left( \\frac{12\\sigma^{12}}{r^{13}} - \\frac{6\\sigma^6}{r^7} \\right)` },
-        { text: 'Evaluate at $r = \\sigma$:', tex: `F(\\sigma) = \\frac{24\\epsilon}{\\sigma} = \\frac{24 \\times ${fmtTex(epsilon, 2)}}{${fmtTex(sigma, 2)}} = ${fmtTex(forceAtSigma, 2)}\\ \\text{units}` },
+        { text: 'Evaluate at $r = \\sigma$:', tex: `F(\\sigma) = \\frac{24\\epsilon}{\\sigma} = \\frac{24 \\times ${fmtTex(epsilon, 2)}}{${fmtTex(sigma, 2)}} = ${fmtTex(forceAtSigma, 2)}\\ \\mathrm{kJ\\,mol^{-1}\\,\\text{Å}^{-1}}` },
       ],
       data: { epsilon, sigma },
     }
