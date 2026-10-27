@@ -6,7 +6,7 @@ import { useThemeColors } from '../../lib/themeColors'
 import { axis, baseLayout, staticConfig } from '../../lib/plotTheme'
 import { CANVAS_FONT, setupCanvas } from '../../lib/canvas'
 import { debyeLength } from '../../lib/edl'
-import { barrier, ccc, HAMAKER_DEFAULT, RADIUS_DEFAULT, STABLE_BARRIER, total, type DlvoParams } from '../../lib/dlvo'
+import { barrier, ccc, HAMAKER_DEFAULT, RADIUS_DEFAULT, secondaryMinimum, STABLE_BARRIER, total, type DlvoParams } from '../../lib/dlvo'
 
 // DLVO energy of two equal spheres (src/lib/dlvo.ts): double-layer repulsion plus van der Waals attraction, in kT.
 
@@ -15,6 +15,9 @@ const H = 220
 const SALT_RANGE: [number, number] = [0.1, 1000] // mM
 const PSI_DEFAULT = 50 // mV
 const N_POINTS = 400
+
+/** Two significant figures without exponent notation: 380 mM, not 3.8e+2 mM. */
+const sig2 = (v: number) => Number(v.toPrecision(2)).toString()
 
 const SALT_NAME: Record<number, string> = { 1: 'NaCl', 2: 'MgSO₄', 3: 'a 3:3 salt' }
 
@@ -35,22 +38,19 @@ export function DlvoTryThis() {
   const isStable = b >= STABLE_BARRIER
 
   // ---------- V(h) ----------
-  const hMax = Math.min(100, Math.max(20, 6 * debye))
+  // The secondary minimum is searched on its own wide grid (it can lie far out at low salt or high ψ₀), and the plot
+  // is widened so that it stays in view.
+  const sec = useMemo(
+    () => secondaryMinimum({ c0: saltConc, z: valency, psi0, a: RADIUS_DEFAULT, hamaker: HAMAKER_DEFAULT }),
+    [saltConc, valency, psi0],
+  )
+  const secondary = sec ? sec.V : 0
+  const hMax = Math.min(300, Math.max(20, 6 * debye, sec ? 1.5 * sec.h : 0))
   const curve = useMemo(() => {
     const p = { c0: saltConc, z: valency, psi0, a: RADIUS_DEFAULT, hamaker: HAMAKER_DEFAULT }
     const hs = Array.from({ length: N_POINTS + 1 }, (_, i) => 0.2 + ((hMax - 0.2) * i) / N_POINTS)
     return { hs, V: hs.map((h) => total(h, p)) }
   }, [saltConc, valency, psi0, hMax])
-  // Secondary minimum: a true local minimum (V falls, then rises again) beyond the barrier. Without a barrier the
-  // curve rises monotonically towards 0, and its value at the plot edge is not a minimum.
-  const peakIndex = curve.V.reduce((best, v, i) => (v > curve.V[best] ? i : best), 0)
-  let secondary = 0
-  if (b > 0)
-    for (let i = Math.max(peakIndex, 1); i < curve.V.length - 1; i++)
-      if (curve.V[i] < curve.V[i - 1] && curve.V[i] <= curve.V[i + 1]) {
-        secondary = Math.min(0, curve.V[i])
-        break
-      }
   const yTop = Math.max(25, 1.2 * b)
   const yBottom = -Math.max(15, 1.5 * Math.abs(secondary))
 
@@ -105,7 +105,7 @@ export function DlvoTryThis() {
         <div className="coverage">
           <span className="coverage-label">Energy barrier</span>
           <span className="coverage-value colloid">
-            {b > 0 ? b.toFixed(0) : 'none'} {b > 0 && <em>kT</em>}
+            {b <= 0 ? 'none' : b < 1 ? '< 1' : b.toFixed(0)} {b > 0 && <em>kT</em>}
           </span>
           <span className="coverage-sub">{isStable ? `≥ ${STABLE_BARRIER} kT: stable` : `< ${STABLE_BARRIER} kT: coagulating`}</span>
         </div>
@@ -114,7 +114,7 @@ export function DlvoTryThis() {
       <div className="sim-grid">
         <div
           role="img"
-          aria-label={`DLVO energy against separation in ${saltConc} mM ${valency}:${valency} salt at ${psi0} mV: barrier ${b.toFixed(0)} kT, ${isStable ? 'stable' : 'coagulating'}.`}
+          aria-label={`DLVO energy against separation in ${saltConc} mM ${valency}:${valency} salt at ${psi0} mV: barrier ${b < 1 ? 'below 1' : b.toFixed(0)} kT, ${isStable ? 'stable' : 'coagulating'}.`}
         >
           <Plot
             data={data}
@@ -146,11 +146,11 @@ export function DlvoTryThis() {
             </div>
             <div>
               <dt>Secondary minimum</dt>
-              <dd>{secondary < -0.05 ? `${secondary.toFixed(1)} kT` : 'none'}</dd>
+              <dd>{sec && secondary < -0.05 ? `${secondary.toFixed(1)} kT at ${sig2(sec.h)} nm` : 'none'}</dd>
             </div>
             <div className="result-main">
               <dt>CCC for z = {valency} at {psi0} mV</dt>
-              <dd>{cccValue.toPrecision(2)} mM</dd>
+              <dd>{sig2(cccValue)} mM</dd>
             </div>
           </dl>
         </div>
@@ -191,13 +191,14 @@ export function DlvoTryThis() {
           ? 'There is no barrier: van der Waals attraction wins at every distance and the particles coagulate.'
           : isStable
             ? `A barrier of ${b.toFixed(0)} kT keeps the particles out of the primary minimum.`
-            : `The barrier of ${b.toFixed(0)} kT is low enough for thermal motion to cross it: slow coagulation.`}{' '}
-        Above the CCC ({cccValue.toPrecision(2)} mM here) the barrier is gone.
+            : `The barrier of ${b < 1 ? 'less than 1' : b.toFixed(0)} kT is low enough for thermal motion to cross it: slow coagulation.`}{' '}
+        Above the CCC ({sig2(cccValue)} mM here) the barrier is gone.
       </p>
       <figcaption>
         <span className="figure-label">Figure 1.</span> DLVO energy of two spheres of radius {RADIUS_DEFAULT} nm with
         A = {HAMAKER_DEFAULT / 1e-20} × 10⁻²⁰ J in water at 25 °C (Derjaguin approximation, weak-overlap double-layer
-        repulsion, non-retarded van der Waals). The dotted line is the {STABLE_BARRIER} kT rule of thumb for long-term
+        repulsion, non-retarded van der Waals; reliable for κa ≫ 1 and κh ≳ 1, and ψ₀ is held fixed although in reality it
+        falls as salt is added). The dotted line is the {STABLE_BARRIER} kT rule of thumb for long-term
         stability. The curve falls without limit at contact (primary minimum); in reality short-range repulsion stops
         it.
       </figcaption>

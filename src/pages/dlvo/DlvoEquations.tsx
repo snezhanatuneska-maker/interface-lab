@@ -17,7 +17,8 @@ export function DlvoEquations() {
           <div className="formula">
             <div className="formula-body">
               <Tex display tex={String.raw`V_{total} = V_R + V_A`} />
-              <Tex display tex={String.raw`V_R = \frac{64\pi a\,n_0 k T\,\Gamma^2}{\kappa^2}\,e^{-\kappa h},\quad \Gamma = \tanh\frac{ze\psi_0}{4kT},\qquad V_A = -\frac{A\,a}{12\,h}`} />
+              <Tex display tex={String.raw`\begin{aligned} V_R &= \frac{64\pi a\,n_0 kT}{\kappa^2} \\ &\quad\times \tanh^2\!\left(\frac{ze\psi_0}{4kT}\right) e^{-\kappa h} \end{aligned}`} />
+              <Tex display tex={String.raw`V_A = -\frac{A\,a}{12\,h}`} />
             </div>
             <span className="formula-number">(1)</span>
           </div>

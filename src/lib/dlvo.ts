@@ -46,6 +46,22 @@ export function barrier(p: DlvoParams): number {
   return best
 }
 
+/** Gaps (nm) on a log grid from 0.1 to 1000 nm: at low salt the secondary minimum lies far beyond 100 nm. */
+const WIDE_GRID = Array.from({ length: 3000 }, (_, i) => 0.1 * 10000 ** (i / 2999))
+
+/**
+ * Secondary minimum beyond the barrier: the first local minimum of V outside the highest maximum, with its depth (kT)
+ * and gap (nm). Null when there is no barrier (V then rises monotonically, so there is no minimum to report).
+ */
+export function secondaryMinimum(p: DlvoParams): { h: number; V: number } | null {
+  const v = WIDE_GRID.map((h) => total(h, p))
+  let peak = -1
+  for (let i = 1; i < v.length - 1; i++) if (v[i] >= v[i - 1] && v[i] > v[i + 1] && v[i] > 0 && (peak < 0 || v[i] > v[peak])) peak = i
+  if (peak < 0) return null
+  for (let i = peak + 1; i < v.length - 1; i++) if (v[i] < v[i - 1] && v[i] <= v[i + 1]) return v[i] < 0 ? { h: WIDE_GRID[i], V: v[i] } : null
+  return null
+}
+
 /** Critical coagulation concentration (mM): the lowest c₀ at which the barrier vanishes (bisection on log c₀). */
 export function ccc(p: Omit<DlvoParams, 'c0'>): number {
   let lo = Math.log(0.01)
