@@ -164,6 +164,14 @@ describe('2 Capillary (Young–Laplace, Jurin, Kelvin)', () => {
     near(cap.kelvinRatio(1e9, 0), 1, 1e-6) // flat surface limit
     near(cap.kelvinRatio(15, 90), 1, 1e-12)
   })
+  it('Kelvin, filling (cylindrical meniscus, Cohan): factor 1, so the pore fills at a higher p/p₀ than it empties', () => {
+    const k1 = (r, t) => Math.exp((-g * Vmol * cosd(t)) / (r * 1e-9 * R * T))
+    for (const [r, t] of [[2, 0], [15, 21], [50, 0]]) {
+      near(cap.kelvinRatio(r, t, 'imbibition'), k1(r, t), 2e-3)
+      near(Math.log(cap.kelvinRatio(r, t, 'drainage')), 2 * Math.log(cap.kelvinRatio(r, t, 'imbibition')), 1e-9)
+      expect(cap.kelvinRatio(r, t, 'imbibition')).toBeGreaterThan(cap.kelvinRatio(r, t, 'drainage'))
+    }
+  })
   it('trends: smaller r → larger |Pc| and lower p/p₀; larger θ (<90°) → smaller Pc', () => {
     expect(cap.capillaryPressure(5, 21)).toBeGreaterThan(cap.capillaryPressure(20, 21))
     expect(cap.kelvinRatio(5, 21)).toBeLessThan(cap.kelvinRatio(20, 21))
@@ -326,9 +334,6 @@ describe('7 Surface explorer (XPS)', () => {
     const Eb = (hv, Ek, phi) => hv - Ek - phi
     near(Eb(1486.6, 1197.8, 4.2), 284.6, 1e-9) // adventitious C 1s
     near(Eb(1253.6, 1179.1, 4.5), 70.0, 1e-9) // Pt 4f7/2 ≈ 71 eV region
-  })
-  it('attenuation: 95 % of the signal from 3λ cos θ', () => {
-    near(1 - Math.exp(-3), 0.95, 0.003)
   })
   it('trainer XPS: E_k in the question and the keyed E_b satisfy E_b = hν − E_k − Φ', () => {
     const xps = problems(generateSurface).filter(({ p }) => p.data.topic === 'xps')
@@ -609,10 +614,6 @@ describe('12 Zeta potential & IEP', () => {
     near(MOBILITY_PER_MV, (eps0 * 78.5 * 1e-3) / 0.89e-3 / 1e-8, 1e-6)
     near(1 / MOBILITY_PER_MV, 12.8, 0.01)
   })
-  it('Hückel limit is 2/3 of Smoluchowski (Henry f from 1 to 1.5)', () => {
-    near((2 / 3) * 1 / 1.0, (2 / 3) * 1, 1e-12)
-    near((2 / 3) * 1.5, 1, 1e-12)
-  })
   it('model ζ(pH): 0 at the IEP, positive below, negative above, bounded and monotonic', () => {
     expect(zeta(7)).toBeCloseTo(0, 12)
     expect(zeta(4)).toBeGreaterThan(0)
@@ -685,34 +686,36 @@ describe('13 DLVO & Schulze–Hardy', () => {
     expect(dlvo.barrier(P(10, 1, 75))).toBeGreaterThan(dlvo.barrier(P(10, 1, 50)))
     expect(dlvo.barrier(P(10, 1, 0))).toBe(0)
   })
-  it('page "secondary minimum" readout is a real minimum, not the end of the plotted range', () => {
-    // logic copied from src/pages/dlvo/DlvoTryThis.tsx
-    const readout = (c0, z, psi0) => {
-      const debye = edl.debyeLength(c0, z)
-      const hMax = Math.min(100, Math.max(20, 6 * debye))
-      const p = P(c0, z, psi0)
-      const hs = Array.from({ length: 401 }, (_, i) => 0.2 + ((hMax - 0.2) * i) / 400)
-      const V = hs.map((x) => dlvo.total(x, p))
-      const b = dlvo.barrier(p)
-      const peakIndex = V.reduce((best, v, i) => (v > V[best] ? i : best), 0)
-      let secondary = 0
-      if (b > 0)
-        for (let i = Math.max(peakIndex, 1); i < V.length - 1; i++)
-          if (V[i] < V[i - 1] && V[i] <= V[i + 1]) {
-            secondary = Math.min(0, V[i])
-            break
-          }
-      // a reported minimum must be an interior point where V turns from falling to rising
-      const i = V.indexOf(secondary)
-      const atEnd = secondary < -0.05 && !(i > 0 && i < V.length - 1 && V[i] < V[i - 1] && V[i] <= V[i + 1])
-      return { secondary, atEnd }
+  it('secondary minimum: the page readout (lib secondaryMinimum) matches an independent search, wherever it lies', () => {
+    // Independent: first local minimum outside the barrier on a fine linear grid out to 1000 nm.
+    const independent = (p) => {
+      const H = Array.from({ length: 40000 }, (_, i) => 0.2 + i * 0.025)
+      const W = H.map((x) => Vtot(x, p))
+      const pk = W.reduce((bi, v, i) => (v > W[bi] ? i : bi), 0)
+      if (W[pk] <= 0) return null
+      for (let i = pk + 1; i < W.length - 1; i++) if (W[i] < W[i - 1] && W[i] <= W[i + 1]) return W[i] < 0 ? { h: H[i], V: W[i] } : null
+      return null
     }
-    const cases = [[300, 1, 50], [1000, 1, 50], [100, 2, 50], [0.1, 1, 50], [10, 1, 50]].map((c) => ({ c, ...readout(...c) }))
-    near(cases[4].secondary, -5.14, 0.01) // 10 mM: the genuine secondary minimum at 15.9 nm is still shown
-    expect(cases[0].secondary).toBe(0) // above the CCC there is none
-    const fake = cases.filter((x) => x.atEnd)
-    if (fake.length) console.log('DLVO page reports the plot edge as a secondary minimum for', fake.map((x) => `${x.c[0]} mM z=${x.c[1]}: ${x.secondary.toFixed(1)} kT`).join('; '))
-    expect(fake.length).toBe(0)
+    const bad = []
+    for (const z of [1, 2, 3])
+      for (const psi of [10, 30, 50, 70, 90, 100])
+        for (const c0 of [0.1, 0.5, 2, 10, 30, 100, 300]) {
+          const p = P(c0, z, psi)
+          const got = dlvo.secondaryMinimum(p)
+          const want = independent(p)
+          if (!want !== !got || (want && (Math.abs(got.V - want.V) > 0.02 * Math.abs(want.V) + 0.01 || rel(got.h, want.h) > 0.03)))
+            bad.push(`${c0} mM z=${z} ψ₀=${psi}: lib ${got ? got.V.toFixed(2) + ' kT at ' + got.h.toFixed(1) : 'none'}, independent ${want ? want.V.toFixed(2) + ' kT at ' + want.h.toFixed(1) : 'none'}`)
+        }
+    if (bad.length) console.log('secondary minimum mismatches:', bad.slice(0, 5).join('; '))
+    expect(bad.length).toBe(0)
+    // 10 mM 1:1 at 90 mV: −4.3 kT near 20 nm, which the page used to report as "none"
+    const s = dlvo.secondaryMinimum(P(10, 1, 90))
+    near(s.V, -4.29, 0.01)
+    // the page takes its readout from the lib and widens the plot to include the minimum
+    const page = readFileSync(new URL('../src/pages/dlvo/DlvoTryThis.tsx', import.meta.url), 'utf8')
+    expect(page).toMatch(/secondaryMinimum\(/)
+    expect(page).toMatch(/1\.5 \* sec\.h/)
+    expect(page).not.toMatch(/toPrecision\(2\)\} mM/) // no "3.8e+2 mM"
   })
   it('trainer: CCC keys follow (z₁/z₂)⁶; Debye keys follow 0.304/(z√c)', () => {
     const list = problems(generateColloid)
@@ -784,6 +787,15 @@ describe('14 Classical nucleation theory', () => {
     expect(nuc.criticalDiameter(1, 0.1, 298)).toBeNull()
     expect(nuc.barrierHom(2, 0.2, 298) / nuc.barrierHom(2, 0.1, 298)).toBeCloseTo(8, 9)
     expect(nuc.criticalDiameter(10, 0.1, 298)).toBeLessThan(nuc.criticalDiameter(2, 0.1, 298))
+  })
+  it('capillary approximation: the default nucleus holds ~100 molecules; the page warns when it holds fewer than ~10', () => {
+    const molecules = (dNm) => (Math.PI * (dNm * 1e-9) ** 3) / (6 * v)
+    near(molecules(nuc.solve(5, 0.1, 60, 298).dStar), 104, 0.02)
+    expect(molecules(nuc.solve(20, 0.02, 60, 500).dStar)).toBeLessThan(1) // slider extreme: sub-molecular "nucleus"
+    const page = readFileSync(new URL('../src/pages/NucleationPage.tsx', import.meta.url), 'utf8')
+    expect(page).toMatch(/molecules\(n\.dStar\) < 10/)
+    const eqs = readFileSync(new URL('../src/pages/nucleation/Equations.tsx', import.meta.url), 'utf8')
+    expect(eqs).toMatch(/Capillary approximation/)
   })
   it('trainer: d*, f(θ) and scaling keys', () => {
     const list = problems(generateNucleation)
@@ -910,9 +922,6 @@ describe('16 Crystal growth & shape', () => {
   it('Wulff: h ∝ γ', () => {
     const [h10, h11] = cry.wulffDistances(1.2, 10)
     near(h11 / h10, 1.2, 1e-12)
-  })
-  it('sphere shape factors: β = π, α = π/6 for diameter x; R = (3α/β)ρG', () => {
-    near((3 * (Math.PI / 6)) / Math.PI, 0.5, 1e-12)
   })
   it('trainer: survivors key', () => {
     for (const { p } of problems(generateCrystal)) {
