@@ -165,6 +165,9 @@ export const HamakerPage: React.FC = () => {
   return (
     <article className="page">
       <header className="page-intro compact">
+        <a className="back-link" href="#/">
+          ← All tools
+        </a>
         <h1>Hamaker & Lifshitz: vdW Between Surfaces</h1>
         <p className="lede">Pick two materials and a medium: attraction or repulsion?</p>
       </header>

@@ -128,8 +128,8 @@ export default function CrystalPage() {
           solute is the slow step, and the slow faces win.
         </p>
         <p className="prose crystal-note">
-          How crystals are born (nucleation) is covered in Prof. Klupp's nucleation &amp; growth simulation — this page
-          starts after the nucleus exists.
+          How crystals are born is covered in the <a href="#/nucleation">nucleation tool</a>; this page starts after the
+          nucleus exists.
         </p>
       </header>
 

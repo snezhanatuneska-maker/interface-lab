@@ -9,6 +9,9 @@ export const SurfaceExplorerPage: React.FC = () => {
   return (
     <article className="page">
       <header className="page-intro compact">
+        <a className="back-link" href="#/">
+          ← All tools
+        </a>
         <h1>Surface Characterization Explorer: SEM, AFM, XPS</h1>
         <p className="lede">
           Compare what Scanning Electron Microscopy (SEM), Atomic Force Microscopy (AFM), and X-ray Photoelectron Spectroscopy (XPS) each reveal about the same catalyst or electrode surface.

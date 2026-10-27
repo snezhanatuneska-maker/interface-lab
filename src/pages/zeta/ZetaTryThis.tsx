@@ -12,6 +12,8 @@ const ZETA_MAX = 60 // mV, plateau far from the IEP
 const ZETA_WIDTH = 3 // pH units over which ζ turns from one plateau to the other
 /** Rule of thumb for electrostatic stability. */
 const STABLE_ZETA = 30 // mV
+/** Below this |ζ| aggregation is fast; between it and STABLE_ZETA stability is limited. */
+const UNSTABLE_ZETA = 10 // mV
 /** Smoluchowski: u = ε₀ε_r ζ / η, in µm·cm/(V·s) per mV (1 µm·cm/(V·s) = 10⁻⁸ m²/(V·s)): about 0.078. */
 const MOBILITY_PER_MV = (E0 * EPS_BULK * 1e-3) / ETA_WATER / 1e-8
 
@@ -26,6 +28,8 @@ export function ZetaTryThis() {
   const zetaNum = parseFloat(zetaPotential)
   const mobility = (MOBILITY_PER_MV * zetaNum).toFixed(2) // Smoluchowski, water at 25 °C
   const isStable = Math.abs(zetaNum) > STABLE_ZETA
+  const isUnstable = Math.abs(zetaNum) < UNSTABLE_ZETA
+  const status = isStable ? 'Stable suspension' : isUnstable ? 'Agglomerating (fast)' : 'Limited stability (slow aggregation)'
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -68,8 +72,8 @@ export function ZetaTryThis() {
     ctx.fillStyle = theme.text
     ctx.fillText(`pH: ${ph.toFixed(1)} | Zeta: ${zetaPotential} mV`, 12, 22)
     ctx.fillStyle = isStable ? theme.accent : theme.data2
-    ctx.fillText(`Status: ${isStable ? 'DISPERSED (Stable Ink)' : 'AGGLOMERATED (Flocculated)'}`, 12, 42)
-  }, [ph, zetaNum, zetaPotential, isStable, theme])
+    ctx.fillText(`Status: ${status}`, 12, 42)
+  }, [ph, zetaNum, zetaPotential, isStable, status, theme])
 
   return (
     <figure id="sim-figure" className="figure hero" aria-label="Interactive pH Titration Simulator">
@@ -99,7 +103,7 @@ export function ZetaTryThis() {
           <div>
             <dt>Dispersion State</dt>
             <dd className={isStable ? 'state-ok' : 'state-bad'}>
-              {isStable ? 'Stable Suspension' : 'Flocculated / Settling'}
+              {status}
             </dd>
           </div>
         </dl>
@@ -131,7 +135,8 @@ export function ZetaTryThis() {
       <figcaption>
         <span className="figure-label">Figure 1.</span> A model oxide with its IEP at pH 7 in an indifferent salt. The
         mobility follows Smoluchowski (thin double layer, water at 25 °C): 1 µm·cm/(V·s) ≈ 12.8 mV. Stable here
-        means |ζ| &gt; {STABLE_ZETA} mV, a rule of thumb that depends on salt and particle size.
+        means |ζ| &gt; {STABLE_ZETA} mV and fast agglomeration |ζ| &lt; {UNSTABLE_ZETA} mV; both are rules of thumb that
+        depend on salt and particle size.
       </figcaption>
     </figure>
   )

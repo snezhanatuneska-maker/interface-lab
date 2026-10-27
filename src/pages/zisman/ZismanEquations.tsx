@@ -1,4 +1,5 @@
 import React from 'react';
+import Tex from '../../components/Tex';
 
 export const ZismanEquations: React.FC = () => {
   return (
@@ -7,10 +8,10 @@ export const ZismanEquations: React.FC = () => {
       <div className="eq-grid">
         <div className="card eq-card">
           <h3>The Zisman Empirical Relation</h3>
-          <p>Relates cosine of contact angle (<em>cos(&theta;)</em>) linearly to liquid surface tension (<em>&gamma;<sub>lv</sub></em>); b is the empirical slope, typically about 0.03 m/mN:</p>
+          <p>Relates cosine of contact angle (<em>cos(&theta;)</em>) linearly to liquid surface tension (<em>&gamma;<sub>LV</sub></em>); b is the empirical slope, typically about 0.03 m/mN:</p>
           <div className="formula">
-            <div className="formula-body formula-text">
-              cos(&theta;) = 1 - b &middot; (&gamma;<sub>lv</sub> - &gamma;<sub>c</sub>)
+            <div className="formula-body eq-math">
+              <Tex display tex={String.raw`\cos\theta = 1 - b\,(\gamma_{LV} - \gamma_c)`} />
             </div>
           </div>
         </div>
@@ -18,8 +19,8 @@ export const ZismanEquations: React.FC = () => {
           <h3>Critical Surface Tension</h3>
           <p>Defined at complete wetting (<em>&theta; = 0&deg;</em>, <em>cos(&theta;) = 1</em>), representing apparent solid surface energy:</p>
           <div className="formula">
-            <div className="formula-body formula-text">
-              &gamma;<sub>c</sub> = lim<sub>&theta;&rarr;0</sub> &gamma;<sub>lv</sub>
+            <div className="formula-body eq-math">
+              <Tex display tex={String.raw`\gamma_c = \lim_{\theta \to 0} \gamma_{LV}`} />
             </div>
           </div>
         </div>

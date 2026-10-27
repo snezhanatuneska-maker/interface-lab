@@ -62,7 +62,9 @@ export const PROFILE_X2 = 0.85
 /** φ → composition between x₁ and x₂. */
 export const toComposition = (phi: number) => (PROFILE_X1 + PROFILE_X2) / 2 + (phi * (PROFILE_X2 - PROFILE_X1)) / 2
 
-export const PHI0_NUCLEATION = -0.6 // metastable: outside the spinodal φ = ±1/√3 of the φ⁴ model
+// Metastable in both models: outside the φ⁴ spinodal φ = ±1/√3, and x₀ = 0.255 lies between the regular-solution binodal
+// (0.15) and spinodal (0.28) that go with x₁ = 0.15, x₂ = 0.85.
+export const PHI0_NUCLEATION = -0.7
 export const PHI0_SPINODAL = 0 // unstable: the middle of the spinodal
 export const PROFILE_T_END = 120
 

@@ -60,13 +60,13 @@ export default function Equations({ model }: { model: Model }) {
           </div>
           <div className="formula">
             <div className="formula-body eq-math">
-              <Tex display tex={String.raw`\sigma = \frac{\varepsilon_0\varepsilon_S(\psi_0-\psi_d)}{\delta} = \sqrt{8c_0N_A\varepsilon_0\varepsilon_r k_BT}\,\sinh\frac{ze\psi_d}{2k_BT}`} />
+              <Tex display tex={String.raw`\begin{aligned} \sigma &= \frac{\varepsilon_0\varepsilon_S(\psi_0-\psi_d)}{\delta} \\ &= \sqrt{8c_0N_A\varepsilon_0\varepsilon_r k_BT}\,\sinh\frac{ze\psi_d}{2k_BT} \end{aligned}`} />
             </div>
             <span className="formula-number">(4)</span>
           </div>
           <div className="formula">
             <div className="formula-body eq-math">
-              <Tex display tex={String.raw`C_S = \frac{\varepsilon_0\varepsilon_S}{\delta},\quad C_d = \varepsilon_0\varepsilon_r\kappa\cosh\frac{ze\psi_d}{2k_BT}`} />
+              <Tex display tex={String.raw`\begin{aligned} C_S &= \frac{\varepsilon_0\varepsilon_S}{\delta} \\ C_d &= \varepsilon_0\varepsilon_r\kappa\cosh\frac{ze\psi_d}{2k_BT} \end{aligned}`} />
               <Tex display tex={String.raw`\frac{1}{C_\text{tot}} = \frac{1}{C_S} + \frac{1}{C_d}`} />
             </div>
             <span className="formula-number">(5)</span>

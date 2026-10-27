@@ -160,7 +160,7 @@ export default function Theory() {
                 <th scope="row">Surface tension γ</th>
                 <td>decreases</td>
                 <td>constant (plateau)</td>
-                <td>the surface is full and the monomer concentration stops rising</td>
+                <td>the free monomer concentration stops rising (the surface is by then nearly saturated)</td>
               </tr>
               <tr>
                 <th scope="row">Osmotic pressure Π</th>

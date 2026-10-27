@@ -9,7 +9,7 @@ export const ZismanTheory: React.FC = () => {
         <div>
           <h3>The Zisman Plot</h3>
           <p>
-            By measuring contact angles (<em>&theta;</em>) of a homologous series of non-polar liquids (e.g. n-alkanes), plotting <span>cos(&theta;)</span> against liquid surface tension (<em>&gamma;<sub>lv</sub></em>) yields a straight line.
+            By measuring contact angles (<em>&theta;</em>) of a homologous series of non-polar liquids (e.g. n-alkanes), plotting <span>cos(&theta;)</span> against liquid surface tension (<em>&gamma;<sub>LV</sub></em>) yields a straight line.
           </p>
         </div>
 
@@ -23,7 +23,7 @@ export const ZismanTheory: React.FC = () => {
         <div>
           <h3>Teflon & Low Energy Surfaces</h3>
           <p>
-            Fluoropolymers like PTFE (Teflon) feature dense <span>-CF<sub>2</sub>-</span> groups with weak dispersion forces, creating a very low surface energy (<em>&gamma;<sub>c</sub></em> &approx; 18 mN/m). Water beads up at about 110°; surfaces of packed <span>-CF<sub>3</sub></span> groups go lower still (&gamma;<sub>c</sub> &approx; 6 mN/m).
+            Fluoropolymers like PTFE (Teflon) feature dense <span>-CF<sub>2</sub>-</span> groups with weak dispersion forces, creating a very low critical surface tension (<em>&gamma;<sub>c</sub></em> &approx; 18 mN/m, close to its surface energy; γ<sub>c</sub> is an empirical quantity, not the surface energy itself). Water beads up at about 110°; surfaces of packed <span>-CF<sub>3</sub></span> groups go lower still (&gamma;<sub>c</sub> &approx; 6 mN/m).
           </p>
         </div>
       </div>

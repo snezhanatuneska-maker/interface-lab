@@ -57,7 +57,16 @@ export const ZismanTryThis: React.FC = () => {
     ctx.fillText('1', 28, py(1) + 4);
     ctx.fillText('0', 28, py(0) + 4);
     ctx.fillText('−1', 22, py(-1));
-    ctx.fillText('γ_lv (mN/m)', 110, 218);
+    // γ ticks, so γ_c can be read where the line reaches cos θ = 1
+    ctx.strokeStyle = theme.axis;
+    for (const g of [20, 40, 60, 80]) {
+      ctx.beginPath();
+      ctx.moveTo(px(g), 200);
+      ctx.lineTo(px(g), 204);
+      ctx.stroke();
+      ctx.fillText(String(g), px(g) - 6, 214);
+    }
+    ctx.fillText('liquid γ (mN/m)', 100, 228);
 
     // The line reaches cos θ = 1 at γ_c and is clipped at cos θ = −1.
     const gEnd = Math.min(80, gammaC + 2 / b);
@@ -134,15 +143,15 @@ export const ZismanTryThis: React.FC = () => {
             value={substrate}
             onChange={(e) => setSubstrate(e.target.value as Substrate)}
           >
-            <option value="teflon">PTFE / Teflon (Low Energy, γ_c ≈ 18 mN/m)</option>
-            <option value="pe">Polyethylene (Medium Energy, γ_c ≈ 31 mN/m)</option>
-            <option value="nylon">Nylon 6,6 (Higher Energy, γ_c ≈ 42 mN/m)</option>
+            <option value="teflon">PTFE / Teflon (Low Energy, γc ≈ 18 mN/m)</option>
+            <option value="pe">Polyethylene (Medium Energy, γc ≈ 31 mN/m)</option>
+            <option value="nylon">Nylon 6,6 (Higher Energy, γc ≈ 42 mN/m)</option>
           </select>
         </label>
 
         <Slider
           id="zisman-gamma"
-          label={<>Liquid Surface Tension (&gamma;<sub>lv</sub>):{' '}</>}
+          label={<>Liquid Surface Tension (&gamma;<sub>LV</sub>):{' '}</>}
           value={`${liquidGamma} mN/m`}
           min={20}
           max={75}
@@ -152,7 +161,7 @@ export const ZismanTryThis: React.FC = () => {
         />
       </div>
       <figcaption>
-        <span className="figure-label">Figure 1.</span> Left: Zisman line cos θ = 1 − b(γ<sub>lv</sub> − γ<sub>c</sub>)
+        <span className="figure-label">Figure 1.</span> Left: Zisman line cos θ = 1 − b(γ<sub>LV</sub> − γ<sub>c</sub>)
         with a typical slope b = 0.03 m/mN. Right: the drop at that angle. The straight line holds for non-polar
         liquids; polar liquids such as water bend the plot, so the line overestimates their angle (it gives about 130°
         for water on PTFE; the measured value is about 110°). Clean glass and metals are high-energy surfaces on which

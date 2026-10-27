@@ -19,7 +19,7 @@ export function ZetaEquations() {
               <Tex display tex={String.raw`u_e = \frac{2\,\varepsilon\,\zeta}{3\,\eta}\,f(\kappa a)`} />
             </div>
           </div>
-          <p>For κa ≫ 1 (most particles in water) this becomes Smoluchowski:</p>
+          <p>For κa ≫ 1 (large particles or salty water; not for small nanoparticles in dilute electrolyte) this becomes Smoluchowski:</p>
           <div className="formula">
             <div className="formula-body">
               <Tex display tex={String.raw`u_e = \frac{\varepsilon\,\zeta}{\eta}`} />

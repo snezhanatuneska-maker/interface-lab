@@ -8,6 +8,9 @@ export const ZismanPage: React.FC = () => {
   return (
     <article className="page">
       <header className="page-intro compact">
+        <a className="back-link" href="#/">
+          ← All tools
+        </a>
         <h1>Surface Energy & The Zisman Plot</h1>
         <p className="lede">
           Explore how contact angles across various liquids allow us to construct Zisman plots, determine critical surface tension, and evaluate hydrophobic coatings like Teflon.

@@ -56,7 +56,7 @@ export default function Theory() {
           <h3>Cassie–Baxter: drop sits on trapped air</h3>
           <div className="formula">
             <div className="formula-body eq-math">
-              <Tex display tex={String.raw`\cos\theta_{CB} = f_s(\cos\theta_Y + 1) - 1`} />
+              <Tex display tex={String.raw`\begin{aligned} &\cos\theta_{CB} \\ &= f_s(\cos\theta_Y + 1) - 1 \end{aligned}`} />
             </div>
           </div>
           <dl className="terms">

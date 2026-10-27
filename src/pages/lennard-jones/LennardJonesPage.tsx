@@ -117,6 +117,9 @@ export const LennardJonesPage: React.FC = () => {
   return (
     <article className="page">
       <header className="page-intro compact">
+        <a className="back-link" href="#/">
+          ← All tools
+        </a>
         <h1>Lennard-Jones Potential Explorer</h1>
         <p className="lede">
           The molecular basis of adhesion, adsorption, and cohesion via the 12-6 potential model.
@@ -128,7 +131,8 @@ export const LennardJonesPage: React.FC = () => {
         </div>
         <p className="note">
           ε: well depth; σ: distance where V = 0; r: distance between the two atom centres. The r⁻¹² term is the
-          short-range repulsion from overlapping electron clouds, the r⁻⁶ term the van der Waals attraction. Defaults are
+          short-range repulsion from overlapping electron clouds (the exponent 12 is chosen for convenience; real Pauli
+          repulsion is closer to exponential), the r⁻⁶ term the van der Waals attraction. Defaults are
           those of argon (ε ≈ 1.0 kJ/mol, σ = 3.4 Å).
         </p>
       </header>
@@ -146,7 +150,7 @@ export const LennardJonesPage: React.FC = () => {
               color={theme.data1}
               yLabel="V (kJ/mol)"
               sigma={sigma}
-              mark={{ r: rm, y: -epsilon, label: 'r_m, −ε' }}
+              mark={{ r: rm, y: -epsilon, label: 'r<sub>m</sub>, −ε' }}
               ariaLabel="Lennard-Jones potential energy curve"
               theme={theme}
             />
@@ -162,7 +166,7 @@ export const LennardJonesPage: React.FC = () => {
               color={theme.data2}
               yLabel="F (kJ/(mol·Å))"
               sigma={sigma}
-              mark={{ r: rm, y: 0, label: 'F = 0 at r_m' }}
+              mark={{ r: rm, y: 0, label: 'F = 0 at r<sub>m</sub>' }}
               ariaLabel="Lennard-Jones force curve"
               theme={theme}
             />

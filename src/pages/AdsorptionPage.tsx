@@ -416,7 +416,7 @@ export default function AdsorptionPage() {
         </h2>
         <ul className="why-list">
           <li>
-            <strong>Fuel cells.</strong> Reactions on Pt go through adsorbed species, described by the Langmuir θ. CO
+            <strong>Fuel cells.</strong> Reactions on Pt go through adsorbed species, whose coverage is often approximated by the Langmuir θ (real H and O layers on Pt interact, which Frumkin or Temkin isotherms add). CO
             binds very strongly (huge K), so a few ppm block the sites.
           </li>
           <li>

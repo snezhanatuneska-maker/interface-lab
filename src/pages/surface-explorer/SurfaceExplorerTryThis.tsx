@@ -66,25 +66,52 @@ export const SurfaceExplorerTryThis: React.FC = () => {
       ctx.fillText('AFM View: Cantilever Tip & 3D Height Map (Vertical Z: < 0.1 nm)', 20, 30);
 
     } else {
-      // XPS spectrum graph view
+      // XPS survey of a Pt/C catalyst: binding energy runs from high (left) to low (right), as spectra are plotted.
+      // Gaussian peaks at their literature positions on a background that steps up on the high-BE side of each peak
+      // (inelastically scattered electrons).
+      const BE_MAX = 600;
+      const x0 = 30;
+      const x1 = 350;
+      const base = 185;
+      const bx = (be: number) => x0 + ((BE_MAX - be) / BE_MAX) * (x1 - x0);
+      const peaks = [
+        { be: 531, h: 45, w: 2.5, label: 'O 1s' },
+        { be: 284.5, h: 110, w: 2, label: 'C 1s' },
+        { be: 74.5, h: 45, w: 1.5, label: '' },
+        { be: 71.2, h: 60, w: 1.5, label: 'Pt 4f' },
+      ];
+      const signal = (be: number) =>
+        peaks.reduce((sum, p) => sum + p.h * Math.exp(-(((be - p.be) / p.w) ** 2) / 2) + (be > p.be ? 0.12 * p.h : 0), 0);
+      ctx.strokeStyle = theme.axis;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x0, 45);
+      ctx.lineTo(x0, base);
+      ctx.lineTo(x1, base);
+      ctx.stroke();
       ctx.strokeStyle = theme.data1;
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(30, 200);
-      for (let x = 30; x < 350; x += 5) {
-        let y = 180;
-        if (x > 100 && x < 130) y = 80; // Peak 1 (e.g. Pt 4f)
-        if (x > 220 && x < 250) y = 110; // Peak 2 (e.g. O 1s)
-        ctx.lineTo(x, y + (Math.random() * 4 - 2));
+      for (let be = BE_MAX; be >= 0; be -= 0.5) {
+        const x = bx(be);
+        const y = base - 4 - signal(be);
+        if (be === BE_MAX) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
       }
       ctx.stroke();
 
       ctx.fillStyle = theme.text;
-      ctx.font = `12px ${CANVAS_FONT}`;
-      ctx.fillText('XPS View: Binding Energy Spectra (~1-10 nm Depth)', 20, 30);
+      ctx.font = `11px ${CANVAS_FONT}`;
+      for (const p of peaks) if (p.label) ctx.fillText(p.label, bx(p.be) + 5, base - signal(p.be) + 4);
       ctx.fillStyle = theme.muted;
-      ctx.fillText('Intensity (Counts)', 25, 215);
-      ctx.fillText('Binding Energy (eV)', 240, 215);
+      for (const be of [600, 400, 200, 0]) ctx.fillText(String(be), bx(be) - 8, base + 13);
+
+      ctx.fillStyle = theme.text;
+      ctx.font = `12px ${CANVAS_FONT}`;
+      ctx.fillText('XPS View: survey of a Pt/C catalyst (~1–10 nm depth)', 20, 30);
+      ctx.fillStyle = theme.muted;
+      ctx.fillText('Intensity', 25, 222);
+      ctx.fillText('Binding energy (eV)', 220, 222);
     }
   }, [mode, theme]);
 

@@ -67,7 +67,7 @@ describe('profiles', () => {
   })
 
   it('nucleation starts uniform and ends with sharp x₂ nuclei', () => {
-    expect(nucleationProfile(0).every((v) => v === -0.6)).toBe(true)
+    expect(nucleationProfile(0).every((v) => v === -0.7)).toBe(true)
     const end = nucleationProfile(PROFILE_T_END)
     expect(Math.max(...end)).toBeGreaterThan(0.99)
     expect(Math.min(...end)).toBeGreaterThan(-1.0001)
