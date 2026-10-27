@@ -22,8 +22,10 @@ export function MipsTheory() {
         <div>
           <h3>Pore-Size Distribution</h3>
           <p>
-            By recording cumulative mercury volume vs. applied pressure, porosimeters generate comprehensive pore-size
-            distributions for macropores and mesopores. At the usual maximum of about 400 MPa mercury reaches pores of
+            By recording cumulative mercury volume vs. applied pressure, porosimeters give the distribution of pore{' '}
+            <em>entry</em> (throat) diameters for macropores and mesopores, assuming cylindrical pores. A large cavity
+            reachable only through a narrow neck is counted at the neck size (ink-bottle effect), and some mercury stays
+            trapped in it on extrusion. At the usual maximum of about 400 MPa mercury reaches pores of
             about 3–4 nm diameter; micropores (&lt; 2 nm) need gas adsorption instead.
           </p>
         </div>

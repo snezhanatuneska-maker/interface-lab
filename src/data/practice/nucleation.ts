@@ -17,9 +17,9 @@ export const NUCLEATION_BANK: BankQuestion[] = [
   },
   {
     question: 'Why is heterogeneous nucleation usually easier than homogeneous nucleation?',
-    correct: 'The surface replaces part of the high-energy interface, so a smaller cluster reaches the critical size',
+    correct: 'The surface replaces part of the high-energy interface, so the critical nucleus needs fewer molecules and the barrier is lower',
     wrong: ['The surface raises the supersaturation', 'The critical radius is larger', 'Surface tension is zero on solids'],
-    explanation: 'ΔG*_het = f(θ)·ΔG*_hom with f ≤ 1.',
+    explanation: 'ΔG*_het = f(θ)·ΔG*_hom with f ≤ 1. The radius of curvature d*/2 is the same as in the bulk; the cap just holds fewer molecules.',
   },
   {
     question: 'For a contact angle θ = 180°, the shape factor f(θ) equals:',

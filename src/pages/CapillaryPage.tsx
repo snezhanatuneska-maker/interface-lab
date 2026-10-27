@@ -50,8 +50,8 @@ export default function CapillaryPage() {
         </a>
         <h1>Capillary Pressure &amp; Pore Filling</h1>
         <p className="lede">
-          Explore how pore radius controls capillary pressure, fluid rise, vapor condensation, and contact angle
-          hysteresis.
+          Explore how pore radius and contact angle control capillary pressure, fluid rise and vapor condensation, and
+          why filling and emptying differ (hysteresis).
         </p>
       </header>
 
@@ -107,7 +107,8 @@ export default function CapillaryPage() {
             Water at 25 °C. The Jurin height is the formal value 2γ cos θ/(ρgr): in a nanopore it only expresses the
             suction as a water column; gravity plays no role at this scale, and no real pore is that long. Filling uses
             a cylindrical meniscus (factor 1 in the Kelvin equation), emptying a hemispherical one (factor 2), so a pore
-            empties at a lower P/P<sub>0</sub> than it fills.
+            empties at a lower P/P<sub>0</sub> than it fills. The Kelvin value neglects the adsorbed film and is only
+            approximate for the narrowest pores (a few nm).
             {theta > 90 && ' With θ > 90° the pressure is negative: the liquid has to be pushed in, and no capillary condensation occurs below saturation.'}
           </p>
           </div>

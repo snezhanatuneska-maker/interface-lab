@@ -52,6 +52,11 @@ export default function Equations() {
             First term: the new phase is more stable, so volume lowers G (favours). Second term: new interface costs
             energy (resists). Below d* the surface term wins and the cluster dissolves; above d* it grows.
           </p>
+          <p className="note">
+            <strong>Capillary approximation.</strong> CNT treats even a tiny cluster as a piece of bulk phase with a
+            sharp interface and the flat-surface γ. That is questionable for a nucleus of a few tens of molecules and
+            meaningless below about ten, so the numbers are qualitative there (the default nucleus holds about 100).
+          </p>
         </div>
 
         <div className="card eq-card het">
@@ -60,9 +65,9 @@ export default function Equations() {
           </div>
           <Formula
             n={5}
-            tex={String.raw`f(\theta) = \frac{(2+\cos\theta)(1-\cos\theta)^2}{4} = \frac{V_\text{cap}}{V_\text{sphere}}`}
+            tex={String.raw`\begin{aligned} f(\theta) &= \frac{(2+\cos\theta)(1-\cos\theta)^2}{4} \\ &= \frac{V_\text{cap}}{V_\text{sphere}} \end{aligned}`}
           />
-          <Formula n={6} tex={String.raw`\Delta G^*_\text{het} = f(\theta)\,\Delta G^*_\text{hom}, \qquad 0 \le f \le 1`} />
+          <Formula n={6} tex={String.raw`\begin{aligned} \Delta G^*_\text{het} &= f(\theta)\,\Delta G^*_\text{hom} \\ 0 &\le f \le 1 \end{aligned}`} />
           <dl className="terms">
             <Term sym="\theta">
               contact angle of the nucleus on the substrate, measured <strong>through the nucleus</strong>

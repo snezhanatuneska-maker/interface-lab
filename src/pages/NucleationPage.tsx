@@ -20,6 +20,7 @@ import {
   T_RANGE,
   THETA_DEFAULT,
   type Nucleus,
+  V_M,
 } from '../lib/nucleation'
 import CapSketch from './nucleation/CapSketch'
 import Equations from './nucleation/Equations'
@@ -49,6 +50,9 @@ function fmt(v: number): string {
   if (v >= 0.1 || v === 0) return v.toFixed(2)
   return v.toPrecision(2)
 }
+
+/** Molecules in a spherical nucleus of diameter d (nm): πd³/(6v_m). Below about 10, CNT is not meaningful. */
+const molecules = (dNm: number) => (Math.PI * (dNm * 1e-9) ** 3) / (6 * V_M)
 
 /** S slider position is ln S, so the low end (where things change fastest) gets room. */
 const sFromPos = (p: number) => {
@@ -328,6 +332,14 @@ export default function NucleationPage() {
                 <dt>Critical diameter d*</dt>
                 <dd>{n ? `${fmt(n.dStar)} nm` : '—'}</dd>
               </div>
+              {n && (
+                <div>
+                  <dt>Molecules in the nucleus</dt>
+                  <dd className={molecules(n.dStar) < 10 ? 'state-bad' : undefined}>
+                    {molecules(n.dStar) < 10 ? `${fmt(molecules(n.dStar))}: too few for CNT` : fmt(molecules(n.dStar))}
+                  </dd>
+                </div>
+              )}
               <div>
                 <dt>ΔG*<sub>hom</sub></dt>
                 <dd className="hom-ink">{n ? `${fmt(n.homKT)} kT` : '—'}</dd>
