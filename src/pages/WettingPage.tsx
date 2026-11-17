@@ -4,10 +4,8 @@ import {
   cassieAngle,
   AR_DEFAULT,
   AR_RANGE,
-  criticalAngle,
   DELTA_DEFAULT,
   DELTA_RANGE,
-  favoredState,
   FSOLID_DEFAULT,
   FSOLID_RANGE,
   GAMMA_LG_RANGE,
@@ -16,6 +14,7 @@ import {
   GAMMA_SL_DEFAULT,
   GAMMA_WATER,
   PRESETS,
+  spreadingCoefficient,
   wenzelAngle,
   WET_LABEL,
   wettability,
@@ -24,7 +23,10 @@ import {
   type Preset,
 } from '../lib/wetting'
 import DropView, { type Surface } from './wetting/DropView'
+import Tex from '../components/Tex'
 import Theory from './wetting/Theory'
+import HysteresisSim from './wetting/HysteresisSim'
+import ReentrantSketch from './wetting/ReentrantSketch'
 
 const VIEWS: { value: Surface; label: string; title: string }[] = [
   { value: 'smooth', label: 'Young', title: 'Young: smooth surface' },
@@ -61,8 +63,7 @@ export default function WettingPage() {
   const young = youngFromTensions(gSG, gSL, gLG)
   const deltaSmooth = mode === 'angle' ? deltaSet : young.delta
   const angles = { smooth: deltaSmooth, wenzel: wenzelAngle(deltaSmooth, Ar), cassie: cassieAngle(deltaSmooth, fSolid) }
-  const crit = criticalAngle(Ar, fSolid)
-  const favored = favoredState(deltaSmooth, Ar, fSolid)
+  const Sw = spreadingCoefficient(gSG, gSL, gLG)
 
   const reset = () => {
     setMode('angle')
@@ -80,7 +81,7 @@ export default function WettingPage() {
     setDeltaSet(p.delta)
     setAr(p.Ar)
     setFSolid(p.fSolid)
-    setView(favoredState(p.delta, p.Ar, p.fSolid)) // show the state this surface actually takes
+    setView(p.view) // show the state this surface takes
   }
 
   const delta = angles[view]
@@ -93,7 +94,7 @@ export default function WettingPage() {
         <a className="back-link" href="#/">
           ← All tools
         </a>
-        <h1>Wetting &amp; Contact Angle: Young, Wenzel, Cassie–Baxter</h1>
+        <h1>Wetting &amp; Contact Angle</h1>
         <p className="lede">
           The contact angle δ is the angle between the solid and the liquid–gas interface, measured through the
           liquid at the three-phase contact line. δ &lt; 90°: partially wetting (hydrophilic for water, oleophilic
@@ -132,7 +133,6 @@ export default function WettingPage() {
             <div className="drop-readout">
               <span className="drop-angle">δ = {Math.round(delta)}°</span>
               <span className={`wet-badge ${wet}`}>{WET_LABEL[wet]}</span>
-              {view !== 'smooth' && view === favored && crit !== null && <span className="tag">favored state</span>}
             </div>
             <ul className="layer-legend drop-legend" aria-label="Legend">
               {LEGEND[view].map((l) => (
@@ -145,30 +145,14 @@ export default function WettingPage() {
 
           <div className="insight wet-state" aria-live="polite">
             <p>
-              <strong>Which state is favored?</strong>{' '}
-              {crit === null ? (
-                <>With A<sub>r</sub> = 1 and f<sub>solid</sub> = 1 both models give Young's angle.</>
-              ) : favored === 'cassie' ? (
-                <>
-                  <span className="cassie-ink">Cassie–Baxter</span>: δ<sub>smooth</sub> = {Math.round(deltaSmooth)}° is
-                  above δ<sub>c</sub> = {Math.round(crit)}°, so gas stays trapped.
-                </>
-              ) : (
-                <>
-                  <span className="wenzel-ink">Wenzel</span>: δ<sub>smooth</sub> = {Math.round(deltaSmooth)}° is below δ
-                  <sub>c</sub> = {Math.round(crit)}°, so liquid fills the grooves.
-                </>
-              )}
-            </p>
-            <p>
-              Wenzel drops are “sticky” (pinned in the grooves); Cassie–Baxter drops roll off easily. The comparison
-              is of energies: below δ<sub>c</sub> a Cassie–Baxter state can still survive as a metastable state, until a
-              push, drop impact or evaporation makes the liquid collapse into the grooves.
+              Wenzel drops are “sticky” (pinned in the grooves); Cassie–Baxter drops roll off easily. A high calculated
+              Cassie–Baxter angle does not mean that this state actually forms: see <a href="#cb-stability">Cassie–Baxter
+              stability</a> below.
             </p>
             {view === 'cassie' && deltaSmooth < 90 && (
               <p>
-                With δ<sub>smooth</sub> &lt; 90° no gas stays trapped: the liquid wicks into the texture, so the
-                Cassie–Baxter angle shown here is not reached on a hydrophilic surface.
+                With δ<sub>smooth</sub> &lt; 90° on simple pillars no gas stays trapped: the liquid wicks into the
+                texture, so the Cassie–Baxter angle shown here is not reached unless the texture is re-entrant.
               </p>
             )}
           </div>
@@ -231,11 +215,17 @@ export default function WettingPage() {
                   onChange={setGLG}
                   hint="water: 72 mN/m"
                 />
-                <p className={`wet-young${young.limit ? ' limit' : ''}`} aria-live="polite">
-                  {young.limit ? (
+                <p className={`wet-young${Sw > 0 ? ' limit' : ''}`} aria-live="polite">
+                  S<sub>w</sub> = γ<sub>sg</sub> − γ<sub>sl</sub> − γ<sub>lg</sub> = <strong>{Sw.toFixed(1)} mN/m</strong>{' '}
+                  <span className={`state-badge${Sw > 0 ? ' above' : ''}`}>
+                    {Sw > 0 ? 'S_w > 0: spreads (dynamic wetting)' : 'S_w < 0: sessile drop (static)'}
+                  </span>
+                  <br />
+                  {Sw > 0 ? (
+                    <>No equilibrium contact angle: the liquid spreads into a film (δ → 0).</>
+                  ) : young.limit ? (
                     <>
-                      |γ<sub>sg</sub> − γ<sub>sl</sub>| &gt; γ<sub>lg</sub>: <strong>{young.limit}</strong> (δ ={' '}
-                      {Math.round(young.delta)}°)
+                      cos δ = {young.cos.toFixed(2)} &lt; −1: complete non-wetting (δ = 180°).
                     </>
                   ) : (
                     <>
@@ -289,11 +279,148 @@ export default function WettingPage() {
         </figure>
       </section>
 
+      {/* ---------- Contact-angle hysteresis ---------- */}
+      <section className="section" aria-labelledby="hyst-title">
+        <h2 id="hyst-title" className="section-title">
+          Contact-angle hysteresis
+        </h2>
+        <div className="card-grid">
+          <div className="card">
+            <h3>Advancing and receding angle</h3>
+            <p>
+              On real surfaces the contact angle is not one number. The <strong>advancing angle δ<sub>a</sub></strong>{' '}
+              (front of a drop that is about to move) is larger than the <strong>receding angle δ<sub>r</sub></strong>{' '}
+              (rear): δ<sub>a</sub> ≥ δ<sub>r</sub>. Both are measured just before the drop starts to move on a tilted,
+              previously unwetted surface. The difference δ<sub>a</sub> − δ<sub>r</sub> is the hysteresis.
+            </p>
+            <p>
+              <strong>Causes:</strong> chemical inhomogeneity, asperities and pits, adsorbed molecules, particles and dust
+              that pin the contact line.
+            </p>
+          </div>
+          <div className="card eq-card">
+            <h3>Retention force (Furmidge)</h3>
+            <div className="formula">
+              <div className="formula-body eq-math">
+                <Tex display tex={String.raw`F = k\,w\,\gamma_{lg}(\cos\delta_r - \cos\delta_a)`} />
+              </div>
+            </div>
+            <p className="note">
+              w: lateral drop width; k = 1 for an ideal spherical cap. The drop slides when the downhill component of
+              its weight, m g sin α, exceeds F. <strong>Why it matters:</strong> in coating and printing, hysteresis
+              decides whether a wet line stays where it was put or dewets and beads up.
+            </p>
+          </div>
+        </div>
+        <HysteresisSim />
+      </section>
+
+      {/* ---------- Cassie–Baxter stability ---------- */}
+      <section className="section" aria-labelledby="cb-stability">
+        <h2 id="cb-stability" className="section-title">
+          Cassie–Baxter stability and re-entrant structures
+        </h2>
+        <p className="prose">
+          A high calculated Cassie–Baxter angle does not mean that the state actually forms. For liquids of low surface
+          tension the global energy minimum is complete wetting of the texture (Wenzel); whether gas stays trapped
+          depends on the geometry of the roughness and on the local contact angle δ at its edges.
+        </p>
+        <p className="prose">
+          <strong>Re-entrant curvature</strong> (an overhang with ψ &lt; 90°, e.g. mushroom-shaped pillars) can hold a
+          stable Cassie–Baxter state even for liquids with δ &lt; 90°: the meniscus hangs under the overhang with its
+          local angle δ and cannot advance down the pillar. Such surfaces repel almost every liquid:{' '}
+          <strong>super-omniphobic</strong>. Example: n-hexane on PTFE collapses to Wenzel on simple pillars but stays
+          Cassie–Baxter on re-entrant structures.
+        </p>
+        <figure className="figure tensio-figure">
+          <ReentrantSketch />
+          <figcaption>
+            <span className="figure-label">Figure 3.</span> The same low-γ liquid on simple pillars (left) and on
+            re-entrant pillars (right).
+          </figcaption>
+        </figure>
+      </section>
+
+      {/* ---------- Lecture examples ---------- */}
+      <section className="section" aria-labelledby="examples-title">
+        <h2 id="examples-title" className="section-title">
+          Wetting in nature and technology
+        </h2>
+        <div className="card-grid">
+          <div className="card">
+            <h3>Lotus effect</h3>
+            <p>
+              Lotus leaves are superhydrophobic: δ &gt; 150° with hysteresis δ<sub>a</sub> − δ<sub>r</sub> &lt; 5°. This
+              comes from surface chemistry (hydrophobic wax) combined with micro- and nanoscale roughness, which holds
+              water in the Cassie–Baxter state. Drops roll off and take dirt with them.
+            </p>
+            <p>
+              Lotus leaves and bird feathers are <em>not</em> oleophobic. Why?
+            </p>
+            <details>
+              <summary>Show the answer</summary>
+              <p>
+                Oils have a low γ<sub>lg</sub>, so their Young angle on the wax is below 90°, and the texture has no
+                re-entrant geometry that could hold such a liquid in the Cassie–Baxter state. The oil wicks in.
+              </p>
+            </details>
+          </div>
+          <div className="card">
+            <h3>Roughness amplifies chemistry</h3>
+            <p>
+              Gold coated with a pH-switchable carboxylic-acid monolayer (MUABA) changes its contact angle with pH. On
+              smooth gold the change is small; on rough gold the same chemical switch gives a huge change in δ.
+            </p>
+            <p>
+              In general roughness takes a hydrophilic surface to <strong>superhydrophilic</strong> and a hydrophobic one
+              to <strong>superhydrophobic</strong> (Wenzel: A<sub>r</sub> multiplies cos δ).
+            </p>
+          </div>
+          <div className="card">
+            <h3>Liquid-infused “slippery” surfaces</h3>
+            <p>
+              A lubricant locked into the surface texture gives the drop a smooth liquid underlay. The contact line has
+              nothing to pin on, so hysteresis is very low and drops slip off at small tilt.
+            </p>
+          </div>
+          <div className="card">
+            <h3>Bio-inspired water collection</h3>
+            <p>
+              The fog-basking beetle <em>Onymacris unguicularis</em> collects fog water on its back. Patterns of
+              hydrophilic and hydrophobic regions and contact-angle gradients make drops grow and move to where they are
+              wanted. Such patterns are used to design water-collecting surfaces; how this particular species does it is
+              not fully known.
+            </p>
+          </div>
+        </div>
+        <p className="callout">
+          <strong>Dynamic wetting example: electrowetting.</strong> An electric field interferes with Young’s equation
+          and forces a liquid film onto Teflon; when the field is removed, the film dewets again.
+        </p>
+        <p className="prose">
+          <strong>Explore more:</strong>{' '}
+          <a className="ext-link" href="https://dropwyse.netlify.app" target="_blank" rel="noopener noreferrer">
+            δropwγse
+          </a>
+          , the lecture’s app, has six modes: Young, hysteresis, Wenzel, Cassie–Baxter with stability, re-entrant
+          structures with stability, and liquid-infused layers.
+        </p>
+      </section>
+
       <section className="section" aria-labelledby="why-title">
         <h2 id="why-title" className="section-title">
-          Why it matters
+          Why it matters for clean energy
         </h2>
         <ul className="why-list">
+          <li>
+            <strong>Dirty solar panels.</strong> Dust lowers PV output, and cleaning panels in deserts uses a lot of
+            water. Self-cleaning (lotus-type) coatings hold drops in the Cassie–Baxter state, above 150° with
+            hysteresis below 5°: rain or dew rolls off and takes the dust with it.
+          </li>
+          <li>
+            <strong>Water transport on patterned surfaces.</strong> Hydrophilic/hydrophobic patterns and contact-angle
+            gradients move drops without pumps, e.g. for fog and dew harvesting.
+          </li>
           <li>
             <strong>PEM fuel cells.</strong> The gas diffusion layer is carbon paper treated with PTFE, which raises δ above
             90°. On the rough fibres Wenzel makes it even more water-repellent, so product water is
@@ -303,10 +430,6 @@ export default function WettingPage() {
             <strong>Water electrolysis.</strong> Electrodes that wet well (hydrophilic, “aerophobic”) let H<sub>2</sub>{' '}
             and O<sub>2</sub> bubbles detach small and fast. Roughness on a hydrophilic surface lowers the angle further
             (Wenzel), freeing active area and lowering the overpotential.
-          </li>
-          <li>
-            <strong>Self-cleaning solar panels.</strong> Lotus-effect coatings hold drops in the Cassie–Baxter state,
-            above 150° with hysteresis below 5°. The drops roll off and pick up dust on the way, so PV output stays high with less cleaning.
           </li>
         </ul>
       </section>

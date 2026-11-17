@@ -79,10 +79,33 @@ export interface Preset {
   delta: number
   Ar: number
   fSolid: number
+  /** Wetting state shown for this surface. */
+  view: 'wenzel' | 'cassie'
 }
 
 export const PRESETS: Preset[] = [
-  { id: 'glass', label: 'Glass (hydrophilic)', delta: 40, Ar: 1.2, fSolid: 0.8 },
-  { id: 'ptfe', label: 'Teflon/PTFE (hydrophobic)', delta: 110, Ar: 1.5, fSolid: 0.6 },
-  { id: 'lotus', label: 'Lotus leaf (superhydrophobic)', delta: 110, Ar: 3, fSolid: 0.1 },
+  { id: 'glass', label: 'Glass (hydrophilic)', delta: 40, Ar: 1.2, fSolid: 0.8, view: 'wenzel' },
+  { id: 'ptfe', label: 'Teflon/PTFE (hydrophobic)', delta: 110, Ar: 1.5, fSolid: 0.6, view: 'wenzel' },
+  { id: 'lotus', label: 'Lotus leaf (superhydrophobic)', delta: 110, Ar: 3, fSolid: 0.1, view: 'cassie' },
 ]
+
+// ---------- Spreading coefficient and contact-angle hysteresis ----------
+
+/** Spreading coefficient S_w = γ_sg − γ_sl − γ_lg: > 0 spreads (dynamic wetting), < 0 sessile drop (static). */
+export const spreadingCoefficient = (gSG: number, gSL: number, gLG: number) => gSG - gSL - gLG
+
+/**
+ * Furmidge retention force F = k w γ_lg (cos δ_r − cos δ_a), N. w: lateral drop width (m), γ_lg in N/m,
+ * k = 1 for an ideal spherical cap.
+ */
+export const furmidgeForce = (w: number, gLG: number, deltaA: number, deltaR: number, k = 1) =>
+  k * w * gLG * (Math.cos(deltaR * RAD) - Math.cos(deltaA * RAD))
+
+/**
+ * Sliding angle (deg): the tilt α at which the gravity component m g sin α equals the Furmidge force.
+ * Null when even a vertical surface cannot move the drop. m = ρ_L V.
+ */
+export function slidingAngle(F: number, volume: number, rhoL = 1000, g = 9.81): number | null {
+  const s = F / (rhoL * volume * g)
+  return s > 1 ? null : Math.asin(Math.max(0, s)) / RAD
+}

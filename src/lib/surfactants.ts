@@ -113,8 +113,8 @@ export interface Surfactant {
 export const PRESETS: Surfactant[] = [
   { id: 'sds', name: 'SDS', chem: 'Sodium dodecyl sulfate, C₁₂H₂₅OSO₃⁻ Na⁺', head: 'anionic', tail: 12 },
   { id: 'ctab', name: 'CTAB', chem: 'Cetyltrimethylammonium bromide, C₁₆H₃₃N(CH₃)₃⁺ Br⁻', head: 'cationic', tail: 16 },
-  { id: 'tween20', name: 'Tween 20', chem: 'Polysorbate 20 (polyoxyethylene sorbitan monolaurate), C₁₂ tail', head: 'nonionic', tail: 12 },
-  { id: 'betaine', name: 'C12 betaine', chem: 'Dodecyl dimethyl betaine, C₁₂H₂₅N⁺(CH₃)₂CH₂COO⁻', head: 'zwitterionic', tail: 12 },
+  { id: 'tween20', name: 'Tween 20 (extra)', chem: 'Polysorbate 20 (polyoxyethylene sorbitan monolaurate), C₁₂ tail', head: 'nonionic', tail: 12 },
+  { id: 'betaine', name: 'C12 betaine (extra)', chem: 'Dodecyl dimethyl betaine, C₁₂H₂₅N⁺(CH₃)₂CH₂COO⁻', head: 'zwitterionic', tail: 12 },
 ]
 
 export const TAIL_RANGE: [number, number] = [8, 16]

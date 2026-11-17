@@ -28,6 +28,7 @@ import {
 import MicelleView from './surfactants/MicelleView'
 import Theory from './surfactants/Theory'
 import Equations from './surfactants/Equations'
+import SurfaceTension from './surfactants/SurfaceTension'
 
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -154,7 +155,7 @@ const PROPS: Record<Exclude<PropId, 'conductivity'>, { f: (s: System, c: number)
 }
 
 function captionFor(prop: PropId, beta: number | null) {
-  const label = <span className="figure-label">Figure 2.</span>
+  const label = <span className="figure-label">Figure 4.</span>
   switch (prop) {
     case 'conductivity':
       return (
@@ -229,13 +230,26 @@ export default function SurfactantPage() {
         <a className="back-link" href="#/">
           ← All tools
         </a>
-        <h1>Surfactants &amp; Micelle Formation</h1>
+        <h1>Surface Tension &amp; Surfactants</h1>
         <p className="lede">
-          Add surfactant to water. First it crowds onto the surface and lowers the surface tension. Above the critical
-          micelle concentration, the CMC, extra molecules hide their tails in micelles instead; by then the surface is
-          already nearly full.
+          Why interfaces cost energy, how surface tension is measured, and how surfactants lower it: first they crowd
+          onto the surface, then, above the critical micelle concentration (CMC), they form micelles instead.
         </p>
       </header>
+
+      <SurfaceTension />
+
+      <Theory part="intro" />
+
+      <section className="section" aria-labelledby="cmc-title">
+        <h2 id="cmc-title" className="section-title">
+          Critical micelle concentration (CMC): simulation
+        </h2>
+        <p className="prose">
+          Above the CMC, extra surfactant forms micelles and γ stays nearly constant. Choose a surfactant and raise the
+          concentration.
+        </p>
+      </section>
 
       {/* ---------- Hero: controls | molecular view + surface tension ---------- */}
       <figure id="sim-figure" className="figure hero" aria-label="Surfactant simulator">
@@ -374,7 +388,7 @@ export default function SurfactantPage() {
         </p>
 
         <figcaption>
-          <span className="figure-label">Figure 1.</span> The beaker shows heads in the water and tails in the air or
+          <span className="figure-label">Figure 3.</span> The beaker shows heads in the water and tails in the air or
           hidden in micelles. On the plot, the dashed line is the CMC and the dot is the current concentration.
         </figcaption>
       </figure>
@@ -434,9 +448,43 @@ export default function SurfactantPage() {
         </figure>
       </section>
 
-      <Theory />
+      <Theory part="cmc" />
+
+      <section className="section" aria-labelledby="app-title">
+        <h2 id="app-title" className="section-title">
+          Explore more
+        </h2>
+        <p className="prose">
+          <a className="ext-link" href="https://lets-get-cohesive.netlify.app/" target="_blank" rel="noopener noreferrer">
+            Let’s get cohesive!
+          </a>{' '}
+          (the lecture’s app; press <em>Liquids</em>) shows the statements of this page in a 2D model liquid: cohesion
+          → tension, the effect of temperature, stretching at equal area, the surfactant plateau and the Wilhelmy
+          force.
+        </p>
+      </section>
 
       <Equations />
+
+      <section className="section" aria-labelledby="why-title">
+        <h2 id="why-title" className="section-title">
+          Why it matters for clean energy
+        </h2>
+        <ul className="why-list">
+          <li>
+            <strong>Electrolysers.</strong> Non-ionic surfactants in the electrolyte adsorb on the electrodes and
+            regulate the size of the H<sub>2</sub> and O<sub>2</sub> bubbles that detach.
+          </li>
+          <li>
+            <strong>Catalyst inks and coatings.</strong> Surfactants lower γ so that inks wet and spread on membranes
+            and gas diffusion layers, and they keep catalyst particles dispersed.
+          </li>
+          <li>
+            <strong>Measuring γ</strong> (Wilhelmy plate, Du Noüy ring) is the standard way to check electrolytes and
+            inks, and to find the CMC.
+          </li>
+        </ul>
+      </section>
 
     </article>
   )

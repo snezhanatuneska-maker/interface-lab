@@ -12,8 +12,13 @@ export function MipsPage() {
         </a>
         <h1>Mercury Intrusion Porosimetry (MIP)</h1>
         <p className="lede">
-          Explore how high-pressure non-wetting mercury intrusion reveals pore-size distributions, threshold radii, and
-          void volumes in porous electrodes.
+          Mercury intrusion is an application of the capillary pressure curve (lecture 4.3). Mercury is non-wetting, so
+          it must be pushed into a pore system; the pressure at which it enters tells the pore size, and the intruded
+          volume against pressure gives the pore-size distribution.
+        </p>
+        <p className="note">
+          Background: <a href="#/capillary">Curved Interfaces &amp; Capillarity</a> (Young–Laplace, capillary pressure
+          curve).
         </p>
       </header>
 

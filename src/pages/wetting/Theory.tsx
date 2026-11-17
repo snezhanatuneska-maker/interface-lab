@@ -16,7 +16,7 @@ export default function Theory() {
   return (
     <section className="section equations" aria-labelledby="eq-title">
       <h2 id="eq-title" className="section-title">
-        Three models
+        Young, Wenzel and Cassie–Baxter
       </h2>
       <div className="wet-eq-grid">
         <div className="card eq-card wet-young">
@@ -33,6 +33,15 @@ export default function Theory() {
             <Term sym={String.raw`\gamma_{lg}`}>surface tension liquid–gas (water: 72 mN/m)</Term>
           </dl>
           <p className="note">The three tensions balance along the surface at the contact line.</p>
+          <div className="formula">
+            <div className="formula-body eq-math">
+              <Tex display tex={String.raw`S_w = \gamma_{sg} - \gamma_{sl} - \gamma_{lg}`} />
+            </div>
+          </div>
+          <p className="note">
+            Spreading coefficient. S<sub>w</sub> &gt; 0: the liquid spreads (dynamic wetting, no equilibrium angle);
+            S<sub>w</sub> &lt; 0: a static sessile drop with angle δ.
+          </p>
         </div>
 
         <div className="card eq-card wet-wenzel">
@@ -66,8 +75,7 @@ export default function Theory() {
               solid fraction under the drop, <Tex tex={String.raw`A_\text{proj, solid}/(A_\text{proj, solid}+A_\text{proj, gas})`} />; the rest is gas
             </Term>
           </dl>
-          <p className="note">Less solid contact gives a higher angle. This is how lotus leaves reach &gt; 150° with drops that roll
-            off.</p>
+          <p className="note">Less solid contact gives a higher angle. With micro- and nanoscale roughness this is how lotus leaves reach δ &gt; 150°.</p>
         </div>
       </div>
     </section>

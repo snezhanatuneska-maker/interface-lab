@@ -2,15 +2,15 @@ export function MipsInsight() {
   return (
     <section className="section" aria-labelledby="why-title">
       <h2 id="why-title" className="section-title">
-        ⚡ Clean Energy Link: Characterising Fuel-Cell Porous Layers
+        Why it matters for clean energy: fuel-cell catalyst layers
       </h2>
       <p className="prose">
-        In proton-exchange membrane fuel cells (PEMFCs), gas diffusion layers (GDLs) and catalyst layers rely on a
-        precise balance of hydrophilic and hydrophobic pores to transport reactant gases (O<sub>2</sub>, H<sub>2</sub>)
-        and remove liquid product water. Mercury intrusion porosimetry is widely used to measure the pore-size
-        distribution of GDLs, microporous layers and catalyst layers. Two limits: the high pressures can compress soft
-        catalyst layers, and mercury is non-wetting in every pore, so it cannot tell hydrophilic from hydrophobic
-        pores. Where water will actually go is measured with water intrusion or the method of standard porosimetry.
+        In a PEM fuel cell the catalyst layer and the gas diffusion layer must carry gas to the catalyst and product
+        water away. How much of their pore volume fills at a given pressure is exactly what a capillary pressure curve
+        describes, and mercury intrusion is the standard way to measure the pore-size distribution of catalyst layers,
+        microporous layers and gas diffusion layers. Two limits: the high pressures can compress soft catalyst layers,
+        and mercury is non-wetting in every pore, so it cannot tell hydrophilic from hydrophobic pores. Where water
+        will actually go is measured with water intrusion instead.
       </p>
     </section>
   )

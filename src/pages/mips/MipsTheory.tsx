@@ -8,8 +8,9 @@ export function MipsTheory() {
         <div>
           <h3>Non-Wetting Behavior</h3>
           <p>
-            Mercury does not spontaneously wet most solids, exhibiting a contact angle greater than 90
-            degrees (<em>δ &gt; 90°</em>). External pressure is required to force it into pores.
+            Mercury is non-wetting for almost all materials (<em>δ ≈ 130–140°</em>). Its capillary pressure is
+            negative, so an external pressure is needed to force it into pores, the opposite of drainage of a wetting
+            liquid in the capillary pressure curve.
           </p>
         </div>
         <div>

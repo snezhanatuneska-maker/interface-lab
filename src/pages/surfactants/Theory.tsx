@@ -1,30 +1,30 @@
-// Theory sections of the surfactant page: classes, why micelles form, properties around the CMC,
-// what moves the CMC, and how surface tension is measured.
+// Theory sections of the surfactant page: classes, why micelles form, properties around the CMC and what moves
+// the CMC (qualitative, as in the lecture).
 
 const CLASSES = [
   {
     name: 'Anionic',
     head: 'neg',
     example: 'SDS (sodium dodecyl sulfate)',
-    text: 'Negative head, Na⁺ counterion. Detergents, toothpaste.',
+    text: 'Negatively charged sulfate head, Na⁺ counterion. Detergents, toothpaste.',
   },
   {
     name: 'Cationic',
     head: 'pos',
     example: 'CTAB (cetyltrimethylammonium bromide)',
-    text: 'Positive head, Br⁻ counterion. Fabric softeners, antiseptics.',
+    text: 'Positively charged ammonium head, Br⁻ counterion. Fabric softeners, antiseptics.',
   },
   {
     name: 'Non-ionic',
     head: 'neutral',
-    example: 'Tween 20 (polysorbate 20)',
-    text: 'Uncharged, bulky polyoxyethylene head. Food, cosmetics.',
+    example: 'Pluronic (PEG-b-PPG-b-PEG)',
+    text: 'Uncharged block copolymer: hydrophilic PEG blocks either side of a hydrophobic PPG block.',
   },
   {
     name: 'Zwitterionic',
     head: 'zwit',
-    example: 'Betaines (e.g. C12 betaine, cocamidopropyl betaine)',
-    text: 'One + and one − charge on the same head, net neutral. Mild shampoos.',
+    example: 'POPC (palmitoyl-oleoyl phosphatidylcholine)',
+    text: 'A phospholipid: one + and one − charge on the head, net neutral, two tails. Cell membranes.',
   },
 ] as const
 
@@ -50,56 +50,19 @@ function MoleculeIcon({ head }: { head: (typeof CLASSES)[number]['head'] }) {
   )
 }
 
-function TensiometerDiagram() {
-  return (
-    <svg viewBox="0 0 520 220" className="tensio-svg" role="img" aria-label="Wilhelmy plate (left) and Du Noüy ring (right) touching a liquid surface, each pulled down by surface tension while a balance measures the force.">
-      {/* ---- Wilhelmy plate ---- */}
-      <text x="130" y="20" className="tensio-title">Wilhelmy plate</text>
-      <line x1="130" y1="30" x2="130" y2="70" className="tensio-wire" />
-      <rect x="95" y="70" width="70" height="80" className="tensio-metal" />
-      <rect x="30" y="140" width="200" height="60" className="tensio-liquid" />
-      {/* liquid climbing the clean platinum plate */}
-      <path d="M30 140 H80 Q93 140 95 124 V140 Z" className="tensio-liquid" />
-      <path d="M165 140 V124 Q167 140 180 140 H230 V140 Z" className="tensio-liquid" />
-      <path d="M30 140 H80 Q93 140 95 124 M165 124 Q167 140 180 140 H230" className="tensio-surface" />
-      <path d="M130 158 V196" className="tensio-arrow" markerEnd="url(#arrow)" />
-      <text x="138" y="190" className="tensio-label">F = γ·L</text>
-      <text x="130" y="214" className="tensio-note" textAnchor="middle">L = 2 × (width + thickness)</text>
-
-      {/* ---- Du Noüy ring ---- */}
-      <text x="390" y="20" className="tensio-title">Du Noüy ring</text>
-      <line x1="390" y1="30" x2="390" y2="62" className="tensio-wire" />
-      <path d="M390 62 L345 92 M390 62 L435 92" className="tensio-wire" />
-      <ellipse cx="390" cy="96" rx="48" ry="9" className="tensio-ring" />
-      <rect x="290" y="140" width="200" height="60" className="tensio-liquid" />
-      {/* liquid lamella pulled up under the ring */}
-      <path d="M290 140 H325 Q338 140 342 98 H438 Q442 140 455 140 H490 V200 H290 Z" className="tensio-liquid" />
-      <path d="M290 140 H325 Q338 140 342 98 M438 98 Q442 140 455 140 H490" className="tensio-surface" />
-      <path d="M390 120 V196" className="tensio-arrow" markerEnd="url(#arrow)" />
-      <text x="398" y="190" className="tensio-label">F<tspan dy="3" fontSize="9">max</tspan><tspan dy="-3"> = 4πRγ·f</tspan></text>
-      <text x="390" y="214" className="tensio-note" textAnchor="middle">R = ring radius, f = correction factor</text>
-
-      <defs>
-        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
-          <path d="M0 0 L10 5 L0 10 Z" className="tensio-arrowhead" />
-        </marker>
-      </defs>
-    </svg>
-  )
-}
-
-export default function Theory() {
-  return (
+export default function Theory({ part }: { part: 'intro' | 'cmc' }) {
+  if (part === 'intro')
+    return (
     <>
       <section className="section" aria-labelledby="what-title">
         <h2 id="what-title" className="section-title">
-          What is a surfactant?
+          Surfactants
         </h2>
         <p className="prose">
-          A <strong>surf</strong>ace <strong>act</strong>ive <strong>ant</strong> is a molecule with two ends that want
-          different things: a <strong>hydrophilic head</strong> that likes water and a <strong>hydrophobic tail</strong>{' '}
-          (a hydrocarbon chain, usually 8–18 carbons) that does not. Surfactants are classified by the charge of the
-          head.
+          A <strong>surf</strong>ace <strong>act</strong>ive <strong>ant</strong> is <strong>amphiphilic</strong>: one
+          molecule with a <strong>hydrophilic head</strong> that likes water and a <strong>hydrophobic tail</strong> (a
+          hydrocarbon chain) that does not. Surfactants adsorb at the interface, head in the water and tail out of it,
+          and so lower γ. They are classified by the charge of the head.
         </p>
         <ul className="type-grid">
           {CLASSES.map((k) => (
@@ -141,6 +104,10 @@ export default function Theory() {
         </p>
       </section>
 
+    </>
+    )
+  return (
+    <>
       <section className="section" aria-labelledby="props-title">
         <h2 id="props-title" className="section-title">
           Properties around the CMC
@@ -215,26 +182,6 @@ export default function Theory() {
         </ul>
       </section>
 
-      <section className="section" aria-labelledby="measure-title">
-        <h2 id="measure-title" className="section-title">
-          Measuring surface tension
-        </h2>
-        <p className="prose">
-          The CMC is usually found by measuring γ at many concentrations and finding where the curve stops falling.
-          Both standard methods hang a clean platinum probe from a sensitive balance and measure how hard the surface
-          pulls on it. Platinum is used because the liquid clings fully to it and it is easy to clean by flaming.
-        </p>
-        <figure className="figure tensio-figure">
-          <TensiometerDiagram />
-          <figcaption>
-            <span className="figure-label">Figure 3.</span> <strong>Wilhelmy plate:</strong> a thin plate just touches
-            the surface; the liquid pulls it down along its perimeter L, and the balance reads F = γL directly, at
-            equilibrium. <strong>Du Noüy ring:</strong> a ring is pulled up through the surface and the
-            maximum force before the liquid film breaks gives γ, after a correction factor f for the shape of the
-            lifted liquid.
-          </figcaption>
-        </figure>
-      </section>
     </>
   )
 }
