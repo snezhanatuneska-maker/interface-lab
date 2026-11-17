@@ -1,32 +1,24 @@
 import type { ReactNode } from 'react'
 import { ADSORPTION_BANK } from '../../data/practice/adsorption'
-import { CAPILLARY_BANK } from '../../data/practice/capillary'
 import { CRYSTAL_BANK } from '../../data/practice/crystal'
 import { DLVO_BANK } from '../../data/practice/dlvo'
 import { EDL_BANK } from '../../data/practice/edl'
-import { MIPS_BANK } from '../../data/practice/mips'
 import { NUCLEATION_BANK } from '../../data/practice/nucleation'
 import { PHASE_BANK } from '../../data/practice/phase'
-import { SURFACTANT_BANK } from '../../data/practice/surfactants'
 import { VDW_BANK } from '../../data/practice/vdw'
-import { WETTING_BANK } from '../../data/practice/wetting'
 import { ZETA_BANK } from '../../data/practice/zeta'
 import { ZISMAN_BANK } from '../../data/practice/zisman'
 import { SURFACE_BANK } from '../../data/practice/surface'
 import { bankGenerator, isBank, mix, type BankData } from '../../lib/bank'
 import type { Generator, Problem } from '../../lib/training'
 import { generateBet, type BetData } from '../../lib/trainBet'
-import { generateCapillary, type CapillaryData } from '../../lib/trainCapillary'
 import { generateColloid, type ColloidData } from '../../lib/trainColloid'
 import { generateCrystal, type CrystalData } from '../../lib/trainCrystal'
 import { generateEdl, type EdlData } from '../../lib/trainEdl'
 import { generateIsotherm, type IsothermData } from '../../lib/trainIsotherm'
-import { generateMips, type MipsData } from '../../lib/trainMips'
 import { generateNucleation, type NucleationData } from '../../lib/trainNucleation'
 import { generatePhase, type PhaseData } from '../../lib/trainPhase'
-import { generateSurfactant, type SurfactantData } from '../../lib/trainSurfactant'
 import { generateVdw, type VdwData } from '../../lib/trainVdw'
-import { generateWetting, type WettingData } from '../../lib/trainWetting'
 import { generateZeta, type ZetaData } from '../../lib/trainZeta'
 import { generateZisman, type ZismanData } from '../../lib/trainZisman'
 import { generateSurface, type SurfaceData } from '../../lib/trainSurface'
@@ -57,22 +49,6 @@ const figure =
     isBank(p.data) || !has(p.data as D) ? null : <Figure data={p.data as D} />
 
 export const CONFIGS: Record<string, TrainerConfig> = {
-  surfactants: {
-    intro: 'The CMC against tail length (Klevens), area per molecule from Γ, and what head charge and salt do.',
-    generate: withBank<SurfactantData>(generateSurfactant, SURFACTANT_BANK, 1),
-  },
-  wetting: {
-    intro: 'Contact angles from Young, Wenzel and Cassie–Baxter, and which state a rough surface favours.',
-    generate: withBank<WettingData>(generateWetting, WETTING_BANK),
-  },
-  capillary: {
-    intro: 'Young–Laplace pressure in nanometre pores, wetting and capillary condensation.',
-    generate: withBank<CapillaryData>(generateCapillary, CAPILLARY_BANK),
-  },
-  porosimetry: {
-    intro: 'Mercury intrusion: pore diameter and pressure from Young–Laplace for a cylindrical pore, and why mercury must be pushed in.',
-    generate: withBank<MipsData>(generateMips, MIPS_BANK),
-  },
   bet: {
     intro: 'From a BET dataset to the monolayer capacity Vₘ, the BET constant C and the specific surface area.',
     generate: generateBet as Generator<unknown>,

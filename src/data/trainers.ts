@@ -1,6 +1,7 @@
 // Training mode: randomized practice for every finished topic. Each trainer here is listed on #/training (grouped by
 // topic), in the side menu's Training section, and as a "Practise this topic" link on its topic's page.
-// To add one: add an entry here and its generator in src/pages/training/configs.tsx.
+// To add one: add an entry here and its generator in src/pages/training/configs.tsx (or, for a course exercise with
+// kind 'exercise', its definition in src/pages/training/exercises.tsx).
 
 export interface Trainer {
   id: string
@@ -13,41 +14,55 @@ export interface Trainer {
   description: string
   /** Route of the trainer page, e.g. '#/training/bet'. */
   href: string
+  /** 'exercise': a course exercise (task, parts, worked solution) instead of randomized multiple choice. */
+  kind?: 'exercise'
+  /** Heading the trainer is grouped under on #/training, when it is not the topic name. */
+  group?: string
 }
 
+export const SHEET1 = 'Liquid Interfaces – Exercise Sheet 1'
+
 export const TRAINERS: Trainer[] = [
-  // ---------- Liquid Interfaces ----------
+  // ---------- Liquid Interfaces: Exercise Sheet 1 ----------
   {
-    id: 'surfactants',
-    title: 'Surfactants & CMC Training',
+    id: 'exercise-1-1',
+    title: 'Exercise 1.1: Wilhelmy plate and Du Noüy ring',
     topic: 'Liquid Interfaces',
     subtopic: 'surfactants-cmc',
-    description: 'The CMC against tail length (Klevens), area per molecule, and what charge and salt do.',
-    href: '#/training/surfactants',
+    description: 'Surface tension from a Wilhelmy plate, the extra mass on a Du Noüy ring, and soap above the CMC.',
+    href: '#/training/exercise-1-1',
+    kind: 'exercise',
+    group: SHEET1,
   },
   {
-    id: 'wetting',
-    title: 'Wetting Training',
+    id: 'exercise-1-2',
+    title: 'Exercise 1.2: Ethanol–water on bare and silanized glass',
     topic: 'Liquid Interfaces',
     subtopic: 'wetting-contact-angle',
-    description: 'Contact angles from Young, Wenzel and Cassie–Baxter, and the favoured state.',
-    href: '#/training/wetting',
+    description: 'Contact-angle trends from surface chemistry, and γ_sl from Young’s equation for both substrates.',
+    href: '#/training/exercise-1-2',
+    kind: 'exercise',
+    group: SHEET1,
   },
   {
-    id: 'capillary',
-    title: 'Capillary Pressure Training',
+    id: 'exercise-1-3',
+    title: 'Exercise 1.3: Capillary pressure diagram of a model pore system',
     topic: 'Liquid Interfaces',
     subtopic: 'capillary-pressure',
-    description: 'Young–Laplace pressure and pore radius, imbibition and capillary condensation.',
-    href: '#/training/capillary',
+    description: 'Capillary pressures and rise heights, drainage and imbibition curves, gravity, and interconnections.',
+    href: '#/training/exercise-1-3',
+    kind: 'exercise',
+    group: SHEET1,
   },
   {
-    id: 'porosimetry',
-    title: 'Mercury Porosimetry Training',
+    id: 'exercise-1-4',
+    title: 'Exercise 1.4: Optical humidity sensor (Kelvin)',
     topic: 'Liquid Interfaces',
-    subtopic: 'mercury-porosimetry',
-    description: 'Pore diameter and intrusion pressure from Young–Laplace for a cylindrical pore.',
-    href: '#/training/porosimetry',
+    subtopic: 'capillary-pressure',
+    description: 'Capillary condensation in small pores, the largest pore needed and the lowest measurable humidity.',
+    href: '#/training/exercise-1-4',
+    kind: 'exercise',
+    group: SHEET1,
   },
   // ---------- Solid Interfaces ----------
   {

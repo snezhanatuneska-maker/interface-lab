@@ -38,10 +38,10 @@ function staircase(curve: CurvePoint[]) {
 
 const COL_W = 64
 const ROW_H = 46
-const PAD_TOP = 34
+const PAD_TOP = 52
 const PAD_BOTTOM = 34
 
-function NetworkView({ net, filled, label }: { net: PoreNetwork; filled: boolean[]; label: string }) {
+export function NetworkView({ net, filled, label }: { net: PoreNetwork; filled: boolean[]; label: string }) {
   const rMax = Math.max(...net.columns.flat())
   const rows = Math.max(...net.columns.map((c) => c.length))
   const W = Math.max(net.columns.length * COL_W + 40, 220)
@@ -55,7 +55,7 @@ function NetworkView({ net, filled, label }: { net: PoreNetwork; filled: boolean
   return (
     <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label} className="network-svg">
       <rect x={0} y={0} width={W} height={PAD_TOP - 6} className="net-gas" />
-      <text x={W / 2} y={18} textAnchor="middle" className="net-label">
+      <text x={W / 2} y={16} textAnchor="middle" className="net-label">
         gas, p₀ + Δp
       </text>
       <rect x={x0 - 8} y={PAD_TOP - 6} width={net.columns.length * COL_W + 16} height={rows * ROW_H + 12} className="net-solid" />
@@ -76,7 +76,7 @@ function NetworkView({ net, filled, label }: { net: PoreNetwork; filled: boolean
         }),
       )}
       {net.columns.map((_, c) => (
-        <text key={c} x={cx(c)} y={PAD_TOP - 12} textAnchor="middle" className="net-col">
+        <text key={c} x={cx(c)} y={PAD_TOP - 14} textAnchor="middle" className="net-col">
           {['I', 'II', 'III', 'IV', 'V', 'VI'][c] ?? c + 1}
         </text>
       ))}

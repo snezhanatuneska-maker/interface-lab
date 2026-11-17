@@ -969,3 +969,45 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
 .bar-metal { fill: var(--data-2); }
 .bar-grid { stroke: var(--data-grid); stroke-width: 1; }
 .bar-tick { font-family: var(--font-sans); font-size: 12px; fill: var(--color-text-muted); }
+
+/* Course exercises (#/training/exercise-…) */
+.ex-header { font-size: var(--text-sm); }
+.ex-task p:first-child { margin-top: 0; }
+.ex-data { padding-left: 1.2em; }
+.ex-figure { margin-top: var(--space-5); }
+.ex-parts { list-style: none; padding: 0; margin: var(--space-5) 0 0; display: grid; gap: var(--space-5); }
+.ex-prompt { margin-top: 0; }
+.ex-fields { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-5); margin: var(--space-3) 0; }
+.ex-field { display: inline-flex; align-items: center; gap: var(--space-2); }
+.ex-input { display: inline-flex; align-items: center; gap: var(--space-1); white-space: nowrap; }
+.ex-input input {
+  font: inherit; font-size: var(--text-sm); width: 5.5em; padding: 2px var(--space-2); text-align: right;
+  background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm);
+}
+.ex-input.right input { border-color: var(--color-accent); }
+.ex-input.wrong input { border-color: var(--data-2); }
+.ex-unit { font-size: var(--text-sm); color: var(--color-text-muted); }
+.ex-mark { font-weight: 700; }
+.ex-input.right .ex-mark { color: var(--color-accent); }
+.ex-input.wrong .ex-mark { color: var(--data-2); }
+.ex-table td, .ex-table th { text-align: center; }
+.ex-table td:last-child { color: var(--color-text); }
+.ex-table .ex-input input { width: 4.2em; }
+.ex-table.official { margin-top: var(--space-3); }
+.ex-buttons { margin-top: var(--space-3); }
+.ex-choice { margin-top: var(--space-4); }
+.ex-answer { margin-bottom: 0; }
+.ex-details { margin-top: var(--space-4); }
+.ex-details > summary { cursor: pointer; font-weight: 600; color: var(--color-accent); margin-bottom: var(--space-3); }
+.ex-networks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); text-align: center; }
+@media (max-width: 600px) { .ex-networks { grid-template-columns: minmax(0, 1fr); } }
+.ex-chem { font-family: var(--font-sans); font-size: 12px; fill: var(--color-text); }
+.ex-weight { fill: var(--data-axis); }
+.ex-pore-filled { fill: var(--pore-liquid); stroke: var(--data-1); }
+.ex-pore-empty { fill: var(--data-plot-bg); stroke: var(--solid-line); }
+.ex-parts > li, .exercise, .ex-task, .ex-figure { min-width: 0; }
+.ex-table .ex-unit { display: none; }
+.ex-table .ex-input input { width: 3.8em; }
+.exercise .table-wrap { overflow-x: auto; }
+.formula-body, .ex-data li { position: relative; }
+.ex-table td, .ex-table th, .table-wrap { position: relative; }

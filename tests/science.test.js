@@ -20,13 +20,11 @@ import * as dlvo from '../src/lib/dlvo'
 import * as nuc from '../src/lib/nucleation'
 import * as phase from '../src/lib/phase'
 import * as cry from '../src/lib/crystal'
-import { generateMips } from '../src/lib/trainMips'
 import * as mips from '../src/lib/mips'
 import { ETA_WATER, generateZeta } from '../src/lib/trainZeta'
 import { makeRng } from '../src/lib/random'
 import { DIFFICULTIES } from '../src/lib/training'
 import { generateBet } from '../src/lib/trainBet'
-import { generateCapillary } from '../src/lib/trainCapillary'
 import { generateColloid } from '../src/lib/trainColloid'
 import { generateEdl } from '../src/lib/trainEdl'
 import { generateHamaker } from '../src/lib/trainHamaker'
@@ -34,9 +32,7 @@ import { generateLennardJones } from '../src/lib/trainLennardJones'
 import { generateNucleation } from '../src/lib/trainNucleation'
 import { generatePhase } from '../src/lib/trainPhase'
 import { generateSurface } from '../src/lib/trainSurface'
-import { generateSurfactant } from '../src/lib/trainSurfactant'
 import { generateVdw } from '../src/lib/trainVdw'
-import { generateWetting } from '../src/lib/trainWetting'
 import { generateZisman } from '../src/lib/trainZisman'
 import { generateCrystal } from '../src/lib/trainCrystal'
 import { generateIsotherm } from '../src/lib/trainIsotherm'
@@ -916,33 +912,6 @@ describe('Trainer answer keys (independent solution of the question text)', () =
     )
     expect(bad.length).toBe(0)
   })
-  it('Capillary: Pc = 2γcosθ/r (γ as stated)', () => {
-    const bad = keyFailures(
-      problems(generateCapillary),
-      (p) => {
-        const q = p.question
-        const g = Number(q.match(/= (\d+(?:\.\d+)?) mN\/m/)[1]) / 1000
-        const t = Number(q.match(/θ = (\d+)°/)[1])
-        if (p.data.ask === 'pressure') return (2 * g * cosd(t)) / (Number(q.match(/r = (\d+) nm/)[1]) * 1e-9) / 1e6
-        return ((2 * g * cosd(t)) / (num(q.match(/pressure of (.+?) MPa/)[1]) * 1e6)) * 1e9
-      },
-      0.01,
-    )
-    expect(bad.length).toBe(0)
-  })
-  it('MIPS: d = −4γcosθ/P', () => {
-    const bad = keyFailures(
-      problems(generateMips),
-      (p) => {
-        const q = p.question
-        const W = -4 * 0.485 * cosd(140)
-        if (p.data.ask === 'diameter') return (W / (num(q.match(/P = (.+?) MPa/)[1]) * 1e6)) * 1e9
-        return W / (Number(q.match(/diameter (\d+) nm/)[1]) * 1e-9) / 1e6
-      },
-      0.01,
-    )
-    expect(bad.length).toBe(0)
-  })
   it('EDL: Stern ε₀ε_S/δ, series 1/(1/C_S + 1/C_d)', () => {
     const bad = keyFailures(
       problems(generateEdl),
@@ -978,24 +947,6 @@ describe('Trainer answer keys (independent solution of the question text)', () =
     )
     expect(bad.length).toBe(0)
   })
-  it('Surfactant: Klevens and area per molecule', () => {
-    const bad = keyFailures(
-      problems(generateSurfactant),
-      (p) => {
-        const q = p.question
-        if (q.includes('Klevens')) {
-          const [n1, n2] = [...q.matchAll(/C(\d+) tail/g)].map((m) => Number(m[1]))
-          const c1 = num(q.match(/CMC of (.+?) mM/)[1])
-          const B = Number(q.match(/B = (\d+(?:\.\d+)?)/)[1])
-          return c1 * 10 ** (-B * (n2 - n1))
-        }
-        const G = Number(q.match(/Γ = (\d+(?:\.\d+)?) µmol/)[1]) * 1e-6
-        return 1e18 / (G * NA)
-      },
-      0.05, // CMC shown to 2 significant figures
-    )
-    expect(bad.length).toBe(0)
-  })
   it('vdW: |φ| ∝ r⁻⁶; Keesom ∝ 1/T', () => {
     const bad = keyFailures(
       problems(generateVdw),
@@ -1012,28 +963,6 @@ describe('Trainer answer keys (independent solution of the question text)', () =
     )
     expect(bad.length).toBe(0)
   })
-  it('Wetting: Young, Wenzel, Cassie angles', () => {
-    const bad = keyFailures(
-      problems(generateWetting).filter(({ p }) => typeof p.data.result === 'number'),
-      (p) => {
-        const q = p.question
-        const g = (re) => Number(q.match(re)[1])
-        if (p.data.ask === 'young') return acosd((g(/gamma_\{SV\}\$ = (\d+(?:\.\d+)?)/) - g(/gamma_\{SL\}\$ = (\d+(?:\.\d+)?)/)) / g(/gamma_\{LV\}\$ = (\d+(?:\.\d+)?)/))
-        if (p.data.ask === 'wenzel') return acosd(g(/\$r\$ = (\d+(?:\.\d+)?)/) * cosd(g(/theta_Y\$ = (\d+)/)))
-        return acosd(g(/f_s\$ = (\d+(?:\.\d+)?)/) * (cosd(g(/theta_Y\$ = (\d+)/)) + 1) - 1)
-      },
-      0.03,
-    )
-    expect(bad.length).toBe(0)
-  })
-  it('Wetting: Young angles in questions stay within what a smooth surface can give (≤ ~120°, as the page now says)', () => {
-    const over = problems(generateWetting)
-      .filter(({ p }) => p.data.ask !== 'young' && p.data.thetaY !== undefined)
-      .map(({ p }) => p.data.thetaY)
-      .filter((t) => t > 125)
-    if (over.length) console.log('Wetting trainer: θ_Y above 125° in', over.length, 'questions, max', Math.max(...over))
-    expect(over.length).toBe(0)
-  })
   it('Isotherm recognition: type III curves use C < 2, type I/II have the right form', () => {
     for (const { p } of problems(generateIsotherm, 100)) {
       const { family, x, ads: y } = p.data
@@ -1043,7 +972,7 @@ describe('Trainer answer keys (independent solution of the question text)', () =
     }
   })
   it('no worked-solution TeX lost its spacing (“\\;” in a JS string becomes a bare “;”)', () => {
-    const gens = { generatePhase, generateSurfactant, generateWetting }
+    const gens = { generatePhase }
     const hits = []
     for (const [name, gen] of Object.entries(gens))
       for (const { p } of problems(gen, 60)) for (const st of p.steps) if (st.tex && /(^|[^\\]);\\Rightarrow/.test(st.tex)) hits.push(`${name}: ${st.tex.slice(0, 80)}`)

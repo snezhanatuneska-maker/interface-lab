@@ -1,71 +1,18 @@
 import { describe, expect, it } from 'vitest'
-const capillaryPressure = (r: number, theta: number) => (2 * 0.072 * Math.cos((theta * Math.PI) / 180)) / (r * 1e-9) / 1e3
 import { checkGenerator } from './checkGenerator'
 import { survivingFamilies } from './crystal'
 import { binodal, region, spinodal } from './phase'
-import { generateCapillary } from './trainCapillary'
 import { generateCrystal } from './trainCrystal'
 import { generateEdl } from './trainEdl'
 import { fmt } from './training'
-import { generateMips } from './trainMips'
 import { generateNucleation } from './trainNucleation'
 import { generatePhase } from './trainPhase'
-import { generateSurfactant } from './trainSurfactant'
 import { generateVdw } from './trainVdw'
 import { generateZeta } from './trainZeta'
 import { generateZisman } from './trainZisman'
 
 // One block per topic trainer: the shared rules (checkGenerator), then the physics of the right answer and the
 // ranges of the numbers it uses.
-
-describe('capillary trainer', () => {
-  it('uses Young–Laplace with nanometre pores and megapascal pressures', () => {
-    for (const p of checkGenerator(generateCapillary)) {
-      const { ask, r, theta, P } = p.data
-      expect(theta).toBeGreaterThanOrEqual(0)
-      expect(theta).toBeLessThan(90)
-      if (ask === 'pressure') {
-        expect(p.options[p.answer]).toBe(`${fmt(capillaryPressure(r, theta) / 1000)} MPa`)
-        expect(P).toBeGreaterThan(0.1)
-        expect(P).toBeLessThan(100)
-      } else {
-        expect(p.options[p.answer]).toBe(`${fmt(r)} nm`)
-        expect(r).toBeGreaterThan(1)
-        expect(r).toBeLessThan(60)
-      }
-    }
-  })
-})
-
-describe('porosimetry trainer', () => {
-  it('follows d = −4γ cos δ / p (d·p ≈ 1490 nm·MPa) over the instrument range', () => {
-    for (const p of checkGenerator(generateMips)) {
-      const { P, d } = p.data
-      expect(d * P).toBeCloseTo(1486, -1)
-      expect(P).toBeGreaterThanOrEqual(0.1)
-      expect(P).toBeLessThanOrEqual(400)
-      expect(p.options[p.answer]).toBe(p.data.ask === 'diameter' ? `${fmt(d)} nm` : `${fmt(P)} MPa`)
-    }
-  })
-})
-
-describe('surfactant trainer', () => {
-  it('lowers the CMC with a longer tail and gives areas of a fraction of a nm²', () => {
-    for (const p of checkGenerator(generateSurfactant)) {
-      const d = p.data
-      if (d.ask === 'klevens') {
-        expect(d.cmc1!).toBeGreaterThan(0.001)
-        expect(d.cmc1!).toBeLessThan(100)
-        expect(d.n2! > d.n1! ? d.cmc2! < d.cmc1! : d.cmc2! > d.cmc1!).toBe(true)
-        expect(p.options[p.answer]).toBe(`${fmt(d.cmc2!, 2)} mM`)
-      } else {
-        expect(d.area!).toBeGreaterThan(0.2)
-        expect(d.area!).toBeLessThan(1.5)
-        expect(p.options[p.answer]).toBe(`${fmt(d.area!)} nm²`)
-      }
-    }
-  })
-})
 
 describe('Zisman trainer', () => {
   it('recovers the critical surface tension from the shown angles', () => {

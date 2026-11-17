@@ -130,9 +130,6 @@ export function cmc(head: HeadType, tail: number): number {
   return 10 ** (p.klevensA - p.klevensB * tail)
 }
 
-/** Old name, kept for the pre-Exercise-Sheet trainer until it is removed. */
-export const cmcNoSalt = cmc
-
 /** Pseudo-phase model: free monomer concentration, M. */
 export const freeMonomer = (c: number, cmcV: number) => Math.min(c, cmcV)
 
@@ -179,9 +176,6 @@ export function surfaceExcess(sys: System, c: number): number {
   const kc = sys.K * freeMonomer(c, sys.cmc)
   return (sys.gammaMax * kc) / (1 + kc)
 }
-
-/** Area per molecule 1/(Γ·N_A), nm². Used only by the pre-Exercise-Sheet trainer until it is removed. */
-export const areaPerMolecule = (gamma: number) => 1e18 / (gamma * N_A)
 
 // ---------------------------------------------------------------------------------------------------------------
 // Other properties
