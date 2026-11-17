@@ -1011,3 +1011,44 @@ a.project-card:hover { border-color: var(--color-accent); color: inherit; }
 .exercise .table-wrap { overflow-x: auto; }
 .formula-body, .ex-data li { position: relative; }
 .ex-table td, .ex-table th, .table-wrap { position: relative; }
+
+/* Exam practice (#/exam) */
+.exam-bar { align-items: center; }
+.exam-timer { margin: 0; font-family: var(--font-serif); font-size: var(--text-lg); font-variant-numeric: tabular-nums; }
+.exam-timer.low { color: var(--data-2); }
+.exam-score { margin-top: var(--space-5); }
+.exam-points { font-weight: 600; color: var(--color-text-muted); white-space: nowrap; }
+.exam-parts { padding-left: 0; list-style: none; display: grid; gap: var(--space-5); margin-top: var(--space-5); }
+.exam-part { min-width: 0; border-left: 3px solid var(--color-border-strong); padding-left: var(--space-4); }
+.exam-prompt { margin-top: 0; max-width: var(--measure); }
+.exam-numeric { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); margin-bottom: var(--space-3); }
+.exam-numeric .exam-text { flex: 1 1 100%; }
+.exam-text {
+  display: block; width: 100%; max-width: var(--measure); box-sizing: border-box; font: inherit; font-size: var(--text-sm);
+  padding: var(--space-2); margin-bottom: var(--space-3); color: var(--color-text); background: var(--color-surface);
+  border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm);
+}
+.exam-text.small { margin-bottom: 0; }
+.exam-solution { margin-top: var(--space-3); }
+.exam-solution-head { font-weight: 600; font-size: var(--text-sm); color: var(--color-text-muted); margin: 0 0 var(--space-2); }
+.exam-version { font-size: var(--text-base); margin: var(--space-3) 0 var(--space-1); }
+.exam-marking { margin-top: var(--space-4); }
+.exam-compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); margin-bottom: var(--space-3); }
+@media (max-width: 600px) { .exam-compare { grid-template-columns: minmax(0, 1fr); } }
+.exam-compare > div { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-3); min-width: 0; }
+.exam-compare p { margin: 0; font-size: var(--text-sm); }
+.exam-yours { white-space: pre-wrap; overflow-wrap: anywhere; }
+.exam-checklist { border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-3); margin: 0; }
+.exam-checklist legend { font-weight: 600; font-size: var(--text-sm); padding: 0 var(--space-1); }
+.exam-check { display: flex; gap: var(--space-2); align-items: flex-start; font-size: var(--text-sm); }
+.exam-check + .exam-check { margin-top: var(--space-2); }
+.exam-check input { margin-top: 0.3em; accent-color: var(--color-accent); }
+.exam-data { max-width: 30rem; }
+.exam-data td { color: var(--color-text); }
+.exam-omitted { font-style: italic; }
+.exam-submit { margin-top: var(--space-6); }
+.exam-extra { margin-top: var(--space-4); }
+.exam-sketch { display: block; width: 100%; max-width: 360px; height: auto; margin: var(--space-3) 0; }
+.exam-pore { fill: var(--data-plot-bg); stroke: var(--solid-line); stroke-width: 0.6; }
+.exam-gas { fill: color-mix(in srgb, var(--gas) 30%, var(--data-plot-bg)); }
+.exam-air { fill: var(--data-plot-bg); }

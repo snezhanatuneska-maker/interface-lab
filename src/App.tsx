@@ -4,7 +4,8 @@ import ThemeToggle from './components/ThemeToggle';
 import SideMenu, { DRAWER_QUERY } from './components/SideMenu';
 import { SITE_LINKS } from './data/nav';
 import { inSection, loadMenuHidden, saveMenuHidden } from './lib/menu';
-import { trainerAt } from './data/trainers';
+import { trainerAt } from './data/trainers'
+import { examAt } from './data/exam';
 import PracticeLinks from './components/PracticeLinks';
 import { useHashRoute } from './lib/useHashRoute';
 import { COURSE } from './siteConfig';
@@ -26,6 +27,8 @@ const DemosPage = lazy(() => import('./pages/DemosPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const TrainingPage = lazy(() => import('./pages/TrainingPage'));
 const TrainerPage = lazy(() => import('./pages/training/TrainerPage'));
+const ExamIndexPage = lazy(() => import('./pages/exam/ExamIndexPage'));
+const ExamPage = lazy(() => import('./pages/exam/ExamPage'));
 const MipsPage = lazy(() => import('./pages/mips/MipsPage').then((m) => ({ default: m.MipsPage })));
 const SurfaceExplorerPage = lazy(() => import('./pages/surface-explorer/SurfaceExplorerPage').then((m) => ({ default: m.SurfaceExplorerPage })));
 const LennardJonesPage = lazy(() => import('./pages/lennard-jones/LennardJonesPage').then((m) => ({ default: m.LennardJonesPage })));
@@ -34,6 +37,7 @@ const HamakerPage = lazy(() => import('./pages/hamaker/HamakerPage').then((m) =>
 export default function App() {
   const route = useHashRoute();
   const trainer = trainerAt(route);
+  const exam = examAt(route);
   const [menuOpen, setMenuOpen] = useState(false); // drawer, below 1024 px
   const [menuHidden, setMenuHidden] = useState(loadMenuHidden); // sidebar folded away, desktop
   const [isDrawer, setIsDrawer] = useState(() => window.matchMedia(DRAWER_QUERY).matches);
@@ -122,6 +126,14 @@ export default function App() {
           ) : route === '/training' ? (
             <Suspense fallback={<p className="loading">Loading training...</p>}>
               <TrainingPage />
+            </Suspense>
+          ) : route === '/exam' ? (
+            <Suspense fallback={<p className="loading">Loading exam practice...</p>}>
+              <ExamIndexPage />
+            </Suspense>
+          ) : exam ? (
+            <Suspense fallback={<p className="loading">Loading exam...</p>}>
+              <ExamPage id={exam.id} />
             </Suspense>
           ) : trainer ? (
             <Suspense fallback={<p className="loading">Loading trainer...</p>}>

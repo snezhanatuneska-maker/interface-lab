@@ -30,9 +30,11 @@ answer the worked solution step by step. **Exam mode** asks 10 questions without
 a review of every question with its solution. Problems come from a seeded random generator (`src/lib/random.ts`), so
 each is reproducible from the number shown above it. The trainers:
 
-- **Liquid Interfaces:** Surfactants & CMC (Klevens rule, area per molecule), Wetting (Young, Wenzel, Cassie–Baxter
-  angles and the favoured state), Capillary Pressure (Young–Laplace pressure and pore radius), Mercury Porosimetry
-  (Washburn pore diameter and pressure).
+- **Liquid Interfaces – Exercise Sheet 1:** the course exercises 1.1 (Wilhelmy plate, Du Noüy ring), 1.2 (γ_sl on
+  bare and silanized glass), 1.3 (capillary pressure diagram, with the pore-network simulator) and 1.4 (Kelvin
+  humidity sensor). Each shows the original task and data, a figure, numeric inputs with a tolerance check, worked
+  solutions ending in the official answer, model answers for comment parts and a *Try with new numbers* button
+  (`src/lib/sheet1.ts`, `src/pages/training/exercises.tsx`, `src/components/training/ExerciseTrainer.tsx`).
 - **Solid Interfaces:** BET Training (a noisy N₂ dataset as a table and straight-line BET plot; find Vₘ, C or m²/g;
   wrong answers are typical mistakes; on Hard the slope and intercept are read off the plot), Isotherm Recognition
   (Langmuir, BET, IUPAC I–IV; harder levels pick curves that look more alike), Zisman Plot (γ_c from the contact
@@ -70,22 +72,28 @@ The first tool is a **Langmuir vs BET adsorption** simulator for bachelor studen
 - **Beyond BET**: the IUPAC isotherm types I–IV and what each says about the surface.
 - **Why it matters for clean energy**: fuel-cell catalysts, catalyst layers, H₂ storage and CO₂ capture.
 
-The **Surfactants & Micelle Formation** tool (`#/surfactants`) shows how surfactant first adsorbs at the air–water
-interface and then forms micelles above the CMC: an animated beaker, surface tension against log c, conductivity,
-osmotic pressure, turbidity and self-diffusion around the CMC, controls for surfactant (SDS, CTAB, Tween 20, C12
-betaine, Custom), tail length, head type and NaCl, plus theory and equations. All constants
-and equations are in `src/lib/surfactants.ts`; values marked ESTIMATED there should be checked against course notes.
+**Exam Practice** (`#/exam`, `#/exam/liquid-interfaces`): the Liquid Interfaces tasks of the course's specimen exam
+(Task 1 and Task 2 (a), (b), (f)) in exam mode (answer boxes, optional timer, submit, self-marking out of 15) or
+study mode (model solutions, not official). One data file per topic in `src/data/exam/`.
+
+The Liquid Interfaces pages follow the lectures (Chapter 1) and the course's Equation Compendium notation (δ, γ_sg,
+γ_sl, γ_lg, A_r, f_solid, p_c, h_c, r_c, …):
+
+- **Surface Tension & Surfactants** (`#/surfactants`): interface and Gibbs dividing surface, γ = (∂F/∂A), the
+  lecture's surface-tension table, Wilhelmy/Du Noüy calculator, pendant drop, surfactant classes and a qualitative
+  CMC simulation (`src/lib/surfaceTension.ts`, `src/lib/surfactants.ts`).
+- **Wetting & Contact Angle** (`#/wetting`): Young with the spreading coefficient, Wenzel and Cassie–Baxter,
+  contact-angle hysteresis with a Furmidge tilt simulator, Cassie–Baxter stability and re-entrant structures, and
+  lecture examples (`src/lib/wetting.ts`).
+- **Curved Interfaces & Capillarity** (`#/capillary`): Young–Laplace, Jurin, the capillary pressure curve with a
+  pore-network simulator (`src/lib/poreNetwork.ts`), and Kelvin with the course γ(T) (`src/lib/capillary.ts`).
+- **Mercury Intrusion Porosimetry** (`#/mips`): Young–Laplace for a cylindrical pore applied to mercury intrusion
+  (`src/lib/mips.ts`).
 
 The **Phase Separation** tool (`#/phase-separation`) contrasts nucleation and spinodal decomposition: drag a point
 on a regular-solution phase diagram (binodal, spinodal, three shaded regions) linked to G(x) with its common tangent
 and inflection points; side-by-side 1D concentration profiles (scripted nuclei vs a Cahn–Hilliard simulation); the
 nucleation barrier ΔG(d) with sliders for S and γ; and CEP examples.
-
-The **Wetting & Contact Angle** tool (`#/wetting`) compares Young, Wenzel and Cassie–Baxter: pick one model at a
-time and see a droplet drawn to scale on a smooth surface, with liquid filling the grooves, or on trapped air, with a
-zoomed view of the contact area. θ_Y is set directly or from γ_SV, γ_SL, γ_LV; sliders for roughness r and solid
-fraction f_s, presets (glass, PTFE, lotus leaf), which state is favored, and why it matters for clean energy. Equations in
-`src/lib/wetting.ts` (tests: `wetting.test.ts`).
 
 The **Van der Waals Forces** tool (`#/van-der-waals`) splits the attraction between two identical neutral molecules
 into Keesom, Debye and London (all −C/r⁶): pick a molecule (Ar, H₂, CH₄, CO, HCl, NH₃, H₂O or Custom), set T and r,
@@ -146,8 +154,8 @@ src/components/training/         Training framework: Trainer (difficulty, streak
 src/lib/random.ts                Seeded random generator (tests: random.test.ts)
 src/lib/training.ts              Problem type, answer options from typical mistakes, number formatting (tests: training.test.ts)
 src/lib/streak.ts                Current and best streak per trainer in localStorage (tests: streak.test.ts)
-src/lib/train*.ts                Problem generators: trainBet, trainIsotherm, trainWetting, trainColloid (own tests), and
-                                 trainSurfactant, trainCapillary, trainMips, trainZisman, trainVdw, trainEdl, trainZeta,
+src/lib/train*.ts                Problem generators: trainBet, trainIsotherm, trainColloid (own tests), and
+                                 trainZisman, trainVdw, trainEdl, trainZeta,
                                  trainNucleation, trainPhase, trainCrystal (tests: trainTopics.test.ts). Each test checks the
                                  answer is among four distinct options and the numbers stay physical (checkGenerator.ts)
 src/lib/bank.ts                  Concept-question banks as generators, and mixing generators (tests: bank.test.ts)
@@ -161,7 +169,7 @@ src/components/Plot.tsx          Loads Plotly on demand, with a same-size "Loadi
 src/components/PlotlyPlot.tsx    Plotly component (uses the smaller "basic" Plotly bundle)
 src/components/Tex.tsx           KaTeX equation component
 src/components/ThemeToggle.tsx   Light/dark switch in the header
-src/pages/SurfactantPage.tsx     Surfactants & CMC page; its sections live in src/pages/surfactants/
+src/pages/SurfactantPage.tsx     Surface Tension & Surfactants page; its sections live in src/pages/surfactants/
 src/pages/WettingPage.tsx        Wetting page; its sections (droplet, theory) live in src/pages/wetting/
 src/pages/VdwPage.tsx            Van der Waals page; its sections (cards, theory) live in src/pages/vdw/
 src/pages/CrystalPage.tsx        Crystal Growth & Shape page (#/crystal-growth); its sections (facet and DLA canvases,
@@ -172,7 +180,7 @@ src/lib/phase.ts                 Regular solution, binodal/spinodal, Cahn–Hill
 src/pages/NucleationPage.tsx     Classical nucleation page; its sections (equations, cap sketch, theory) live in src/pages/nucleation/
 src/lib/nucleation.ts            ΔG(d), d*, ΔG*, shape factor f(θ), log rate (tests: nucleation.test.ts)
 src/lib/vdw.ts                   Keesom, Debye, London coefficients, molecule presets, constants (tests: vdw.test.ts)
-src/lib/wetting.ts               Young, Wenzel, Cassie–Baxter, critical angle, presets (tests: wetting.test.ts)
+src/lib/wetting.ts               Young, S_w, Wenzel, Cassie–Baxter, Furmidge, presets (tests: wetting.test.ts)
 src/lib/surfactants.ts           CMC, surface tension and property models, all constants (tests: surfactants.test.ts)
 src/lib/adsorption.ts            Isotherm equations, BET fit, surface area, example samples (tests: adsorption.test.ts)
 src/lib/plotTheme.ts             Shared Plotly layout and axis styling

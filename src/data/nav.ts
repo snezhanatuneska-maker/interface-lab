@@ -5,5 +5,6 @@ export const SITE_LINKS: MenuLink[] = [
   { title: 'Home', href: '#/' },
   { title: 'Demos', href: '#/demos' },
   { title: 'Training', href: '#/training' },
+  { title: 'Exam Practice', href: '#/exam' },
   { title: 'About', href: '#/about' },
 ]
