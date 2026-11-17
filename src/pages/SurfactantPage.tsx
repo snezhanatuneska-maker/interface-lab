@@ -5,18 +5,15 @@ import { Segmented, Slider } from '../components/Controls'
 import { useThemeColors, type ThemeColors } from '../lib/themeColors'
 import { axis, baseLayout, staticConfig } from '../lib/plotTheme'
 import {
-  areaPerMolecule,
   C_RANGE,
   concentrationGrid,
   conductivity,
-  counterionBinding,
   diffusionRel,
   freeMonomer,
   isIonic,
   makeSystem,
   osmoticRel,
   PRESETS,
-  SALT_MAX,
   surfaceExcess,
   surfaceTension,
   TAIL_RANGE,
@@ -32,7 +29,7 @@ import SurfaceTension from './surfactants/SurfaceTension'
 
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-const DEFAULT = { surf: 'sds' as SurfactantId, head: 'anionic' as HeadType, tail: 12, saltMM: 0, logC: -3 }
+const DEFAULT = { surf: 'sds' as SurfactantId, head: 'anionic' as HeadType, tail: 12, logC: -3 }
 const [LOG_MIN, LOG_MAX] = C_RANGE.map(Math.log10)
 
 const HEAD_LABEL: Record<HeadType, string> = {
@@ -154,15 +151,14 @@ const PROPS: Record<Exclude<PropId, 'conductivity'>, { f: (s: System, c: number)
   },
 }
 
-function captionFor(prop: PropId, beta: number | null) {
+function captionFor(prop: PropId) {
   const label = <span className="figure-label">Figure 4.</span>
   switch (prop) {
     case 'conductivity':
       return (
         <>
           {label} Ionic surfactants only. Two straight lines meet at the CMC (they look curved on the log axis); the
-          slope drops because micelles bind part of their counterions
-          {beta !== null && <>, here β = {beta.toFixed(2)}</>}.
+          slope drops because micelles bind part of their counterions and move slowly.
         </>
       )
     case 'osmotic':
@@ -196,7 +192,6 @@ export default function SurfactantPage() {
   const [surf, setSurf] = useState<SurfactantId>(DEFAULT.surf)
   const [customHead, setCustomHead] = useState<HeadType>(DEFAULT.head)
   const [customTail, setCustomTail] = useState(DEFAULT.tail)
-  const [saltMM, setSaltMM] = useState(DEFAULT.saltMM)
   const [logC, setLogC] = useState(DEFAULT.logC)
   const [paused, setPaused] = useState(prefersReducedMotion)
   const [prop, setProp] = useState<PropId>('conductivity')
@@ -206,12 +201,11 @@ export default function SurfactantPage() {
   const head = preset?.head ?? customHead
   const tail = preset?.tail ?? customTail
   const ionic = isIonic(head)
-  const sys = makeSystem(head, tail, saltMM / 1e3)
+  const sys = makeSystem(head, tail)
   const c = 10 ** logC
   const above = c > sys.cmc
   const gamma = surfaceTension(sys, c)
   const Gamma = surfaceExcess(sys, c)
-  const beta = counterionBinding(head)
 
   // What the molecular view draws. Monomer and micelle counts are on a compressed (square-root / log) scale,
   // since the real numbers span many decades.
@@ -269,7 +263,7 @@ export default function SurfactantPage() {
               </select>
             </div>
 
-            {/* Head and tail only matter for Custom; salt only for ionic surfactants. */}
+            {/* Head and tail only matter for Custom. */}
             {!preset && (
               <>
                 <div className="select">
@@ -297,18 +291,6 @@ export default function SurfactantPage() {
               </>
             )}
 
-            {ionic && (
-              <Slider
-                id="salt"
-                label={<>Added NaCl</>}
-                value={`${saltMM} mM`}
-                min={0}
-                max={SALT_MAX * 1e3}
-                step={1}
-                pos={saltMM}
-                onChange={setSaltMM}
-              />
-            )}
 
             <Slider
               id="conc"
@@ -332,16 +314,6 @@ export default function SurfactantPage() {
                 <dd>
                   <span className={`state-badge${above ? ' above' : ''}`}>{state}</span>
                 </dd>
-              </div>
-              <div>
-                <dt>
-                  Surface excess <em>Γ</em>
-                </dt>
-                <dd>{(Gamma * 1e6).toFixed(2)} µmol/m²</dd>
-              </div>
-              <div>
-                <dt>Area per molecule</dt>
-                <dd>{Gamma > sys.gammaMax * 1e-3 ? `${areaPerMolecule(Gamma).toFixed(2)} nm²` : '—'}</dd>
               </div>
             </dl>
             <div className="sim-buttons">
@@ -420,10 +392,10 @@ export default function SurfactantPage() {
                   c={c}
                   f={conductivity}
                   yRange={[0, condMax]}
-                  yTitle="κ (mS/cm)"
+                  yTitle="κ (rel.)"
                   color={theme.data2}
                   theme={theme}
-                  label={`Conductivity: two straight lines meeting at the CMC; the slope drops above it. β = ${beta?.toFixed(2)}.`}
+                  label="Conductivity: two straight lines meeting at the CMC; the slope drops above it."
                 />
               ) : (
                 <p className="multiple-empty">
@@ -444,7 +416,7 @@ export default function SurfactantPage() {
               />
             )}
           </div>
-          <figcaption>{captionFor(prop, beta)}</figcaption>
+          <figcaption>{captionFor(prop)}</figcaption>
         </figure>
       </section>
 

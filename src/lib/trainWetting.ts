@@ -1,9 +1,16 @@
 import type { Rng } from './random'
 import { labelled, numericOptions, round, type Difficulty, type Generator, type Step } from './training'
-import { cassieAngle, criticalAngle, FSOLID_RANGE as FS_RANGE, AR_RANGE as R_RANGE, DELTA_RANGE as THETA_RANGE, wenzelAngle, youngFromTensions } from './wetting'
+import { cassieAngle, FSOLID_RANGE as FS_RANGE, AR_RANGE as R_RANGE, DELTA_RANGE as THETA_RANGE, wenzelAngle, youngFromTensions } from './wetting'
 
 // Wetting training: contact angles from Young, Wenzel and Cassie–Baxter, and which rough-surface state is favoured.
 // Reuses src/lib/wetting.ts. Angles in degrees, tensions in mN/m.
+
+// Old trainer (removed with Exercise Sheet 1): keeps its own critical-angle comparison.
+const criticalAngle = (r: number, fs: number) => (r - fs < 1e-9 ? null : (Math.acos(Math.min(1, Math.max(-1, (fs - 1) / (r - fs)))) * 180) / Math.PI)
+export const favoredState = (t: number, r: number, fs: number) => {
+  const c = criticalAngle(r, fs)
+  return c !== null && t > c ? 'cassie' : 'wenzel'
+}
 
 export type WettingAsk = 'young' | 'wenzel' | 'cassie' | 'state'
 

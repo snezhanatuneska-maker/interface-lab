@@ -211,42 +211,24 @@ describe('3 Mercury intrusion porosimetry', () => {
 // =====================================================================================================
 // 4. Surfactants
 // =====================================================================================================
-describe('4 Surfactants & CMC', () => {
-  it('literature CMCs (25 °C): SDS 8.2 mM, CTAB ~0.9–1.0 mM, C10 sulfate ~33 mM, C14 ~2.1 mM', () => {
-    near(surf.cmc('anionic', 12, 0) * 1e3, 8.2, 0.01)
-    near(surf.cmc('cationic', 16, 0) * 1e3, 0.92, 0.1)
-    near(surf.cmc('anionic', 10, 0) * 1e3, 33, 0.05)
-    near(surf.cmc('anionic', 14, 0) * 1e3, 2.1, 0.05)
+describe('4 Surfactants & CMC (qualitative trend model)', () => {
+  it('literature-order CMCs: SDS 8.2 mM, CTAB ~0.9–1.0 mM, C10 sulfate ~33 mM, C14 ~2.1 mM', () => {
+    near(surf.cmc('anionic', 12) * 1e3, 8.2, 0.01)
+    near(surf.cmc('cationic', 16) * 1e3, 0.92, 0.1)
+    near(surf.cmc('anionic', 10) * 1e3, 33, 0.05)
+    near(surf.cmc('anionic', 14) * 1e3, 2.1, 0.05)
   })
-  it('SDS in 0.1 M NaCl: ~1.4–1.6 mM (Corrin–Harkins); salt never raises the CMC', () => {
-    const c = surf.cmc('anionic', 12, 0.1) * 1e3
-    expect(c).toBeGreaterThan(1.3)
-    expect(c).toBeLessThan(1.7)
-    expect(surf.cmc('anionic', 12, 0.01)).toBeLessThan(surf.cmc('anionic', 12, 0))
-    expect(surf.cmc('nonionic', 12, 0.1)).toBe(surf.cmc('nonionic', 12, 0))
+  it('lecture trends: longer tail → lower CMC; non-ionic < ionic', () => {
+    expect(surf.cmc('anionic', 13)).toBeLessThan(surf.cmc('anionic', 12))
+    expect(surf.cmc('nonionic', 12)).toBeLessThan(surf.cmc('anionic', 12))
   })
-  it('Klevens: ×10^−0.3 ≈ ½ per CH₂ (ionic), ×10^−0.5 ≈ ⅓ (non-ionic)', () => {
-    near(surf.cmc('anionic', 13, 0) / surf.cmc('anionic', 12, 0), 10 ** -0.3, 1e-9)
-    near(surf.cmc('nonionic', 13, 0) / surf.cmc('nonionic', 12, 0), 10 ** -0.5, 1e-9)
-  })
-  it('Gibbs: Γ = −(1/nRT) dγ/dln c reproduces the Szyszkowski/Langmuir Γ; area per SDS ≈ 0.52 nm²', () => {
-    for (const [head, tail, salt] of [['anionic', 12, 0], ['cationic', 16, 0.05], ['nonionic', 12, 0]]) {
-      const s = surf.makeSystem(head, tail, salt)
-      const c = s.cmc / 5
-      const dl = 1e-5
-      const dgdl = (surf.surfaceTension(s, c * Math.exp(dl)) - surf.surfaceTension(s, c * Math.exp(-dl))) / (2 * dl)
-      near(-dgdl / (s.n * R * surf.T), surf.surfaceExcess(s, c), 1e-4)
-      near(surf.surfaceTension(s, s.cmc), surf.HEADS[head].gammaCmc, 1e-9) // continuous at the CMC
-      expect(surf.surfaceTension(s, 10 * s.cmc)).toBe(surf.surfaceTension(s, s.cmc)) // flat above
+  it('γ is continuous at the CMC and flat above; γ = γ₀ with no surfactant', () => {
+    for (const [head, tail] of [['anionic', 12], ['cationic', 16], ['nonionic', 12]]) {
+      const s = surf.makeSystem(head, tail)
+      near(surf.surfaceTension(s, s.cmc), surf.HEADS[head].gammaCmc, 1e-9)
+      expect(surf.surfaceTension(s, 10 * s.cmc)).toBe(surf.surfaceTension(s, s.cmc))
+      expect(surf.surfaceTension(s, 0)).toBe(surf.GAMMA_0)
     }
-    near(1 / (3.2e-6 * NA) * 1e18, 0.519, 2e-3)
-    near(surf.areaPerMolecule(3.2e-6), 0.519, 2e-3)
-    near(surf.counterionBinding('anionic'), 0.64, 0.01)
-  })
-  it('limits: γ = γ₀ with no surfactant; Gibbs n = 2 → 1 with excess salt', () => {
-    expect(surf.surfaceTension(surf.makeSystem('anionic', 12, 0), 0)).toBe(surf.GAMMA_0)
-    expect(surf.gibbsN('anionic', 8e-3, 0)).toBe(2)
-    expect(surf.gibbsN('anionic', 1e-3, 10)).toBeLessThan(1.001)
   })
 })
 
@@ -268,13 +250,6 @@ describe('5 Wetting (Young, Wenzel, Cassie–Baxter)', () => {
     near(wet.wenzelAngle(110, 1.5), 120.9, 2e-3)
     near(wet.cassieAngle(110, 0.1), 159.1, 2e-3)
     near(wet.cassieAngle(110, 1e-9), 180, 1e-4) // f_solid → 0: drop on air
-  })
-  it('critical angle: Wenzel and Cassie energies equal at δc (cos δc = (f_solid − 1)/(A_r − f_solid))', () => {
-    for (const [Ar, fSolid] of [[1.5, 0.5], [3, 0.1], [2, 0.3]]) {
-      const dc = wet.criticalAngle(Ar, fSolid)
-      near(Ar * cosd(dc), fSolid * (cosd(dc) + 1) - 1, 1e-9)
-      expect(dc).toBeGreaterThan(90)
-    }
   })
   it('trend: roughness amplifies the existing tendency', () => {
     expect(wet.wenzelAngle(60, 2)).toBeLessThan(60)

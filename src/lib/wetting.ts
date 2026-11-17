@@ -3,7 +3,6 @@
 // Angles in degrees, tensions in mN/m.
 
 export type InputMode = 'angle' | 'tension'
-export type WetState = 'wenzel' | 'cassie'
 export type Wettability = 'hydrophilic' | 'hydrophobic' | 'superhydrophobic'
 
 /** Young angle δ on a smooth surface: water never exceeds about 120° (–CF₃ monolayers). */
@@ -39,21 +38,6 @@ export const wenzelAngle = (deltaSmooth: number, Ar: number) => acosDeg(Ar * Mat
 
 /** Cassie–Baxter: cos δ_rough = f_solid (cos δ_smooth + 1) − 1. */
 export const cassieAngle = (deltaSmooth: number, fSolid: number) => acosDeg(fSolid * (Math.cos(deltaSmooth * RAD) + 1) - 1)
-
-/**
- * δ_smooth above which Cassie–Baxter has the lower energy: cos δ_c = (f_solid − 1)/(A_r − f_solid).
- * Always between 90° and 180°. Null when A_r = f_solid = 1 (both models reduce to Young).
- */
-export function criticalAngle(Ar: number, fSolid: number): number | null {
-  if (Ar - fSolid < 1e-9) return null
-  return acosDeg((fSolid - 1) / (Ar - fSolid))
-}
-
-/** Favored state: Cassie–Baxter when δ_smooth is above the critical angle, else Wenzel. */
-export function favoredState(deltaSmooth: number, Ar: number, fSolid: number): WetState {
-  const c = criticalAngle(Ar, fSolid)
-  return c !== null && deltaSmooth > c ? 'cassie' : 'wenzel'
-}
 
 /**
  * Lecture classes: δ < 90° partially wetting (hydrophilic for water), δ > 90° non-wetting (hydrophobic), δ > 150°

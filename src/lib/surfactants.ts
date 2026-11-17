@@ -38,8 +38,6 @@ export interface HeadParams {
   gammaCmc: number
   /** Saturated surface excess Γmax, mol/m². Kept the same for every tail length of the class. */
   gammaMax: number
-  /** Corrin–Harkins slope b (ionic only): log10(CMC) = a − b·log10(CMC + c_salt). */
-  corrinB: number
   /** Conductivity slopes below / above the CMC, in mS·cm⁻¹ per mM of surfactant (ionic only). */
   condBelow: number
   condAbove: number
@@ -63,7 +61,6 @@ export const HEADS: Record<HeadType, HeadParams> = {
     klevensA: klevensA(8.2e-3, 12, 0.3),
     gammaCmc: 0.039, // SDS γ at the CMC ≈ 38–40 mN/m
     gammaMax: 3.2e-6, // SDS Γmax ≈ 3.2 µmol/m² → ≈ 0.52 nm² per molecule (Gibbs, n = 2); literature 0.45–0.55 nm²
-    corrinB: 0.66, // SDS + NaCl: CMC ≈ 1.6 mM at 0.1 M NaCl; slope 0.6–0.7 reported (≈ degree of counterion binding)
     condBelow: 0.072, // ≈ Λ°(Na⁺) + Λ°(DS⁻) ≈ 50 + 22 S·cm²/mol → 0.072 mS·cm⁻¹/mM
     condAbove: 0.026, // ESTIMATED to give β ≈ 0.64 (literature β for SDS ≈ 0.6–0.7)
   },
@@ -72,7 +69,6 @@ export const HEADS: Record<HeadType, HeadParams> = {
     klevensA: klevensA(9.2e-4, 16, 0.3),
     gammaCmc: 0.036, // CTAB γ at the CMC ≈ 36–37 mN/m
     gammaMax: 2.8e-6, // ≈ 0.59 nm² per molecule; literature for CTAB ≈ 0.55–0.65 nm²
-    corrinB: 0.6, // ESTIMATED for CTAB + NaCl (values 0.6–0.8 are reported, higher with KBr)
     condBelow: 0.098, // ≈ Λ°(Br⁻) + Λ°(CTA⁺) ≈ 78 + 20 S·cm²/mol
     condAbove: 0.025, // ESTIMATED to give β ≈ 0.74 (literature β for CTAB ≈ 0.7–0.8)
   },
@@ -81,7 +77,6 @@ export const HEADS: Record<HeadType, HeadParams> = {
     klevensA: klevensA(6e-5, 12, 0.5),
     gammaCmc: 0.036, // Tween 20 γ at the CMC ≈ 36–38 mN/m
     gammaMax: 1.5e-6, // ESTIMATED: ≈ 1.1 nm² per molecule; literature for Tween 20 spans ~0.9–1.5 nm²
-    corrinB: 0, // not used: no counterions
     condBelow: 0,
     condAbove: 0,
   },
@@ -90,7 +85,6 @@ export const HEADS: Record<HeadType, HeadParams> = {
     klevensA: klevensA(1.8e-3, 12, 0.5),
     gammaCmc: 0.035, // ESTIMATED for C12 betaine (≈ 33–36 mN/m reported)
     gammaMax: 3.0e-6, // ESTIMATED: ≈ 0.55 nm² per molecule
-    corrinB: 0, // not used: the head carries both charges, so salt is not modelled
     condBelow: 0,
     condAbove: 0,
   },
@@ -118,7 +112,6 @@ export const PRESETS: Surfactant[] = [
 ]
 
 export const TAIL_RANGE: [number, number] = [8, 16]
-export const SALT_MAX = 0.2 // M NaCl, top of the salt slider
 /** Concentration axis and slider range, M: wide enough to reach well below and above every preset's CMC. */
 export const C_RANGE: [number, number] = [1e-7, 1]
 
@@ -128,36 +121,17 @@ export const N_AGG = 60
 export const D_MICELLE_RATIO = 0.15
 
 // ---------------------------------------------------------------------------------------------------------------
-// CMC: Klevens (tail length) and Corrin–Harkins (salt)
+// CMC: an internal trend model (not shown on the page): longer tail → lower CMC, non-ionic below ionic.
 // ---------------------------------------------------------------------------------------------------------------
 
-/** Klevens: log10(CMC₀) = A − B·n. CMC without added salt, in M. */
-export function cmcNoSalt(head: HeadType, tail: number): number {
+/** CMC in M from the internal trend model log10(CMC) = A − B·n (Klevens-type line, anchored on the presets). */
+export function cmc(head: HeadType, tail: number): number {
   const p = HEADS[head]
   return 10 ** (p.klevensA - p.klevensB * tail)
 }
 
-/**
- * Corrin–Harkins: log10(CMC) = a − b·log10(CMC + c_salt), solved for CMC by bisection.
- * The counterions the surfactant brings itself (≈ CMC) count as well as the added salt, which is why CMC appears
- * on both sides. a is fixed by requiring the zero-salt CMC from Klevens: a = (1 + b)·log10(CMC₀).
- * Non-ionic and zwitterionic surfactants ignore salt (their CMC barely moves with NaCl).
- */
-export function cmc(head: HeadType, tail: number, salt: number): number {
-  const c0 = cmcNoSalt(head, tail)
-  const b = HEADS[head].corrinB
-  if (!isIonic(head) || salt <= 0 || b === 0) return c0
-  const a = (1 + b) * Math.log10(c0)
-  const f = (x: number) => Math.log10(x) + b * Math.log10(x + salt) - a // increasing in x; root is the CMC
-  let lo = Math.log10(c0) - 8
-  let hi = Math.log10(c0) // salt can only lower the CMC
-  for (let i = 0; i < 60; i++) {
-    const mid = (lo + hi) / 2
-    if (f(10 ** mid) > 0) hi = mid
-    else lo = mid
-  }
-  return 10 ** ((lo + hi) / 2)
-}
+/** Old name, kept for the pre-Exercise-Sheet trainer until it is removed. */
+export const cmcNoSalt = cmc
 
 /** Pseudo-phase model: free monomer concentration, M. */
 export const freeMonomer = (c: number, cmcV: number) => Math.min(c, cmcV)
@@ -166,13 +140,9 @@ export const freeMonomer = (c: number, cmcV: number) => Math.min(c, cmcV)
 // Surface tension, surface excess and area per molecule
 // ---------------------------------------------------------------------------------------------------------------
 
-/**
- * Gibbs prefactor n in Γ = −(1/nRT)·dγ/dln c: 2 for a 1:1 ionic surfactant without salt (surfactant ion and
- * counterion both adsorb/accumulate), falling to 1 in excess salt. The standard interpolation
- * n = 1 + c/(c + c_salt) is evaluated at the CMC, so each curve uses one n.
- */
-export function gibbsN(head: HeadType, cmcV: number, salt: number): number {
-  return isIonic(head) ? 1 + cmcV / (cmcV + salt) : 1
+/** Prefactor n of the internal surface-tension model: 2 for a 1:1 ionic surfactant (ion and counterion), else 1. */
+export function gibbsN(head: HeadType): number {
+  return isIonic(head) ? 2 : 1
 }
 
 /**
@@ -187,18 +157,16 @@ export function szyszkowskiK(head: HeadType, cmcV: number, n: number): number {
 export interface System {
   head: HeadType
   tail: number
-  salt: number // M NaCl (ignored for non-ionic and zwitterionic)
   cmc: number // M
   n: number // Gibbs prefactor
   K: number // Szyszkowski constant, 1/M
   gammaMax: number // mol/m²
 }
 
-export function makeSystem(head: HeadType, tail: number, salt: number): System {
-  const s = isIonic(head) ? salt : 0
-  const cmcV = cmc(head, tail, s)
-  const n = gibbsN(head, cmcV, s)
-  return { head, tail, salt: s, cmc: cmcV, n, K: szyszkowskiK(head, cmcV, n), gammaMax: HEADS[head].gammaMax }
+export function makeSystem(head: HeadType, tail: number): System {
+  const cmcV = cmc(head, tail)
+  const n = gibbsN(head)
+  return { head, tail, cmc: cmcV, n, K: szyszkowskiK(head, cmcV, n), gammaMax: HEADS[head].gammaMax }
 }
 
 /** Szyszkowski: γ = γ₀ − n·R·T·Γmax·ln(1 + K·c_free), N/m. Constant above the CMC because c_free is. */
@@ -212,7 +180,7 @@ export function surfaceExcess(sys: System, c: number): number {
   return (sys.gammaMax * kc) / (1 + kc)
 }
 
-/** Area per molecule A = 1/(Γ·N_A), in nm². With Γ = Γmax this is the minimum (closest-packed) area. */
+/** Area per molecule 1/(Γ·N_A), nm². Used only by the pre-Exercise-Sheet trainer until it is removed. */
 export const areaPerMolecule = (gamma: number) => 1e18 / (gamma * N_A)
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -229,12 +197,6 @@ export function conductivity(sys: System, c: number): number {
   const mM = c * 1e3
   const cmcMM = sys.cmc * 1e3
   return mM <= cmcMM ? p.condBelow * mM : p.condBelow * cmcMM + p.condAbove * (mM - cmcMM)
-}
-
-/** Degree of counterion binding β = 1 − S_above/S_below (ionic only, else null). */
-export function counterionBinding(head: HeadType): number | null {
-  const p = HEADS[head]
-  return isIonic(head) ? 1 - p.condAbove / p.condBelow : null
 }
 
 /**

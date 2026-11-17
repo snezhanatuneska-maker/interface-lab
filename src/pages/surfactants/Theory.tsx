@@ -134,8 +134,8 @@ export default function Theory({ part }: { part: 'intro' | 'cmc' }) {
                 <td>increases</td>
                 <td>almost constant (still rising for ionic surfactants)</td>
                 <td>
-                  a micelle of ~60 molecules counts as one particle; for ionic surfactants the unbound counter-ions
-                  (about 1 − β of them) still add
+                  a micelle of many molecules counts as one particle; for ionic surfactants the unbound counter-ions
+                  still add
                 </td>
               </tr>
               <tr>
@@ -167,17 +167,13 @@ export default function Theory({ part }: { part: 'intro' | 'cmc' }) {
         </h2>
         <ul className="why-list prose">
           <li>
-            <strong>Longer tail → lower CMC.</strong> Each extra CH₂ makes it more favourable to leave the water. For
-            ionic surfactants one CH₂ roughly halves the CMC; for non-ionics it divides it by about 3 (Klevens).
+            <strong>Longer hydrophobic tail → lower CMC.</strong> Each extra CH₂ makes it more favourable for the tail
+            to leave the water, so micelles form at a lower concentration.
           </li>
           <li>
-            <strong>Charged head → higher CMC.</strong> In a micelle the ionic heads are pushed close together and
-            repel each other, which works against micellisation. Non-ionic heads have no such penalty, so at the same
-            tail length their CMC is one to two orders of magnitude lower.
-          </li>
-          <li>
-            <strong>Salt → lower CMC (ionic only).</strong> Added counter-ions (Na⁺ for SDS, Cl⁻ for CTAB) crowd around the
-            charged heads and screen their repulsion, so micelles form more easily (Corrin–Harkins). Non-ionic CMCs barely change.
+            <strong>Non-ionic surfactants generally have a lower CMC than ionic ones.</strong> In a micelle ionic heads
+            are pushed close together and repel each other, which works against micelle formation; non-ionic heads have
+            no such penalty.
           </li>
         </ul>
       </section>

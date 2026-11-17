@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { cassieAngle, criticalAngle, favoredState, PRESETS, wenzelAngle, wettability, youngFromTensions } from './wetting'
+import { cassieAngle, furmidgeForce, PRESETS, slidingAngle, spreadingCoefficient, wenzelAngle, wettability, youngFromTensions } from './wetting'
 
 describe('wetting models', () => {
   it('Young from tensions, with the complete (non-)wetting limits', () => {
@@ -23,12 +23,19 @@ describe('wetting models', () => {
     expect(cassieAngle(110, 0.1)).toBeGreaterThan(cassieAngle(110, 0.5))
   })
 
-  it('critical angle sits between 90° and 180°', () => {
-    expect(criticalAngle(1, 1)).toBeNull()
-    expect(criticalAngle(1, 0.5)).toBeCloseTo(180)
-    expect(criticalAngle(3, 0.1)).toBeCloseTo(108.08, 1)
-    expect(favoredState(60, 3, 0.1)).toBe('wenzel')
-    expect(favoredState(110, 3, 0.1)).toBe('cassie')
+  it('spreading coefficient: S_w = γ_sg − γ_sl − γ_lg; spreading exactly when Young has no angle', () => {
+    expect(spreadingCoefficient(100, 10, 72)).toBe(18)
+    expect(youngFromTensions(100, 10, 72).limit).toBe('complete wetting')
+    expect(spreadingCoefficient(40, 20, 72)).toBeLessThan(0)
+  })
+
+  it('Furmidge: F = w γ_lg (cos δ_r − cos δ_a), zero without hysteresis; sliding angle from m g sin α = F', () => {
+    expect(furmidgeForce(3e-3, 0.072, 100, 100)).toBeCloseTo(0, 12)
+    const F = furmidgeForce(3e-3, 0.072, 110, 90)
+    expect(F).toBeCloseTo(3e-3 * 0.072 * Math.cos((110 * Math.PI) / 180) * -1, 9)
+    const a = slidingAngle(F, 20e-9)!
+    expect(1000 * 20e-9 * 9.81 * Math.sin((a * Math.PI) / 180)).toBeCloseTo(F, 12)
+    expect(slidingAngle(1, 20e-9)).toBeNull()
   })
 
   it('labels angles', () => {
@@ -46,8 +53,8 @@ describe('wetting models', () => {
   it('presets land in the intended regime', () => {
     const [glass, ptfe, lotus] = PRESETS
     expect(wettability(wenzelAngle(glass.delta, glass.Ar))).toBe('hydrophilic')
-    expect(favoredState(ptfe.delta, ptfe.Ar, ptfe.fSolid)).toBe('wenzel')
-    expect(favoredState(lotus.delta, lotus.Ar, lotus.fSolid)).toBe('cassie')
+    expect(ptfe.view).toBe('wenzel')
+    expect(lotus.view).toBe('cassie')
     expect(wettability(cassieAngle(lotus.delta, lotus.fSolid))).toBe('superhydrophobic')
   })
 })

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { makeRng } from './random'
 import { DIFFICULTIES } from './training'
-import { generateWetting } from './trainWetting'
-import { favoredState, FSOLID_RANGE as FS_RANGE, AR_RANGE as R_RANGE } from './wetting'
+import { favoredState, generateWetting } from './trainWetting'
+import { FSOLID_RANGE as FS_RANGE, AR_RANGE as R_RANGE } from './wetting'
 
 describe('wetting trainer', () => {
   for (const d of DIFFICULTIES)
