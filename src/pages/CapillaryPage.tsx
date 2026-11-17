@@ -1,18 +1,13 @@
 import { useState } from 'react'
-import { Segmented, Slider } from '../components/Controls'
-import {
-  capillaryPressure,
-  jurinHeight,
-  kelvinRatio,
-  DELTA_DEFAULT,
-  DELTA_RANGE,
-  MODE_DEFAULT,
-  RC_DEFAULT,
-  RC_RANGE,
-  type Mode,
-} from '../lib/capillary'
+import { Slider } from '../components/Controls'
+import { capillaryPressure, gammaWater, jurinHeight, KELVIN_0, poreKelvinRatio } from '../lib/capillary'
 import PoreView from './capillary/PoreView'
 import Equations from './capillary/Equations'
+
+const RC_RANGE: [number, number] = [2, 50] // nm
+const DELTA_RANGE: [number, number] = [0, 150]
+const T_RANGE: [number, number] = [-10, 100] // °C
+const DEFAULTS = { rc: 15, delta: 21, tC: 25 }
 
 const LEGEND = [
   { color: 'var(--pore-liquid)', label: 'liquid' },
@@ -28,18 +23,20 @@ function fmtHeight(m: number): string {
 }
 
 export default function CapillaryPage() {
-  const [rc, setRc] = useState(RC_DEFAULT)
-  const [delta, setDelta] = useState(DELTA_DEFAULT)
-  const [mode, setMode] = useState<Mode>(MODE_DEFAULT)
+  const [rc, setRc] = useState(DEFAULTS.rc)
+  const [delta, setDelta] = useState(DEFAULTS.delta)
+  const [tC, setTC] = useState(DEFAULTS.tC)
 
-  const pc = capillaryPressure(rc, delta).toFixed(1)
-  const hc = fmtHeight(jurinHeight(rc, delta))
-  const kelvin = kelvinRatio(rc, delta, mode).toFixed(3)
+  const T = tC + KELVIN_0
+  const gamma = gammaWater(T)
+  const pcMPa = capillaryPressure(gamma, delta, rc * 1e-9) / 1e6
+  const hc = fmtHeight(jurinHeight(gamma, delta, rc * 1e-9))
+  const kelvin = poreKelvinRatio(gamma, rc * 1e-9, delta, T)
 
   const reset = () => {
-    setRc(RC_DEFAULT)
-    setDelta(DELTA_DEFAULT)
-    setMode(MODE_DEFAULT)
+    setRc(DEFAULTS.rc)
+    setDelta(DEFAULTS.delta)
+    setTC(DEFAULTS.tC)
   }
 
   return (
@@ -50,8 +47,8 @@ export default function CapillaryPage() {
         </a>
         <h1>Capillary Pressure &amp; Pore Filling</h1>
         <p className="lede">
-          Explore how pore radius and contact angle control capillary pressure, fluid rise and vapour condensation, and
-          why filling and emptying differ (hysteresis).
+          Explore how pore radius, contact angle and temperature control capillary pressure, capillary rise and
+          vapour condensation in a pore.
         </p>
       </header>
 
@@ -63,8 +60,10 @@ export default function CapillaryPage() {
               Capillary pressure <em>p</em>
               <sub>c</sub>
             </span>
-            <span className="coverage-value capillary">{pc} kPa</span>
-            <span className="coverage-sub">{mode === 'imbibition' ? 'imbibition (filling)' : 'drainage (emptying)'}</span>
+            <span className="coverage-value capillary">{pcMPa.toFixed(2)} MPa</span>
+            <span className="coverage-sub">
+              water, γ(T) = {(gamma * 1e3).toFixed(1)} mN/m at {tC} °C
+            </span>
           </div>
           <ul className="layer-legend" aria-label="Legend">
             {LEGEND.map((l) => (
@@ -76,57 +75,39 @@ export default function CapillaryPage() {
         </div>
 
         <div className="sim-grid">
-          <PoreView
-            rc={rc}
-            delta={delta}
-            mode={mode}
-            label={`Pore of radius r_c ${rc} nm, contact angle δ ${delta}°, ${mode}.`}
-          />
+          <PoreView rc={rc} delta={delta} label={`Pore of radius r_c ${rc} nm, contact angle δ ${delta}°.`} />
           <div>
-          <dl className="results" aria-live="polite">
-            <div>
-              <dt>
-                Capillary pressure p<sub>c</sub>
-              </dt>
-              <dd>{pc} kPa</dd>
-            </div>
-            <div>
-              <dt>
-                Capillary rise height h<sub>c</sub> (Jurin)
-              </dt>
-              <dd>{hc}</dd>
-            </div>
-            <div>
-              <dt>
-                Kelvin ratio p/p<sub>0</sub>, {mode === 'imbibition' ? 'filling' : 'emptying'}
-              </dt>
-              <dd>{kelvin}</dd>
-            </div>
-          </dl>
-          <p className="note">
-            Water at 25 °C. The Jurin height is the formal value h<sub>c</sub> = 2γ<sub>lg</sub> cos δ/(ρ<sub>L</sub>gr<sub>c</sub>): in a nanopore it only expresses the
-            suction as a water column; gravity plays no role at this scale, and no real pore is that long. Filling uses
-            a cylindrical meniscus (factor 1 in the Kelvin equation), emptying a hemispherical one (factor 2), so a pore
-            empties at a lower p/p<sub>0</sub> than it fills. The Kelvin value neglects the adsorbed film and is only
-            approximate for the narrowest pores (a few nm).
-            {delta > 90 && ' With δ > 90° the pressure is negative: the liquid has to be pushed in, and no capillary condensation occurs below saturation.'}
-          </p>
+            <dl className="results" aria-live="polite">
+              <div>
+                <dt>
+                  Capillary pressure p<sub>c</sub>
+                </dt>
+                <dd>{pcMPa.toFixed(2)} MPa</dd>
+              </div>
+              <div>
+                <dt>
+                  Capillary rise height h<sub>c</sub> (Jurin)
+                </dt>
+                <dd>{hc}</dd>
+              </div>
+              <div>
+                <dt>
+                  Kelvin: pore fills at p/p<sub>0</sub>
+                </dt>
+                <dd>{kelvin.toFixed(3)}</dd>
+              </div>
+            </dl>
+            <p className="note">
+              γ(T) = 121.5 mN/m − 0.1662 mN m⁻¹ K⁻¹ × T, V<sub>m</sub> = 18 cm³/mol. The Jurin height is the formal
+              value h<sub>c</sub> = p<sub>c</sub>/(ρ<sub>L</sub>g): in a nanopore it only expresses the suction as a
+              water column. The Kelvin value uses a hemispherical meniscus of signed radius r = −r<sub>c</sub>/cos δ;
+              it is only approximate in pores of a few nm.
+              {delta > 90 && ' With δ > 90° the meniscus is convex (r > 0): p_c is negative and no capillary condensation occurs below saturation.'}
+            </p>
           </div>
         </div>
 
         <div className="figure-controls hero-controls">
-          <div className="model-control">
-            <span className="control-label">Process mode</span>
-            <Segmented
-              label="Process mode"
-              value={mode}
-              onChange={setMode}
-              options={[
-                { value: 'imbibition', label: 'Imbibition' },
-                { value: 'drainage', label: 'Drainage' },
-              ]}
-            />
-          </div>
           <Slider
             id="rc"
             label={<>Capillary radius <em>r</em><sub>c</sub></>}
@@ -146,7 +127,16 @@ export default function CapillaryPage() {
             step={1}
             pos={delta}
             onChange={setDelta}
-            hint={mode === 'imbibition' ? 'filling: use the advancing angle δₐ' : 'emptying: use the receding angle δᵣ (< δₐ)'}
+          />
+          <Slider
+            id="temp"
+            label={<>Temperature <em>T</em></>}
+            value={`${tC} °C`}
+            min={T_RANGE[0]}
+            max={T_RANGE[1]}
+            step={1}
+            pos={tC}
+            onChange={setTC}
           />
           <div className="sim-buttons">
             <button type="button" className="button" onClick={reset}>
@@ -156,7 +146,8 @@ export default function CapillaryPage() {
         </div>
         <figcaption>
           <span className="figure-label">Figure 1.</span> Left: the pore, with its walls, the liquid and the meniscus.
-          Right: capillary pressure p<sub>c</sub>, capillary rise height h<sub>c</sub> and Kelvin ratio p/p<sub>0</sub> for the current setting.
+          Right: capillary pressure p<sub>c</sub>, capillary rise height h<sub>c</sub> and the relative pressure p/p
+          <sub>0</sub> at which the pore fills by capillary condensation, for the current setting.
         </figcaption>
       </figure>
 
@@ -177,16 +168,11 @@ export default function CapillaryPage() {
           because the vapour pressure over a concave meniscus is lower than over a flat surface (Kelvin equation). The
           smaller the pore, the lower the pressure at which it fills.
         </p>
-        <h3>Two kinds of hysteresis</h3>
+        <h3>Contact-angle hysteresis</h3>
         <p className="prose">
-          <strong>Imbibition and drainage.</strong> A liquid advancing into a pore meets the wall at the advancing
-          angle δ<sub>a</sub>; when it recedes, at the smaller receding angle δ<sub>r</sub>. Filling and emptying
-          therefore need different capillary pressures. Use the mode switch and set δ to δ<sub>a</sub> or δ<sub>r</sub>.
-        </p>
-        <p className="prose">
-          <strong>Sorption hysteresis.</strong> In capillary condensation the loop has other causes: a pore fills
-          through a cylindrical meniscus but empties through a hemispherical one (so at a lower p/p₀), condensation is
-          delayed by metastable films, and wide cavities behind narrow necks (ink bottles) only empty when the neck does.
+          A liquid advancing into a pore meets the wall at the advancing angle δ<sub>a</sub>; when it recedes, at the
+          smaller receding angle δ<sub>r</sub>. Filling and emptying therefore need different capillary pressures. Set
+          δ to δ<sub>a</sub> or δ<sub>r</sub> to compare.
         </p>
       </section>
 

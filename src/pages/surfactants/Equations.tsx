@@ -33,7 +33,7 @@ const EQUATIONS: Eq[] = [
     note: 'Below the CMC (c = free monomer); above it γ stays at its CMC value.',
     tex: String.raw`\gamma = \gamma_0 - n\,R\,T\,\Gamma_\text{max}\,\ln(1 + K c)`,
     terms: [
-      ['γ₀', 'pure water, 72.0 mN/m at 25 °C'],
+      ['γ₀', 'pure water, 72 mN/m'],
       ['n', '2 for an ionic surfactant without salt, 1 otherwise'],
       ['K', 'adsorption constant (how strongly molecules prefer the surface)'],
     ],

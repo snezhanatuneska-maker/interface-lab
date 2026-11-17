@@ -142,41 +142,34 @@ describe('1 Adsorption (Langmuir, BET)', () => {
 // 2. Capillary pressure
 // =====================================================================================================
 describe('2 Capillary (Young–Laplace, Jurin, Kelvin)', () => {
-  const g = 0.07197 // water, 25 °C (CRC)
-  const rho = 997.05
-  const Vmol = 0.018015 / rho
-  const T = 298.15
-  it('p_c = 2γ cos δ / r_c (kPa)', () => {
-    near(cap.capillaryPressure(15, 0), (2 * g) / 15e-9 / 1e3, 2e-3) // 9.6 MPa
-    near(cap.capillaryPressure(15, 21), ((2 * g * cosd(21)) / 15e-9) / 1e3, 2e-3)
-    near(cap.capillaryPressure(2, 60), ((2 * g * 0.5) / 2e-9) / 1e3, 2e-3)
-    expect(Math.abs(cap.capillaryPressure(15, 90))).toBeLessThan(1e-9)
-    expect(cap.capillaryPressure(15, 120)).toBeLessThan(0)
+  const g = 0.072 // water, the exercise value
+  const Vm = 18e-6
+  it('p_c = 2γ cos δ / r_c (Pa)', () => {
+    near(cap.capillaryPressure(g, 0, 15e-9), (2 * g) / 15e-9, 1e-12) // 9.6 MPa
+    near(cap.capillaryPressure(g, 21, 15e-9), (2 * g * cosd(21)) / 15e-9, 1e-12)
+    expect(Math.abs(cap.capillaryPressure(g, 90, 15e-9))).toBeLessThan(1e-6)
+    expect(cap.capillaryPressure(g, 120, 15e-9)).toBeLessThan(0)
   })
   it('Jurin: h_c = 1.47 cm for r_c = 1 mm, 14.7 m for r_c = 1 µm', () => {
-    near(cap.jurinHeight(1e6, 0), (2 * g) / (rho * 9.80665 * 1e-3), 3e-3)
-    near(cap.jurinHeight(1e3, 0), 14.7, 5e-3)
-    near(cap.jurinHeight(15, 21), (2 * g * cosd(21)) / (rho * 9.80665 * 15e-9), 3e-3) // ~920 m
+    near(cap.jurinHeight(g, 0, 1e-3), 0.01468, 2e-3)
+    near(cap.jurinHeight(g, 0, 1e-6), 14.7, 2e-3)
   })
-  it('Kelvin (hemispherical meniscus), water 25 °C', () => {
-    const k = (rc, d) => Math.exp((-2 * g * Vmol * cosd(d)) / (rc * 1e-9 * R * T))
-    for (const [rc, d] of [[2, 0], [15, 21], [50, 0], [5, 45]]) near(cap.kelvinRatio(rc, d), k(rc, d), 2e-3)
-    near(cap.kelvinRatio(2, 0), 0.59, 5e-3)
-    near(cap.kelvinRatio(1e9, 0), 1, 1e-6) // flat surface limit
-    near(cap.kelvinRatio(15, 90), 1, 1e-12)
+  it('γ(T) of water from the course: 121.5 − 0.1662·T mN/m', () => {
+    near(cap.gammaWater(293.15), 0.0728, 2e-3)
+    near(cap.gammaWater(373.15), 0.0595, 2e-3)
   })
-  it('Kelvin, filling (cylindrical meniscus, Cohan): factor 1, so the pore fills at a higher p/p₀ than it empties', () => {
-    const k1 = (rc, d) => Math.exp((-g * Vmol * cosd(d)) / (rc * 1e-9 * R * T))
-    for (const [rc, d] of [[2, 0], [15, 21], [50, 0]]) {
-      near(cap.kelvinRatio(rc, d, 'imbibition'), k1(rc, d), 2e-3)
-      near(Math.log(cap.kelvinRatio(rc, d, 'drainage')), 2 * Math.log(cap.kelvinRatio(rc, d, 'imbibition')), 1e-9)
-      expect(cap.kelvinRatio(rc, d, 'imbibition')).toBeGreaterThan(cap.kelvinRatio(rc, d, 'drainage'))
-    }
+  it('Kelvin with a signed radius: concave meniscus r = −r_c/cos δ gives p < p₀', () => {
+    const T = 298.15
+    const k = (rc, d) => Math.exp((-2 * g * Vm * cosd(d)) / (rc * R * T))
+    for (const [rc, d] of [[2e-9, 0], [15e-9, 21], [50e-9, 0], [5e-9, 45]]) near(cap.poreKelvinRatio(g, rc, d, T), k(rc, d), 1e-4)
+    near(cap.poreKelvinRatio(g, 2e-9, 0, T), 0.59, 0.01)
+    near(cap.kelvinRatio(g, 1, T), 1, 1e-6) // flat surface limit
+    expect(cap.kelvinRatio(g, 10e-9, T)).toBeGreaterThan(1) // convex droplet
   })
-  it('trends: smaller r_c → larger |p_c| and lower p/p₀; larger δ (<90°) → smaller p_c', () => {
-    expect(cap.capillaryPressure(5, 21)).toBeGreaterThan(cap.capillaryPressure(20, 21))
-    expect(cap.kelvinRatio(5, 21)).toBeLessThan(cap.kelvinRatio(20, 21))
-    expect(cap.capillaryPressure(15, 60)).toBeLessThan(cap.capillaryPressure(15, 20))
+  it('trends: smaller r_c → larger p_c and lower p/p₀; larger δ (<90°) → smaller p_c', () => {
+    expect(cap.capillaryPressure(g, 21, 5e-9)).toBeGreaterThan(cap.capillaryPressure(g, 21, 20e-9))
+    expect(cap.poreKelvinRatio(g, 5e-9, 21, 298)).toBeLessThan(cap.poreKelvinRatio(g, 20e-9, 21, 298))
+    expect(cap.capillaryPressure(g, 60, 1e-6)).toBeLessThan(cap.capillaryPressure(g, 20, 1e-6))
   })
 })
 

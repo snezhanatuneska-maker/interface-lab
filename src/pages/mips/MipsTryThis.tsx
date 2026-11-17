@@ -92,7 +92,7 @@ export function MipsTryThis() {
             <dd>{intrusionPercentage}%</dd>
           </div>
           <div>
-            <dt>Washburn Mode</dt>
+            <dt>Mercury</dt>
             <dd>
               Non-wetting: γ = {GAMMA_HG} N/m, δ = {DELTA_HG}°
             </dd>
@@ -120,7 +120,7 @@ export function MipsTryThis() {
       </div>
       <figcaption>
         <span className="figure-label">Figure 1.</span> Five cylindrical pores (labels are diameters). A pore fills
-        once p exceeds its Washburn entry pressure; the intruded share counts each pore’s volume (∝ d²).
+        once p exceeds its entry pressure p = −4γ cos δ/d; the intruded share counts each pore’s volume (∝ d²).
       </figcaption>
     </figure>
   )

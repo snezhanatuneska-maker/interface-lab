@@ -37,8 +37,8 @@ export interface Subtopic {
   chapter?: string
 }
 
-// TODO: fill in `chapter` for each subtopic with the lecture chapter numbers from Prof. Klupp's
-// Interface Engineering course (left empty until they are checked against the course material).
+// `chapter`: lecture chapter from Prof. Klupp Taylor's Interface Engineering course (WS 2026/27). Set for Liquid
+// Interfaces (Chapter 1); the other topics are left empty until they are checked against the course material.
 export const SUBTOPICS: Subtopic[] = [
   // ---------- Liquid Interfaces ----------
   {
@@ -50,6 +50,7 @@ export const SUBTOPICS: Subtopic[] = [
     concepts: ['CMC', 'Anionic/cationic/non-ionic/zwitterionic (SDS, CTAB, Tween 20, betaine)', 'Tail length', 'Ionic repulsion'],
     cepLink: 'Surfactants control wetting and foaming in electrolytes and catalyst inks.',
     href: '#/surfactants',
+    chapter: 'Chapter 1',
   },
   {
     id: 'wetting-contact-angle',
@@ -60,6 +61,7 @@ export const SUBTOPICS: Subtopic[] = [
     concepts: ["Young's equation", 'Roughness amplifies wetting', 'Contact angle >150°', 'Lotus effect'],
     cepLink: 'Water management in fuel-cell gas diffusion layers and bubble release on electrolyser electrodes.',
     href: '#/wetting',
+    chapter: 'Chapter 1',
   },
   {
     id: 'capillary-pressure',
@@ -70,15 +72,17 @@ export const SUBTOPICS: Subtopic[] = [
     concepts: ['Young–Laplace', "Jurin's law", 'Capillary pressure ∝ 1/r', 'Hysteresis', 'Kelvin equation'],
     cepLink: 'Liquid transport in porous electrodes and catalyst layers.',
     href: '#/capillary',
+    chapter: 'Chapter 1',
   },
   {
     id: 'mercury-porosimetry',
     title: 'Mercury Intrusion Porosimetry',
     topic: 'Liquid Interfaces',
     description: 'Push mercury into pores and get the pore-size distribution.',
-    concepts: ['Washburn equation', 'Non-wetting intrusion', 'Pore-size distribution'],
+    concepts: ['Young–Laplace for a cylindrical pore', 'Non-wetting intrusion', 'Pore-size distribution'],
     cepLink: 'A common method for characterising fuel-cell gas diffusion and catalyst layers.',
     href: '#/mips',
+    chapter: 'Chapter 1',
   },
 
   // ---------- Solid Interfaces ----------

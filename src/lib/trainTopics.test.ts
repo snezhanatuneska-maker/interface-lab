@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { capillaryPressure } from './capillary'
+const capillaryPressure = (r: number, theta: number) => (2 * 0.072 * Math.cos((theta * Math.PI) / 180)) / (r * 1e-9) / 1e3
 import { checkGenerator } from './checkGenerator'
 import { survivingFamilies } from './crystal'
 import { binodal, region, spinodal } from './phase'
@@ -38,7 +38,7 @@ describe('capillary trainer', () => {
 })
 
 describe('porosimetry trainer', () => {
-  it('follows Washburn (d·P ≈ 1490 nm·MPa) over the instrument range', () => {
+  it('follows d = −4γ cos δ / p (d·p ≈ 1490 nm·MPa) over the instrument range', () => {
     for (const p of checkGenerator(generateMips)) {
       const { P, d } = p.data
       expect(d * P).toBeCloseTo(1486, -1)

@@ -46,7 +46,7 @@ export const TRAINERS: Trainer[] = [
     title: 'Mercury Porosimetry Training',
     topic: 'Liquid Interfaces',
     subtopic: 'mercury-porosimetry',
-    description: 'Pore diameter and intrusion pressure from the Washburn equation.',
+    description: 'Pore diameter and intrusion pressure from Young–Laplace for a cylindrical pore.',
     href: '#/training/porosimetry',
   },
   // ---------- Solid Interfaces ----------

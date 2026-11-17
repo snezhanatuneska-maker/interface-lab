@@ -13,10 +13,10 @@ export function MipsTheory() {
           </p>
         </div>
         <div>
-          <h3>The Washburn Equation</h3>
+          <h3>Pressure and pore size</h3>
           <p>
-            Pressure (<em>p</em>) is inversely proportional to the entry pore radius (<em>r</em><sub>c</sub>). Smaller nanopores
-            require immense hydraulic pressures to intrude.
+            By Young–Laplace for a cylindrical pore, the pressure (<em>p</em>) needed to enter a pore is inversely
+            proportional to its radius (<em>r</em><sub>c</sub>). Smaller pores need higher pressures.
           </p>
         </div>
         <div>

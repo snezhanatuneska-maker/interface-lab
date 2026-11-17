@@ -23,7 +23,7 @@ export const isIonic = (h: HeadType) => h === 'anionic' || h === 'cationic'
 export const R_GAS = 8.314 // J/(mol·K), gas constant (CODATA 8.314 462 618)
 export const N_A = 6.02214076e23 // 1/mol, Avogadro constant (SI exact)
 export const T = 298.15 // K, 25 °C: all CMC values below are for 25 °C
-export const GAMMA_0 = 0.0720 // N/m, surface tension of pure water at 25 °C (71.97 mN/m, CRC Handbook)
+export const GAMMA_0 = 0.072 // N/m, surface tension of pure water: the single value used on the site (exercise value)
 
 // ---------------------------------------------------------------------------------------------------------------
 // Head-group classes: the parameters a "Custom" surfactant inherits from its head type

@@ -70,7 +70,7 @@ export const CONFIGS: Record<string, TrainerConfig> = {
     generate: withBank<CapillaryData>(generateCapillary, CAPILLARY_BANK),
   },
   porosimetry: {
-    intro: 'Mercury intrusion: pore diameter and pressure from the Washburn equation, and why mercury must be pushed in.',
+    intro: 'Mercury intrusion: pore diameter and pressure from Young–Laplace for a cylindrical pore, and why mercury must be pushed in.',
     generate: withBank<MipsData>(generateMips, MIPS_BANK),
   },
   bet: {

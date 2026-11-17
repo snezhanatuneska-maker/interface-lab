@@ -1,4 +1,6 @@
-import { capillaryPressure, GAMMA } from './capillary'
+// Old capillary trainer (replaced by Exercise Sheet 1 in Part E). Keeps its own constants.
+const GAMMA = 0.072
+const capillaryPressure = (r: number, theta: number) => (2 * GAMMA * Math.cos((theta * Math.PI) / 180)) / (r * 1e-9) / 1e3
 import type { Rng } from './random'
 import { fmt, fmtTex, numericOptions, type Difficulty, type Generator } from './training'
 

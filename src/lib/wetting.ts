@@ -12,7 +12,7 @@ export const AR_RANGE: [number, number] = [1, 3]
 export const FSOLID_RANGE: [number, number] = [0.05, 1]
 export const GAMMA_RANGE: [number, number] = [0, 100]
 export const GAMMA_LG_RANGE: [number, number] = [20, 80]
-export const GAMMA_WATER = 72.0 // mN/m at 25 °C, as on the capillary and surfactant pages
+export const GAMMA_WATER = 72 // mN/m, water: the single value used on the site (exercise value)
 
 export const DELTA_DEFAULT = 110
 export const AR_DEFAULT = 1.5
@@ -55,9 +55,23 @@ export function favoredState(deltaSmooth: number, Ar: number, fSolid: number): W
   return c !== null && deltaSmooth > c ? 'cassie' : 'wenzel'
 }
 
+/**
+ * Lecture classes: δ < 90° partially wetting (hydrophilic for water), δ > 90° non-wetting (hydrophobic), δ > 150°
+ * (water) superhydrophobic, which in full also needs low hysteresis, δ_a − δ_r < 5°.
+ */
 export function wettability(delta: number): Wettability {
   return delta > 150 ? 'superhydrophobic' : delta > 90 ? 'hydrophobic' : 'hydrophilic'
 }
+
+/** Badge text for each class. */
+export const WET_LABEL: Record<Wettability, string> = {
+  hydrophilic: 'partially wetting (hydrophilic)',
+  hydrophobic: 'non-wetting (hydrophobic)',
+  superhydrophobic: 'superhydrophobic',
+}
+
+/** Superhydrophobic in the lecture's sense: δ > 150° and contact-angle hysteresis δ_a − δ_r < 5°. */
+export const isSuperhydrophobic = (delta: number, deltaA: number, deltaR: number) => delta > 150 && deltaA - deltaR < 5
 
 export interface Preset {
   id: 'glass' | 'ptfe' | 'lotus'

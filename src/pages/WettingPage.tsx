@@ -17,6 +17,7 @@ import {
   GAMMA_WATER,
   PRESETS,
   wenzelAngle,
+  WET_LABEL,
   wettability,
   youngFromTensions,
   type InputMode,
@@ -95,9 +96,10 @@ export default function WettingPage() {
         <h1>Wetting &amp; Contact Angle: Young, Wenzel, Cassie–Baxter</h1>
         <p className="lede">
           The contact angle δ is the angle between the solid and the liquid–gas interface, measured through the
-          liquid, where they meet. δ &lt; 90° is hydrophilic (the liquid wets), δ &gt; 90° is hydrophobic, and δ &gt;
-          150° with low contact-angle hysteresis (drops roll off at a tilt of less than about 10°) is
-          superhydrophobic. A smooth
+          liquid at the three-phase contact line. δ &lt; 90°: partially wetting (hydrophilic for water, oleophilic
+          for oil, amphiphilic for many liquids). δ &gt; 90°: non-wetting (hydrophobic, oleophobic, omniphobic).
+          Water with δ &gt; 150° and contact-angle hysteresis δ<sub>a</sub> − δ<sub>r</sub> &lt; 5° is
+          superhydrophobic. A contact angle can be static (equilibrium) or dynamic, δ(t). A smooth
           surface never gets water above about 120°: higher angles need roughness.
         </p>
       </header>
@@ -129,7 +131,7 @@ export default function WettingPage() {
             </div>
             <div className="drop-readout">
               <span className="drop-angle">δ = {Math.round(delta)}°</span>
-              <span className={`wet-badge ${wet}`}>{wet}</span>
+              <span className={`wet-badge ${wet}`}>{WET_LABEL[wet]}</span>
               {view !== 'smooth' && view === favored && crit !== null && <span className="tag">favored state</span>}
             </div>
             <ul className="layer-legend drop-legend" aria-label="Legend">
@@ -304,7 +306,7 @@ export default function WettingPage() {
           </li>
           <li>
             <strong>Self-cleaning solar panels.</strong> Lotus-effect coatings hold drops in the Cassie–Baxter state,
-            above 150°. The drops roll off and pick up dust on the way, so PV output stays high with less cleaning.
+            above 150° with hysteresis below 5°. The drops roll off and pick up dust on the way, so PV output stays high with less cleaning.
           </li>
         </ul>
       </section>
