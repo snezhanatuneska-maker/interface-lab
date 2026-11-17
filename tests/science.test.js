@@ -20,7 +20,8 @@ import * as dlvo from '../src/lib/dlvo'
 import * as nuc from '../src/lib/nucleation'
 import * as phase from '../src/lib/phase'
 import * as cry from '../src/lib/crystal'
-import { GAMMA_HG, THETA_HG, generateMips } from '../src/lib/trainMips'
+import { generateMips } from '../src/lib/trainMips'
+import * as mips from '../src/lib/mips'
 import { ETA_WATER, generateZeta } from '../src/lib/trainZeta'
 import { makeRng } from '../src/lib/random'
 import { DIFFICULTIES } from '../src/lib/training'
@@ -145,34 +146,34 @@ describe('2 Capillary (Young–Laplace, Jurin, Kelvin)', () => {
   const rho = 997.05
   const Vmol = 0.018015 / rho
   const T = 298.15
-  it('Young–Laplace 2γcosθ/r (kPa)', () => {
+  it('p_c = 2γ cos δ / r_c (kPa)', () => {
     near(cap.capillaryPressure(15, 0), (2 * g) / 15e-9 / 1e3, 2e-3) // 9.6 MPa
     near(cap.capillaryPressure(15, 21), ((2 * g * cosd(21)) / 15e-9) / 1e3, 2e-3)
     near(cap.capillaryPressure(2, 60), ((2 * g * 0.5) / 2e-9) / 1e3, 2e-3)
     expect(Math.abs(cap.capillaryPressure(15, 90))).toBeLessThan(1e-9)
     expect(cap.capillaryPressure(15, 120)).toBeLessThan(0)
   })
-  it('Jurin: 1.47 cm for r = 1 mm (radius), 14.7 m for r = 1 µm', () => {
+  it('Jurin: h_c = 1.47 cm for r_c = 1 mm, 14.7 m for r_c = 1 µm', () => {
     near(cap.jurinHeight(1e6, 0), (2 * g) / (rho * 9.80665 * 1e-3), 3e-3)
     near(cap.jurinHeight(1e3, 0), 14.7, 5e-3)
     near(cap.jurinHeight(15, 21), (2 * g * cosd(21)) / (rho * 9.80665 * 15e-9), 3e-3) // ~920 m
   })
   it('Kelvin (hemispherical meniscus), water 25 °C', () => {
-    const k = (r, t) => Math.exp((-2 * g * Vmol * cosd(t)) / (r * 1e-9 * R * T))
-    for (const [r, t] of [[2, 0], [15, 21], [50, 0], [5, 45]]) near(cap.kelvinRatio(r, t), k(r, t), 2e-3)
+    const k = (rc, d) => Math.exp((-2 * g * Vmol * cosd(d)) / (rc * 1e-9 * R * T))
+    for (const [rc, d] of [[2, 0], [15, 21], [50, 0], [5, 45]]) near(cap.kelvinRatio(rc, d), k(rc, d), 2e-3)
     near(cap.kelvinRatio(2, 0), 0.59, 5e-3)
     near(cap.kelvinRatio(1e9, 0), 1, 1e-6) // flat surface limit
     near(cap.kelvinRatio(15, 90), 1, 1e-12)
   })
   it('Kelvin, filling (cylindrical meniscus, Cohan): factor 1, so the pore fills at a higher p/p₀ than it empties', () => {
-    const k1 = (r, t) => Math.exp((-g * Vmol * cosd(t)) / (r * 1e-9 * R * T))
-    for (const [r, t] of [[2, 0], [15, 21], [50, 0]]) {
-      near(cap.kelvinRatio(r, t, 'imbibition'), k1(r, t), 2e-3)
-      near(Math.log(cap.kelvinRatio(r, t, 'drainage')), 2 * Math.log(cap.kelvinRatio(r, t, 'imbibition')), 1e-9)
-      expect(cap.kelvinRatio(r, t, 'imbibition')).toBeGreaterThan(cap.kelvinRatio(r, t, 'drainage'))
+    const k1 = (rc, d) => Math.exp((-g * Vmol * cosd(d)) / (rc * 1e-9 * R * T))
+    for (const [rc, d] of [[2, 0], [15, 21], [50, 0]]) {
+      near(cap.kelvinRatio(rc, d, 'imbibition'), k1(rc, d), 2e-3)
+      near(Math.log(cap.kelvinRatio(rc, d, 'drainage')), 2 * Math.log(cap.kelvinRatio(rc, d, 'imbibition')), 1e-9)
+      expect(cap.kelvinRatio(rc, d, 'imbibition')).toBeGreaterThan(cap.kelvinRatio(rc, d, 'drainage'))
     }
   })
-  it('trends: smaller r → larger |Pc| and lower p/p₀; larger θ (<90°) → smaller Pc', () => {
+  it('trends: smaller r_c → larger |p_c| and lower p/p₀; larger δ (<90°) → smaller p_c', () => {
     expect(cap.capillaryPressure(5, 21)).toBeGreaterThan(cap.capillaryPressure(20, 21))
     expect(cap.kelvinRatio(5, 21)).toBeLessThan(cap.kelvinRatio(20, 21))
     expect(cap.capillaryPressure(15, 60)).toBeLessThan(cap.capillaryPressure(15, 20))
@@ -180,19 +181,17 @@ describe('2 Capillary (Young–Laplace, Jurin, Kelvin)', () => {
 })
 
 // =====================================================================================================
-// 3. Mercury porosimetry (formulas copied from src/pages/mips/MipsTryThis.tsx)
+// 3. Mercury porosimetry (src/lib/mips.ts)
 // =====================================================================================================
 describe('3 Mercury intrusion porosimetry', () => {
-  const WASHBURN = -4 * GAMMA_HG * Math.cos((THETA_HG * Math.PI) / 180)
-  const entryDiameter = (P) => (WASHBURN / (P * 1e6)) * 1e9
-  const entryPressure = (d) => WASHBURN / (d * 1e-9) / 1e6
+  const { entryDiameter, entryPressure } = mips
   const PORES = [45, 30, 20, 12, 6]
   const intruded = (P) => {
     const vol = (d) => d * d
     const filled = PORES.filter((d) => P >= entryPressure(d))
     return (100 * filled.reduce((a, d) => a + vol(d), 0)) / PORES.reduce((a, d) => a + vol(d), 0)
   }
-  it('Washburn d = −4γcosθ/P: 1486/P nm with γ = 0.485 N/m, θ = 140°', () => {
+  it('d = −4γ cos δ / p: 1486/p nm with γ = 0.485 N/m, δ = 140°', () => {
     const ref = (P) => ((-4 * 0.485 * cosd(140)) / (P * 1e6)) * 1e9
     for (const P of [20, 100, 400]) near(entryDiameter(P), ref(P), 1e-9)
     near(entryDiameter(1), 1486, 1e-3)
@@ -200,7 +199,7 @@ describe('3 Mercury intrusion porosimetry', () => {
     near(entryDiameter(414), 3.6, 0.01) // 60 000 psi
     expect(entryPressure(entryDiameter(37))).toBeCloseTo(37, 9)
   })
-  it('limits: θ = 90° needs no pressure; θ < 90° would be spontaneous', () => {
+  it('limits: δ = 90° needs no pressure; δ < 90° would be spontaneous', () => {
     expect(-4 * 0.485 * cosd(90)).toBeCloseTo(0, 12)
     expect(-4 * 0.485 * cosd(60)).toBeLessThan(0)
   })
@@ -262,12 +261,12 @@ describe('4 Surfactants & CMC', () => {
 // 5. Wetting
 // =====================================================================================================
 describe('5 Wetting (Young, Wenzel, Cassie–Baxter)', () => {
-  it('Young: cos θ = (γSV − γSL)/γLV', () => {
-    near(wet.youngFromTensions(40, 20, 72.8).theta, acosd(20 / 72.8), 1e-12)
-    near(wet.youngFromTensions(20, 40, 50).theta, acosd(-0.4), 1e-12)
+  it('Young: cos δ = (γ_sg − γ_sl)/γ_lg', () => {
+    near(wet.youngFromTensions(40, 20, 72.8).delta, acosd(20 / 72.8), 1e-12)
+    near(wet.youngFromTensions(20, 40, 50).delta, acosd(-0.4), 1e-12)
     expect(wet.youngFromTensions(100, 10, 72.8).limit).toBe('complete wetting')
   })
-  it('Wenzel with r = 1 and Cassie with f_s = 1 give Young; textbook numbers', () => {
+  it('Wenzel with A_r = 1 and Cassie with f_solid = 1 give Young; textbook numbers', () => {
     for (const t of [20, 70, 110]) {
       near(wet.wenzelAngle(t, 1), t, 1e-9)
       near(wet.cassieAngle(t, 1), t, 1e-9)
@@ -275,13 +274,13 @@ describe('5 Wetting (Young, Wenzel, Cassie–Baxter)', () => {
     near(wet.wenzelAngle(70, 1.5), 59.1, 2e-3)
     near(wet.wenzelAngle(110, 1.5), 120.9, 2e-3)
     near(wet.cassieAngle(110, 0.1), 159.1, 2e-3)
-    near(wet.cassieAngle(110, 1e-9), 180, 1e-4) // f_s → 0: drop on air
+    near(wet.cassieAngle(110, 1e-9), 180, 1e-4) // f_solid → 0: drop on air
   })
-  it('critical angle: Wenzel and Cassie energies equal at θc (cos θc = (fs − 1)/(r − fs))', () => {
-    for (const [r, fs] of [[1.5, 0.5], [3, 0.1], [2, 0.3]]) {
-      const tc = wet.criticalAngle(r, fs)
-      near(r * cosd(tc), fs * (cosd(tc) + 1) - 1, 1e-9)
-      expect(tc).toBeGreaterThan(90)
+  it('critical angle: Wenzel and Cassie energies equal at δc (cos δc = (f_solid − 1)/(A_r − f_solid))', () => {
+    for (const [Ar, fSolid] of [[1.5, 0.5], [3, 0.1], [2, 0.3]]) {
+      const dc = wet.criticalAngle(Ar, fSolid)
+      near(Ar * cosd(dc), fSolid * (cosd(dc) + 1) - 1, 1e-9)
+      expect(dc).toBeGreaterThan(90)
     }
   })
   it('trend: roughness amplifies the existing tendency', () => {

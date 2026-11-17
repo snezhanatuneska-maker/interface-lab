@@ -1,5 +1,5 @@
 // One droplet on a surface, drawn as a spherical cap of fixed volume, so a higher contact angle gives a taller,
-// narrower drop. Smooth: flat solid. Wenzel: grooves under the drop filled with liquid. Cassie–Baxter: air pockets
+// narrower drop. δ is the contact angle through the liquid. Smooth: flat solid. Wenzel: grooves under the drop filled with liquid. Cassie–Baxter: gas pockets
 // in the grooves under the drop. The texture is drawn larger than life so the grooves are easy to see.
 // The tangent line and angle arc are drawn at the right contact point.
 
@@ -9,28 +9,28 @@ const W = 480
 const H = 300
 const CX = W / 2
 const Y0 = 210 // top of the solid (pillar tops)
-const R90 = 80 // drop radius at θ = 90° (a hemisphere); sets the fixed volume
+const R90 = 80 // drop radius at δ = 90° (a hemisphere); sets the fixed volume
 const PERIOD = 18 // groove period, px
 
 interface Props {
-  theta: number
+  delta: number
   surface: Surface
-  r: number
-  fs: number
+  Ar: number
+  fSolid: number
   label: string
 }
 
 const RAD = Math.PI / 180
 
-/** Sphere radius of a cap with contact angle θ and the volume of a hemisphere of radius R90. */
-function capRadius(theta: number): number {
-  const c = Math.cos(theta * RAD)
+/** Sphere radius of a cap with contact angle δ and the volume of a hemisphere of radius R90. */
+function capRadius(delta: number): number {
+  const c = Math.cos(delta * RAD)
   return R90 * (2 / (2 - 3 * c + c ** 3)) ** (1 / 3)
 }
 
-export default function DropView({ theta, surface, r, fs, label }: Props) {
+export default function DropView({ delta, surface, Ar, fSolid, label }: Props) {
   // Near 0° the cap becomes an infinitely wide film; near 180° it touches at a point. Keep it drawable.
-  const t = Math.min(Math.max(theta, 6), 178)
+  const t = Math.min(Math.max(delta, 6), 178)
   const R = capRadius(t)
   const a = R * Math.sin(t * RAD) // base half-width
   const left = CX - a
@@ -38,10 +38,10 @@ export default function DropView({ theta, surface, r, fs, label }: Props) {
   const large = t > 90 ? 1 : 0
   const cap = `M${left} ${Y0} A${R} ${R} 0 ${large} 1 ${right} ${Y0}`
 
-  // Deeper grooves for larger r (exaggerated). Pillar width: half the period for Wenzel, f_s of it for Cassie–Baxter.
+  // Deeper grooves for larger A_r (exaggerated). Pillar width: half the period for Wenzel, f_solid of it for Cassie–Baxter.
   const rough = surface !== 'smooth'
-  const depth = rough ? 12 + (r - 1) * 12 : 0
-  const pillar = surface === 'cassie' ? Math.max(fs * PERIOD, 2) : PERIOD / 2
+  const depth = rough ? 12 + (Ar - 1) * 12 : 0
+  const pillar = surface === 'cassie' ? Math.max(fSolid * PERIOD, 2) : PERIOD / 2
   const gap = PERIOD - pillar
   const pillars: number[] = [] // pillar centres
   if (rough) for (let x = (CX % PERIOD) - PERIOD; x < W + PERIOD; x += PERIOD) pillars.push(x)
@@ -50,7 +50,7 @@ export default function DropView({ theta, surface, r, fs, label }: Props) {
     .map((x) => [Math.max(x + pillar / 2, left), Math.min(x + pillar / 2 + gap, right)] as const)
     .filter(([x0, x1]) => x1 - x0 > 0.5)
 
-  // Tangent at the right contact point: direction (−cos θ, sin θ) in math axes.
+  // Tangent at the right contact point: direction (−cos δ, sin δ) in math axes.
   const L = 56
   const tx = right - L * Math.cos(t * RAD)
   const ty = Y0 - L * Math.sin(t * RAD)
@@ -79,7 +79,7 @@ export default function DropView({ theta, surface, r, fs, label }: Props) {
       )}
       {!rough && <line x1={0} x2={W} y1={Y0} y2={Y0} className="drop-solid-edge" />}
 
-      {/* Under the drop: liquid in the grooves (Wenzel) or trapped air (Cassie–Baxter) */}
+      {/* Under the drop: liquid in the grooves (Wenzel) or trapped gas (Cassie–Baxter) */}
       {surface === 'wenzel' &&
         grooves.map(([x0, x1]) => (
           <rect key={x0} x={x0} y={Y0 - 0.5} width={x1 - x0} height={depth + 0.5} className="drop-groove-liquid" />
@@ -110,16 +110,16 @@ export default function DropView({ theta, surface, r, fs, label }: Props) {
       <path d={arc} className="drop-arc" />
       <circle cx={right} cy={Y0} r={3.5} className="drop-contact" />
       <text x={labelX} y={Math.min(ty, Y0 - 12) - 6} className="drop-label" textAnchor="middle">
-        θ = {Math.round(theta)}°
+        δ = {Math.round(delta)}°
       </text>
-      {theta <= 6 && (
+      {delta <= 6 && (
         <text x={CX} y={Y0 - 30} className="drop-label" textAnchor="middle">
           spreads into a film
         </text>
       )}
 
-      <Zoom surface={surface} r={r} fs={fs} />
-      {theta > 6 && (
+      <Zoom surface={surface} Ar={Ar} fSolid={fSolid} />
+      {delta > 6 && (
         <path d={`M${ZX + ZW} ${ZY + ZH * 0.6} L${CX} ${Y0 + depth / 2}`} className="zoom-leader" />
       )}
 
@@ -128,7 +128,7 @@ export default function DropView({ theta, surface, r, fs, label }: Props) {
           ? 'smooth solid'
           : surface === 'wenzel'
             ? 'liquid fills the grooves under the drop'
-            : 'air trapped in the grooves under the drop'}
+            : 'gas trapped in the grooves under the drop'}
       </text>
     </svg>
   )
@@ -141,10 +141,10 @@ const ZW = 168
 const ZH = 112
 const ZP = 56 // zoomed period
 
-function Zoom({ surface, r, fs }: { surface: Surface; r: number; fs: number }) {
+function Zoom({ surface, Ar, fSolid }: { surface: Surface; Ar: number; fSolid: number }) {
   const top = ZY + 50 // pillar tops
-  const d = surface === 'smooth' ? 0 : Math.min(18 + (r - 1) * 14, ZH - 50 - 10)
-  const pw = surface === 'cassie' ? Math.max(fs * ZP, 4) : ZP / 2
+  const d = surface === 'smooth' ? 0 : Math.min(18 + (Ar - 1) * 14, ZH - 50 - 10)
+  const pw = surface === 'cassie' ? Math.max(fSolid * ZP, 4) : ZP / 2
   const gap = ZP - pw
   const xs = [ZX - ZP / 2 + 6, ZX + ZP / 2 + 6, ZX + (3 * ZP) / 2 + 6, ZX + (5 * ZP) / 2 + 6] // pillar centres
   return (

@@ -2,20 +2,20 @@ import { useState } from 'react'
 import { Segmented, Slider } from '../components/Controls'
 import {
   cassieAngle,
+  AR_DEFAULT,
+  AR_RANGE,
   criticalAngle,
+  DELTA_DEFAULT,
+  DELTA_RANGE,
   favoredState,
-  FS_DEFAULT,
-  FS_RANGE,
-  GAMMA_LV_RANGE,
+  FSOLID_DEFAULT,
+  FSOLID_RANGE,
+  GAMMA_LG_RANGE,
   GAMMA_RANGE,
+  GAMMA_SG_DEFAULT,
   GAMMA_SL_DEFAULT,
-  GAMMA_SV_DEFAULT,
   GAMMA_WATER,
   PRESETS,
-  R_DEFAULT,
-  R_RANGE,
-  THETA_DEFAULT,
-  THETA_RANGE,
   wenzelAngle,
   wettability,
   youngFromTensions,
@@ -28,7 +28,7 @@ import Theory from './wetting/Theory'
 const VIEWS: { value: Surface; label: string; title: string }[] = [
   { value: 'smooth', label: 'Young', title: 'Young: smooth surface' },
   { value: 'wenzel', label: 'Wenzel', title: 'Wenzel: liquid in the grooves' },
-  { value: 'cassie', label: 'Cassie–Baxter', title: 'Cassie–Baxter: air under the drop' },
+  { value: 'cassie', label: 'Cassie–Baxter', title: 'Cassie–Baxter: gas under the drop' },
 ]
 
 const LEGEND: Record<Surface, { cls: string; label: string }[]> = {
@@ -42,48 +42,48 @@ const LEGEND: Record<Surface, { cls: string; label: string }[]> = {
   ],
   cassie: [
     { cls: 'liquid', label: 'liquid' },
-    { cls: 'air', label: 'trapped air' },
+    { cls: 'air', label: 'trapped gas' },
     { cls: 'solid', label: 'textured solid' },
   ],
 }
 
 export default function WettingPage() {
   const [mode, setMode] = useState<InputMode>('angle')
-  const [thetaSet, setThetaSet] = useState(THETA_DEFAULT)
-  const [gSV, setGSV] = useState(GAMMA_SV_DEFAULT)
+  const [deltaSet, setDeltaSet] = useState(DELTA_DEFAULT)
+  const [gSG, setGSG] = useState(GAMMA_SG_DEFAULT)
   const [gSL, setGSL] = useState(GAMMA_SL_DEFAULT)
-  const [gLV, setGLV] = useState(GAMMA_WATER)
-  const [r, setR] = useState(R_DEFAULT)
-  const [fs, setFs] = useState(FS_DEFAULT)
+  const [gLG, setGLG] = useState(GAMMA_WATER)
+  const [Ar, setAr] = useState(AR_DEFAULT)
+  const [fSolid, setFSolid] = useState(FSOLID_DEFAULT)
   const [view, setView] = useState<Surface>('wenzel')
 
-  const young = youngFromTensions(gSV, gSL, gLV)
-  const thetaY = mode === 'angle' ? thetaSet : young.theta
-  const angles = { smooth: thetaY, wenzel: wenzelAngle(thetaY, r), cassie: cassieAngle(thetaY, fs) }
-  const crit = criticalAngle(r, fs)
-  const favored = favoredState(thetaY, r, fs)
+  const young = youngFromTensions(gSG, gSL, gLG)
+  const deltaSmooth = mode === 'angle' ? deltaSet : young.delta
+  const angles = { smooth: deltaSmooth, wenzel: wenzelAngle(deltaSmooth, Ar), cassie: cassieAngle(deltaSmooth, fSolid) }
+  const crit = criticalAngle(Ar, fSolid)
+  const favored = favoredState(deltaSmooth, Ar, fSolid)
 
   const reset = () => {
     setMode('angle')
-    setThetaSet(THETA_DEFAULT)
-    setGSV(GAMMA_SV_DEFAULT)
+    setDeltaSet(DELTA_DEFAULT)
+    setGSG(GAMMA_SG_DEFAULT)
     setGSL(GAMMA_SL_DEFAULT)
-    setGLV(GAMMA_WATER)
-    setR(R_DEFAULT)
-    setFs(FS_DEFAULT)
+    setGLG(GAMMA_WATER)
+    setAr(AR_DEFAULT)
+    setFSolid(FSOLID_DEFAULT)
     setView('wenzel')
   }
 
   const applyPreset = (p: Preset) => {
     setMode('angle')
-    setThetaSet(p.thetaY)
-    setR(p.r)
-    setFs(p.fs)
-    setView(favoredState(p.thetaY, p.r, p.fs)) // show the state this surface actually takes
+    setDeltaSet(p.delta)
+    setAr(p.Ar)
+    setFSolid(p.fSolid)
+    setView(favoredState(p.delta, p.Ar, p.fSolid)) // show the state this surface actually takes
   }
 
-  const theta = angles[view]
-  const wet = wettability(theta)
+  const delta = angles[view]
+  const wet = wettability(delta)
   const v = VIEWS.find((x) => x.value === view)!
 
   return (
@@ -94,9 +94,10 @@ export default function WettingPage() {
         </a>
         <h1>Wetting &amp; Contact Angle: Young, Wenzel, Cassie–Baxter</h1>
         <p className="lede">
-          The contact angle θ is the angle between the solid and the liquid surface, measured through the drop, where
-          they meet. θ &lt; 90° is hydrophilic (the liquid wets), θ &gt; 90° is hydrophobic, and θ &gt; 150° with low
-          contact-angle hysteresis (drops roll off at a tilt of less than about 10°) is superhydrophobic. A smooth
+          The contact angle δ is the angle between the solid and the liquid–gas interface, measured through the
+          liquid, where they meet. δ &lt; 90° is hydrophilic (the liquid wets), δ &gt; 90° is hydrophobic, and δ &gt;
+          150° with low contact-angle hysteresis (drops roll off at a tilt of less than about 10°) is
+          superhydrophobic. A smooth
           surface never gets water above about 120°: higher angles need roughness.
         </p>
       </header>
@@ -119,15 +120,15 @@ export default function WettingPage() {
             <h3>{v.title}</h3>
             <div className="surface-wrap">
               <DropView
-                theta={theta}
+                delta={delta}
                 surface={view}
-                r={r}
-                fs={fs}
-                label={`${v.title}: contact angle ${Math.round(theta)} degrees, ${wet}`}
+                Ar={Ar}
+                fSolid={fSolid}
+                label={`${v.title}: contact angle δ ${Math.round(delta)} degrees, ${wet}`}
               />
             </div>
             <div className="drop-readout">
-              <span className="drop-angle">θ = {Math.round(theta)}°</span>
+              <span className="drop-angle">δ = {Math.round(delta)}°</span>
               <span className={`wet-badge ${wet}`}>{wet}</span>
               {view !== 'smooth' && view === favored && crit !== null && <span className="tag">favored state</span>}
             </div>
@@ -144,27 +145,27 @@ export default function WettingPage() {
             <p>
               <strong>Which state is favored?</strong>{' '}
               {crit === null ? (
-                <>With r = 1 and f<sub>s</sub> = 1 both models give Young's angle.</>
+                <>With A<sub>r</sub> = 1 and f<sub>solid</sub> = 1 both models give Young's angle.</>
               ) : favored === 'cassie' ? (
                 <>
-                  <span className="cassie-ink">Cassie–Baxter</span>: θ<sub>Y</sub> = {Math.round(thetaY)}° is above
-                  θ<sub>c</sub> = {Math.round(crit)}°, so air stays trapped.
+                  <span className="cassie-ink">Cassie–Baxter</span>: δ<sub>smooth</sub> = {Math.round(deltaSmooth)}° is
+                  above δ<sub>c</sub> = {Math.round(crit)}°, so gas stays trapped.
                 </>
               ) : (
                 <>
-                  <span className="wenzel-ink">Wenzel</span>: θ<sub>Y</sub> = {Math.round(thetaY)}° is below θ
+                  <span className="wenzel-ink">Wenzel</span>: δ<sub>smooth</sub> = {Math.round(deltaSmooth)}° is below δ
                   <sub>c</sub> = {Math.round(crit)}°, so liquid fills the grooves.
                 </>
               )}
             </p>
             <p>
               Wenzel drops are “sticky” (pinned in the grooves); Cassie–Baxter drops roll off easily. The comparison
-              is of energies: below θ<sub>c</sub> a Cassie–Baxter state can still survive as a metastable state, until a
+              is of energies: below δ<sub>c</sub> a Cassie–Baxter state can still survive as a metastable state, until a
               push, drop impact or evaporation makes the liquid collapse into the grooves.
             </p>
-            {view === 'cassie' && thetaY < 90 && (
+            {view === 'cassie' && deltaSmooth < 90 && (
               <p>
-                With θ<sub>Y</sub> &lt; 90° no air stays trapped: the liquid wicks into the texture, so the
+                With δ<sub>smooth</sub> &lt; 90° no gas stays trapped: the liquid wicks into the texture, so the
                 Cassie–Baxter angle shown here is not reached on a hydrophilic surface.
               </p>
             )}
@@ -178,38 +179,38 @@ export default function WettingPage() {
                 value={mode}
                 onChange={setMode}
                 options={[
-                  { value: 'angle', label: <>Set θ<sub>Y</sub> directly</> },
+                  { value: 'angle', label: <>Set δ directly</> },
                   { value: 'tension', label: 'Surface tensions' },
                 ]}
               />
             </div>
             {mode === 'angle' ? (
               <Slider
-                id="thetaY"
-                label={<>Young angle <em>θ</em><sub>Y</sub></>}
-                value={`${thetaSet}°`}
-                min={THETA_RANGE[0]}
-                max={THETA_RANGE[1]}
+                id="deltaSmooth"
+                label={<>Young angle <em>δ</em> (smooth)</>}
+                value={`${deltaSet}°`}
+                min={DELTA_RANGE[0]}
+                max={DELTA_RANGE[1]}
                 step={1}
-                pos={thetaSet}
-                onChange={setThetaSet}
+                pos={deltaSet}
+                onChange={setDeltaSet}
                 hint="smooth surfaces: at most about 120° for water"
               />
             ) : (
               <>
                 <Slider
-                  id="gSV"
-                  label={<>γ<sub>SV</sub></>}
-                  value={`${gSV.toFixed(1)} mN/m`}
+                  id="gSG"
+                  label={<>γ<sub>sg</sub></>}
+                  value={`${gSG.toFixed(1)} mN/m`}
                   min={GAMMA_RANGE[0]}
                   max={GAMMA_RANGE[1]}
                   step={0.5}
-                  pos={gSV}
-                  onChange={setGSV}
+                  pos={gSG}
+                  onChange={setGSG}
                 />
                 <Slider
                   id="gSL"
-                  label={<>γ<sub>SL</sub></>}
+                  label={<>γ<sub>sl</sub></>}
                   value={`${gSL.toFixed(1)} mN/m`}
                   min={GAMMA_RANGE[0]}
                   max={GAMMA_RANGE[1]}
@@ -218,25 +219,25 @@ export default function WettingPage() {
                   onChange={setGSL}
                 />
                 <Slider
-                  id="gLV"
-                  label={<>γ<sub>LV</sub></>}
-                  value={`${gLV.toFixed(1)} mN/m`}
-                  min={GAMMA_LV_RANGE[0]}
-                  max={GAMMA_LV_RANGE[1]}
+                  id="gLG"
+                  label={<>γ<sub>lg</sub></>}
+                  value={`${gLG.toFixed(1)} mN/m`}
+                  min={GAMMA_LG_RANGE[0]}
+                  max={GAMMA_LG_RANGE[1]}
                   step={0.1}
-                  pos={gLV}
-                  onChange={setGLV}
-                  hint="water: 72.0 mN/m at 25 °C"
+                  pos={gLG}
+                  onChange={setGLG}
+                  hint="water: 72 mN/m"
                 />
                 <p className={`wet-young${young.limit ? ' limit' : ''}`} aria-live="polite">
                   {young.limit ? (
                     <>
-                      |γ<sub>SV</sub> − γ<sub>SL</sub>| &gt; γ<sub>LV</sub>: <strong>{young.limit}</strong> (θ
-                      <sub>Y</sub> = {Math.round(young.theta)}°)
+                      |γ<sub>sg</sub> − γ<sub>sl</sub>| &gt; γ<sub>lg</sub>: <strong>{young.limit}</strong> (δ ={' '}
+                      {Math.round(young.delta)}°)
                     </>
                   ) : (
                     <>
-                      cos θ<sub>Y</sub> = {young.cos.toFixed(3)} → θ<sub>Y</sub> = <strong>{young.theta.toFixed(1)}°</strong>
+                      cos δ = {young.cos.toFixed(3)} → δ = <strong>{young.delta.toFixed(1)}°</strong>
                     </>
                   )}
                 </p>
@@ -244,26 +245,26 @@ export default function WettingPage() {
             )}
             <Slider
               id="rough"
-              label={<>Roughness <em>r</em></>}
-              value={r.toFixed(2)}
-              min={R_RANGE[0]}
-              max={R_RANGE[1]}
+              label={<>Roughness ratio <em>A</em><sub>r</sub></>}
+              value={Ar.toFixed(2)}
+              min={AR_RANGE[0]}
+              max={AR_RANGE[1]}
               step={0.05}
-              pos={r}
-              onChange={setR}
+              pos={Ar}
+              onChange={setAr}
               hint="Wenzel; 1 = smooth"
               className={view === 'wenzel' ? undefined : 'inactive'}
             />
             <Slider
-              id="fs"
-              label={<>Solid fraction <em>f</em><sub>s</sub></>}
-              value={fs.toFixed(2)}
-              min={FS_RANGE[0]}
-              max={FS_RANGE[1]}
+              id="fsolid"
+              label={<>Solid fraction <em>f</em><sub>solid</sub></>}
+              value={fSolid.toFixed(2)}
+              min={FSOLID_RANGE[0]}
+              max={FSOLID_RANGE[1]}
               step={0.01}
-              pos={fs}
-              onChange={setFs}
-              hint="Cassie–Baxter; 1 = no air"
+              pos={fSolid}
+              onChange={setFSolid}
+              hint="Cassie–Baxter; 1 = no gas"
               className={view === 'cassie' ? undefined : 'inactive'}
             />
             <div className="sim-buttons wet-presets">
@@ -280,8 +281,8 @@ export default function WettingPage() {
 
           <figcaption>
             <span className="figure-label">Figure 1.</span> The same drop volume on the chosen surface, with the
-            tangent at the contact point. The texture is drawn enlarged; deeper grooves mean larger r, thinner pillars
-            mean smaller f<sub>s</sub>.
+            tangent at the contact point. The texture is drawn enlarged; deeper grooves mean larger A<sub>r</sub>, thinner
+            pillars mean smaller f<sub>solid</sub>.
           </figcaption>
         </figure>
       </section>
@@ -292,8 +293,8 @@ export default function WettingPage() {
         </h2>
         <ul className="why-list">
           <li>
-            <strong>PEM fuel cells.</strong> The gas diffusion layer is carbon paper treated with PTFE, which raises θ
-            <sub>Y</sub> above 90°. On the rough fibres Wenzel makes it even more water-repellent, so product water is
+            <strong>PEM fuel cells.</strong> The gas diffusion layer is carbon paper treated with PTFE, which raises δ above
+            90°. On the rough fibres Wenzel makes it even more water-repellent, so product water is
             pushed out, the pores do not flood and gas still reaches the catalyst layer.
           </li>
           <li>

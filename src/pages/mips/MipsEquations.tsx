@@ -10,18 +10,19 @@ export function MipsEquations() {
         <div className="card eq-card">
           <h3>The Washburn Equation</h3>
           <p>
-            Relates applied hydraulic pressure (<em>P</em>) directly to pore radius (<em>r</em>) and mercury surface
-            tension (<em>γ</em>):
+            Relates the applied pressure (<em>p</em>) to the pore radius (<em>r</em><sub>c</sub>) and the mercury
+            surface tension (<em>γ</em>):
           </p>
           <div className="formula">
             <div className="formula-body">
-              <Tex display tex={String.raw`P = \frac{-2\,\gamma\cos\theta}{r}`} />
+              <Tex display tex={String.raw`p = -\frac{2\gamma\cos\delta}{r_c}`} />
             </div>
             <span className="formula-number">(1)</span>
           </div>
           <p className="note">
-            For a cylindrical pore of radius r (diameter d = 2r, so P = −4γ cos θ/d). Mercury: γ = 0.485 N/m and
-            θ ≈ 130–140° (140° assumed here), so cos θ &lt; 0 and P &gt; 0. Rule of thumb: d [nm] ≈ 1490/P [MPa].
+            For a cylindrical pore of radius r<sub>c</sub> (diameter d = 2r<sub>c</sub>, so d = −4γ cos δ/p). Mercury:
+            γ = 0.485 N/m and δ ≈ 130–140° (140° assumed here), so cos δ &lt; 0 and p &gt; 0. Rule of thumb: d [nm] ≈
+            1490/p [MPa].
           </p>
         </div>
         <div className="card eq-card">
@@ -31,7 +32,7 @@ export function MipsEquations() {
           </p>
           <div className="formula">
             <div className="formula-body">
-              <Tex display tex={String.raw`W = \int P\,dV`} />
+              <Tex display tex={String.raw`W = \int p\,dV`} />
             </div>
             <span className="formula-number">(2)</span>
           </div>

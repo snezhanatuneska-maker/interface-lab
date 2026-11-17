@@ -9,22 +9,22 @@ export default function Equations() {
       <div className="eq-grid">
         <div className="card eq-card">
           <div className="eq-head">
-            <h3>Young–Laplace equation</h3>
+            <h3>Capillary pressure (Young–Laplace)</h3>
           </div>
-          <p className="note">Pressure jump across the curved meniscus in a cylindrical pore of radius r:</p>
+          <p className="note">Pressure jump across the curved meniscus in a cylindrical capillary of radius r<sub>c</sub>:</p>
           <div className="formula">
             <div className="formula-body eq-math">
-              <Tex display tex={String.raw`P_c = \frac{2\,\gamma\cos\theta}{r}`} />
+              <Tex display tex={String.raw`p_c = \frac{2\gamma_{lg}\cos\delta}{r_c}`} />
             </div>
             <span className="formula-number">(1)</span>
           </div>
           <p className="note">
-            γ: surface tension (water 72.0 mN/m at 25 °C); θ: contact angle through the liquid; r: pore radius. Jurin’s
-            law follows by setting P<sub>c</sub> = ρgh:
+            γ<sub>lg</sub>: surface tension liquid–gas (water 72 mN/m); δ: contact angle (through liquid); r<sub>c</sub>:
+            capillary radius. Jurin’s law follows by setting p<sub>c</sub> = ρ<sub>L</sub>gh<sub>c</sub>:
           </p>
           <div className="formula">
             <div className="formula-body eq-math">
-              <Tex display tex={String.raw`h = \frac{2\,\gamma\cos\theta}{\rho\,g\,r}`} />
+              <Tex display tex={String.raw`h_c = \frac{2\gamma_{lg}\cos\delta}{\rho_L g r_c}`} />
             </div>
             <span className="formula-number">(2)</span>
           </div>
@@ -35,21 +35,21 @@ export default function Equations() {
             <h3>Kelvin equation</h3>
           </div>
           <p className="note">
-            Governs capillary condensation, explaining vapor condensation at reduced relative pressures:
+            Governs capillary condensation, explaining vapour condensation at reduced relative pressures:
           </p>
           <div className="formula">
             <div className="formula-body eq-math">
-              <Tex display tex={String.raw`\ln\frac{P}{P_0} = \frac{-2\,\gamma\,V_\text{mol}\cos\theta}{r\,R\,T}`} />
+              <Tex display tex={String.raw`\ln\frac{p}{p_0} = -\frac{2V_m\gamma\cos\delta}{R T r_c}`} />
             </div>
             <span className="formula-number">(3)</span>
           </div>
           <p className="note">
-            V<sub>mol</sub>: molar volume of the liquid (water 18.07 cm³/mol); R: gas constant; T: temperature. The
+            V<sub>m</sub>: molar volume of the liquid (water 18 cm³/mol); R: gas constant; T: temperature. The
             factor 2 is for a hemispherical meniscus (emptying); a pore filling through a cylindrical meniscus has
             factor 1; the readout switches with the filling/emptying mode. In real pores an adsorbed film of thickness t
-            lines the wall first, so the pore radius is r + t; the readout neglects t and uses the slider r. The Kelvin
-            equation with the bulk γ is reliable only in mesopores wider than a few nm: near 2 nm it is at best
-            approximate, and below 2 nm (micropores) pores fill by micropore filling instead.
+            lines the wall first, so the pore radius is r<sub>c</sub> + t; the readout neglects t and uses the slider
+            r<sub>c</sub>. The Kelvin equation with the bulk γ is reliable only in mesopores wider than a few nm: near
+            2 nm it is at best approximate, and below 2 nm (micropores) pores fill by micropore filling instead.
           </p>
         </div>
       </div>

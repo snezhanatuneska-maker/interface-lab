@@ -1,72 +1,74 @@
-// Wetting simulator: Young, Wenzel and Cassie–Baxter contact angles. Angles in degrees, tensions in mN/m.
+// Wetting simulator: Young, Wenzel and Cassie–Baxter contact angles, in the course compendium's notation
+// (δ: contact angle through the liquid; γ_sg, γ_sl, γ_lg; A_r: roughness ratio; f_solid: solid fraction).
+// Angles in degrees, tensions in mN/m.
 
 export type InputMode = 'angle' | 'tension'
 export type WetState = 'wenzel' | 'cassie'
 export type Wettability = 'hydrophilic' | 'hydrophobic' | 'superhydrophobic'
 
-/** Young angle on a smooth surface: water never exceeds about 120° (–CF₃ monolayers). */
-export const THETA_RANGE: [number, number] = [0, 120]
-export const R_RANGE: [number, number] = [1, 3]
-export const FS_RANGE: [number, number] = [0.05, 1]
+/** Young angle δ on a smooth surface: water never exceeds about 120° (–CF₃ monolayers). */
+export const DELTA_RANGE: [number, number] = [0, 120]
+export const AR_RANGE: [number, number] = [1, 3]
+export const FSOLID_RANGE: [number, number] = [0.05, 1]
 export const GAMMA_RANGE: [number, number] = [0, 100]
-export const GAMMA_LV_RANGE: [number, number] = [20, 80]
+export const GAMMA_LG_RANGE: [number, number] = [20, 80]
 export const GAMMA_WATER = 72.0 // mN/m at 25 °C, as on the capillary and surfactant pages
 
-export const THETA_DEFAULT = 110
-export const R_DEFAULT = 1.5
-export const FS_DEFAULT = 0.5
-export const GAMMA_SV_DEFAULT = 40
+export const DELTA_DEFAULT = 110
+export const AR_DEFAULT = 1.5
+export const FSOLID_DEFAULT = 0.5
+export const GAMMA_SG_DEFAULT = 40
 export const GAMMA_SL_DEFAULT = 20
 
 const RAD = Math.PI / 180
 const clampCos = (c: number) => Math.min(1, Math.max(-1, c))
 const acosDeg = (c: number) => Math.acos(clampCos(c)) / RAD
 
-/** cos θ_Y = (γ_SV − γ_SL)/γ_LV. Outside [−1, 1] there is no angle: complete wetting or non-wetting. */
-export function youngFromTensions(gSV: number, gSL: number, gLV: number): {
+/** Young: cos δ = (γ_sg − γ_sl)/γ_lg. Outside [−1, 1] there is no angle: complete wetting or non-wetting. */
+export function youngFromTensions(gSG: number, gSL: number, gLG: number): {
   cos: number
-  theta: number
+  delta: number
   limit: 'complete wetting' | 'complete non-wetting' | null
 } {
-  const cos = (gSV - gSL) / gLV
-  return { cos, theta: acosDeg(cos), limit: cos > 1 ? 'complete wetting' : cos < -1 ? 'complete non-wetting' : null }
+  const cos = (gSG - gSL) / gLG
+  return { cos, delta: acosDeg(cos), limit: cos > 1 ? 'complete wetting' : cos < -1 ? 'complete non-wetting' : null }
 }
 
-/** Wenzel: cos θ_W = r cos θ_Y (clamped to [−1, 1]). */
-export const wenzelAngle = (thetaY: number, r: number) => acosDeg(r * Math.cos(thetaY * RAD))
+/** Wenzel: cos δ_rough = A_r cos δ_smooth (clamped to [−1, 1]). */
+export const wenzelAngle = (deltaSmooth: number, Ar: number) => acosDeg(Ar * Math.cos(deltaSmooth * RAD))
 
-/** Cassie–Baxter: cos θ_CB = f_s (cos θ_Y + 1) − 1. */
-export const cassieAngle = (thetaY: number, fs: number) => acosDeg(fs * (Math.cos(thetaY * RAD) + 1) - 1)
+/** Cassie–Baxter: cos δ_rough = f_solid (cos δ_smooth + 1) − 1. */
+export const cassieAngle = (deltaSmooth: number, fSolid: number) => acosDeg(fSolid * (Math.cos(deltaSmooth * RAD) + 1) - 1)
 
 /**
- * θ_Y above which Cassie–Baxter has the lower energy: cos θ_c = (f_s − 1)/(r − f_s).
- * Always between 90° and 180°. Null when r = f_s = 1 (both models reduce to Young).
+ * δ_smooth above which Cassie–Baxter has the lower energy: cos δ_c = (f_solid − 1)/(A_r − f_solid).
+ * Always between 90° and 180°. Null when A_r = f_solid = 1 (both models reduce to Young).
  */
-export function criticalAngle(r: number, fs: number): number | null {
-  if (r - fs < 1e-9) return null
-  return acosDeg((fs - 1) / (r - fs))
+export function criticalAngle(Ar: number, fSolid: number): number | null {
+  if (Ar - fSolid < 1e-9) return null
+  return acosDeg((fSolid - 1) / (Ar - fSolid))
 }
 
-/** Favored state: Cassie–Baxter when θ_Y is above the critical angle, else Wenzel. */
-export function favoredState(thetaY: number, r: number, fs: number): WetState {
-  const c = criticalAngle(r, fs)
-  return c !== null && thetaY > c ? 'cassie' : 'wenzel'
+/** Favored state: Cassie–Baxter when δ_smooth is above the critical angle, else Wenzel. */
+export function favoredState(deltaSmooth: number, Ar: number, fSolid: number): WetState {
+  const c = criticalAngle(Ar, fSolid)
+  return c !== null && deltaSmooth > c ? 'cassie' : 'wenzel'
 }
 
-export function wettability(theta: number): Wettability {
-  return theta > 150 ? 'superhydrophobic' : theta > 90 ? 'hydrophobic' : 'hydrophilic'
+export function wettability(delta: number): Wettability {
+  return delta > 150 ? 'superhydrophobic' : delta > 90 ? 'hydrophobic' : 'hydrophilic'
 }
 
 export interface Preset {
   id: 'glass' | 'ptfe' | 'lotus'
   label: string
-  thetaY: number
-  r: number
-  fs: number
+  delta: number
+  Ar: number
+  fSolid: number
 }
 
 export const PRESETS: Preset[] = [
-  { id: 'glass', label: 'Glass (hydrophilic)', thetaY: 40, r: 1.2, fs: 0.8 },
-  { id: 'ptfe', label: 'Teflon/PTFE (hydrophobic)', thetaY: 110, r: 1.5, fs: 0.6 },
-  { id: 'lotus', label: 'Lotus leaf (superhydrophobic)', thetaY: 110, r: 3, fs: 0.1 },
+  { id: 'glass', label: 'Glass (hydrophilic)', delta: 40, Ar: 1.2, fSolid: 0.8 },
+  { id: 'ptfe', label: 'Teflon/PTFE (hydrophobic)', delta: 110, Ar: 1.5, fSolid: 0.6 },
+  { id: 'lotus', label: 'Lotus leaf (superhydrophobic)', delta: 110, Ar: 3, fSolid: 0.1 },
 ]

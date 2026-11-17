@@ -1,6 +1,6 @@
 import type { Rng } from './random'
 import { labelled, numericOptions, round, type Difficulty, type Generator, type Step } from './training'
-import { cassieAngle, criticalAngle, FS_RANGE, R_RANGE, THETA_RANGE, wenzelAngle, youngFromTensions } from './wetting'
+import { cassieAngle, criticalAngle, FSOLID_RANGE as FS_RANGE, AR_RANGE as R_RANGE, DELTA_RANGE as THETA_RANGE, wenzelAngle, youngFromTensions } from './wetting'
 
 // Wetting training: contact angles from Young, Wenzel and Cassie–Baxter, and which rough-surface state is favoured.
 // Reuses src/lib/wetting.ts. Angles in degrees, tensions in mN/m.
@@ -56,7 +56,7 @@ export const generateWetting: Generator<WettingData> = (rng: Rng, difficulty: Di
       gSV = round(gSL + gLV * Math.cos(rng.uniform(20, 150) * RAD), 3)
       cos = (gSV - gSL) / gLV
     } while (gSV < 5 || Math.abs(cos) > 0.95)
-    const theta = youngFromTensions(gSV, gSL, gLV).theta
+    const theta = youngFromTensions(gSV, gSL, gLV).delta
     const { options, answer } = numericOptions(
       rng,
       theta,

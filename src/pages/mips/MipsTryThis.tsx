@@ -2,17 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { Slider } from '../../components/Controls'
 import { useThemeColors } from '../../lib/themeColors'
 import { CANVAS_FONT, setupCanvas } from '../../lib/canvas'
-import { GAMMA_HG, THETA_HG } from '../../lib/trainMips'
+import { DELTA_HG, entryDiameter, entryPressure, GAMMA_HG } from '../../lib/mips'
 
 const W = 380
 const H = 240
 
-/** Washburn: −4γ cos θ in N/m, so d [nm] = WASHBURN / P [MPa] × 1000 (≈ 1486/P). */
-const WASHBURN = -4 * GAMMA_HG * Math.cos((THETA_HG * Math.PI) / 180)
-/** Smallest pore diameter (nm) mercury enters at P (MPa). */
-const entryDiameter = (P: number) => (WASHBURN / (P * 1e6)) * 1e9
-/** Pressure (MPa) needed to enter a pore of diameter d (nm). */
-const entryPressure = (d: number) => WASHBURN / (d * 1e-9) / 1e6
 /** Diameters of the drawn pores, nm. */
 const PORES = [45, 30, 20, 12, 6]
 
@@ -70,7 +64,7 @@ export function MipsTryThis() {
     ctx.fillRect(20, 20, W - 40, 25)
     ctx.fillStyle = theme.text
     ctx.font = `13px ${CANVAS_FONT}`
-    ctx.fillText(`Mercury Reservoir (P = ${pressureMPa} MPa)`, 35, 37)
+    ctx.fillText(`Mercury reservoir (p = ${pressureMPa} MPa)`, 35, 37)
   }, [pressureMPa, theme])
 
   return (
@@ -81,7 +75,7 @@ export function MipsTryThis() {
             Smallest pore entered: diameter <em>d</em>
           </span>
           <span className="coverage-value colloid">{dEntry.toFixed(1)} nm</span>
-          <span className="coverage-sub">radius r = {(dEntry / 2).toFixed(1)} nm</span>
+          <span className="coverage-sub">radius r<sub>c</sub> = {(dEntry / 2).toFixed(1)} nm</span>
         </div>
       </div>
 
@@ -100,7 +94,7 @@ export function MipsTryThis() {
           <div>
             <dt>Washburn Mode</dt>
             <dd>
-              Non-wetting: γ = {GAMMA_HG} N/m, θ = {THETA_HG}°
+              Non-wetting: γ = {GAMMA_HG} N/m, δ = {DELTA_HG}°
             </dd>
           </div>
         </dl>
@@ -109,7 +103,7 @@ export function MipsTryThis() {
       <div className="figure-controls hero-controls">
         <Slider
           id="pressure"
-          label="Applied Hydraulic Pressure"
+          label={<>Applied pressure <em>p</em></>}
           value={`${pressureMPa} MPa`}
           min={5}
           max={250}
@@ -126,7 +120,7 @@ export function MipsTryThis() {
       </div>
       <figcaption>
         <span className="figure-label">Figure 1.</span> Five cylindrical pores (labels are diameters). A pore fills
-        once P exceeds its Washburn entry pressure; the intruded share counts each pore’s volume (∝ d²).
+        once p exceeds its Washburn entry pressure; the intruded share counts each pore’s volume (∝ d²).
       </figcaption>
     </figure>
   )
